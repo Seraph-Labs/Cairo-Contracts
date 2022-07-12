@@ -105,7 +105,7 @@ namespace JsonString:
         return (arr1_len + arr2_len + 2, new_arr)
     end
 
-    func append_data_to_JsonString{
+    func append_data_to_jsonString{
         syscall_ptr : felt*, range_check_ptr, pedersen_ptr : HashBuiltin*
     }(arr1_len : felt, arr1 : felt*, arr2_len : felt, arr2 : felt*) -> (
         arr_len : felt, arr : felt*
