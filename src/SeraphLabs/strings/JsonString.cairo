@@ -104,6 +104,21 @@ namespace JsonString:
         memcpy(new_arr + arr1_len + 2, arr2, arr2_len)
         return (arr1_len + arr2_len + 2, new_arr)
     end
+
+    func append_data_to_JsonString{
+        syscall_ptr : felt*, range_check_ptr, pedersen_ptr : HashBuiltin*
+    }(arr1_len : felt, arr1 : felt*, arr2_len : felt, arr2 : felt*) -> (
+        arr_len : felt, arr : felt*
+    ):
+        alloc_locals
+        let (new_arr_len, new_arr) = _new_array()
+        memcpy(new_arr, arr1, arr1_len - 1)
+        assert new_arr[arr1_len - 1] = COMMA
+        assert new_arr[arr1_len] = WHITESPACE
+        memcpy(new_arr + arr1_len + 1, arr2, arr2_len)
+        assert new_arr[arr1_len + arr2_len + 1] = CLOSECURLY
+        return (arr1_len + arr2_len + 2, new_arr)
+    end
 end
 
 func _new_array{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (

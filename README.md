@@ -17,8 +17,8 @@ pip install git+https://github.com/0xKahi/SeraphLabs
 
 ## Strings
 
-| libraries                                                |                       description                       |
-| :------------------------------------------------------- | :-----------------------------------------------------: |
-| [AsciiArray](src/SeraphLabs/strings/AsciiArray.cairo)    | used to convert variable into an array of ascii numbers |
-| [JsonString](src/SeraphLabs/strings/JsonString.cairo)    |         used to make onchain dynamic json files         |
-| [StringObject](src/SeraphLabs/models/StringObject.cairo) |                 object used for strings                 |
+| libraries                                                |                                  description                                  |
+| :------------------------------------------------------- | :---------------------------------------------------------------------------: |
+| [AsciiArray](src/SeraphLabs/strings/AsciiArray.cairo)    |            used to convert variable into an array of ascii numbers            |
+| [JsonString](src/SeraphLabs/strings/JsonString.cairo)    | used to make onchain dynamic json strings to stream line frontend development |
+| [StringObject](src/SeraphLabs/models/StringObject.cairo) |                            object used for strings                            |
