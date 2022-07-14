@@ -3,7 +3,7 @@ import pytest
 import pytest_asyncio
 from starkware.starknet.testing.starknet import Starknet
 from utils.openzepplin.utils import str_to_felt, assert_revert, assert_event_emitted
-from utils.argHandler import unpack_tpl,arr_res, string_to_ascii_arr
+from utils.argHandler import unpack_tpl,arr_res, string_to_ascii_arr, to_starknet_args
 from utils.accounts_utils import Account
 # The path to the contract source code.
 ACCOUNT_FILE = os.path.join("SeraphLabs","contracts", "Account.cairo")
@@ -64,3 +64,14 @@ async def test_doublequote_append(contract_factory):
     text ='"weapon #2114"'
     res1 = await test_contract.test_enclosed_string_append((2114,0)).call()
     assert res1.result == ((string_to_ascii_arr(text)),)            
+
+@pytest.mark.asyncio
+async def test_string_equal(contract_factory):
+    _, accounts, test_contract = contract_factory
+    class1 = dict(val=str_to_felt('"paladin"'),len=9)
+    class2 = dict(val=str_to_felt('"crusader"'),len=10)
+
+    res1 = await test_contract.test_stringEqual(to_starknet_args(class1),to_starknet_args(class1)).call()
+    res2 = await test_contract.test_stringEqual(to_starknet_args(class1),to_starknet_args(class2)).call()
+    assert res1.result == (1,)
+    assert res2.result == (0,)

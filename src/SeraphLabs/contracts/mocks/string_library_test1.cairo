@@ -5,7 +5,7 @@ from starkware.cairo.common.uint256 import Uint256, uint256_check
 from starkware.cairo.common.cairo_builtins import HashBuiltin, SignatureBuiltin, BitwiseBuiltin
 from SeraphLabs.strings.AsciiArray import word_to_ascii, concat_word_with_uint
 from SeraphLabs.strings.JsonString import JsonString
-from SeraphLabs.models.StringObject import StrObj
+from SeraphLabs.models.StringObject import StrObj, StrObj_is_equal
 
 @view
 func return_ascii_arr{
@@ -100,4 +100,12 @@ func test_enclosed_string_append{
         word_arr_len, word_arr, number_arr_len, number_arr
     )
     return (arr_len, arr)
+end
+
+@view
+func test_stringEqual{syscall_ptr : felt*, range_check_ptr, pedersen_ptr : HashBuiltin*}(
+    a : StrObj, b : StrObj
+) -> (res : felt):
+    let (res) = StrObj_is_equal(a, b)
+    return (res)
 end

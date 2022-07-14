@@ -21,7 +21,7 @@ from starkware.cairo.common.memcpy import memcpy
 
 from SeraphLabs.math.Pow2 import pow2
 from SeraphLabs.arrays.ReverseArray import reverse_array
-from SeraphLabs.models.StringObject import StrObj
+from SeraphLabs.models.StringObject import StrObj, StrObj_check
 
 # ---------------------------------------------------------------------------- #
 #                  converts a shortstring into an ascii array                  #
@@ -31,8 +31,7 @@ func word_to_ascii{bitwise_ptr : BitwiseBuiltin*, range_check_ptr}(Str : StrObj)
     strArr_len : felt, strArr : felt*
 ):
     alloc_locals
-    let (is_valid) = is_le(Str.len, 31)
-    assert is_valid = TRUE
+    StrObj_check(Str)
 
     tempvar multiplier = 8 * Str.len
     let (local strArr : felt*) = alloc()
