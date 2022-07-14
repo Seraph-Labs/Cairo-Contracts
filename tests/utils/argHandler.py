@@ -30,3 +30,24 @@ def string_to_ascii_arr(string):
     for byte in arr:
         x.append(byte)
     return ([*x])
+
+def ascii_to_string(data):
+  (L, ) = data.result
+  x = ''.join(chr(i) for i in L)
+  return (x)
+
+def to_starknet_args(data):
+  items = []
+  values = data.values() if type(data) is dict else data
+  for d in values:
+    if type(d) is dict:
+      items.extend([*to_starknet_args(d)])
+    elif type(d) is tuple:
+      items.extend([*to_starknet_args(d)])
+    elif type(d) is list:
+      items.append(len(d))
+      items.extend([*to_starknet_args(tuple(d))])
+    else:
+      items.append(d)
+
+  return tuple(items)
