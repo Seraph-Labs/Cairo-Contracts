@@ -57,3 +57,10 @@ async def test_json_arr(contract_factory):
     jsontext = '{"name":"BasicSeraph", "weapon":"sword", "attributes":["name":"BasicSeraph", "weapon":"sword", "weapon":"sword"]}'
     res1 = await test_contract.get_string_jsonArr().call()
     assert res1.result == ((string_to_ascii_arr(jsontext)),)            
+
+@pytest.mark.asyncio
+async def test_doublequote_append(contract_factory):
+    _, accounts, test_contract = contract_factory
+    text ='"weapon #10"'
+    res1 = await test_contract.test_enclosed_string_append((10,0)).call()
+    assert res1.result == ((string_to_ascii_arr(text)),)            

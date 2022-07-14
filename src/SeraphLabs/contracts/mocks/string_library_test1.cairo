@@ -87,3 +87,17 @@ func get_string_jsonArr{
 
     return (arr_len, arr)
 end
+
+@view
+func test_enclosed_string_append{
+    bitwise_ptr : BitwiseBuiltin*, syscall_ptr : felt*, range_check_ptr, pedersen_ptr : HashBuiltin*
+}(tokenId : Uint256) -> (arr_len : felt, arr : felt*):
+    alloc_locals
+    let x = '"weapon"'
+    let (number_arr_len, number_arr) = concat_word_with_uint(StrObj(' #', 2), tokenId)
+    let (word_arr_len, word_arr) = word_to_ascii(StrObj(x, 8))
+    let (arr_len, arr) = JsonString.append_data_to_enclosedString(
+        word_arr_len, word_arr, number_arr_len, number_arr
+    )
+    return (arr_len, arr)
+end
