@@ -76,7 +76,7 @@ namespace JsonString:
         assert new_arr[new_arr_len] = COLON
         assert new_arr[new_arr_len + 1] = OPENSQBRAC
         memcpy(new_arr + new_arr_len + 2, arr, arr_len)
-        assert new_arr[new_arr_len + arr_len + 3] = CLOSESQBRAC
+        assert new_arr[new_arr_len + arr_len + 2] = CLOSESQBRAC
         return (new_arr_len + arr_len + 3, new_arr)
     end
 
