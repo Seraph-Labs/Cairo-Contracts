@@ -5,6 +5,9 @@ from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.memcpy import memcpy
 
+# some functions ideas taken from
+# https://github.com/gaetbout/starknet-array-manipulation#add_first
+
 namespace Array:
     func create{syscall_ptr : felt*, range_check_ptr, pedersen_ptr : HashBuiltin*}() -> (
         arr_len : felt, arr : felt*
