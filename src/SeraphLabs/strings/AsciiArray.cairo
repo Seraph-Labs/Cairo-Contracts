@@ -20,7 +20,7 @@ from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.memcpy import memcpy
 
 from SeraphLabs.math.Pow2 import pow2
-from SeraphLabs.arrays.ReverseArray import reverse_array
+from SeraphLabs.arrays.Array import Array
 from SeraphLabs.models.StringObject import StrObj, StrObj_check
 
 # ---------------------------------------------------------------------------- #
@@ -53,7 +53,7 @@ func uint256_to_ascii{
         return (1, new_arr)
     end
     let (local new_arr_len) = _create_uint_ascii_array(arr=new_arr, inum=num, index=0)
-    let (r_arr_len, r_arr) = reverse_array(new_arr_len, new_arr)
+    let (r_arr_len, r_arr) = Array.reverse(new_arr_len, new_arr)
     return (r_arr_len, r_arr)
 end
 
