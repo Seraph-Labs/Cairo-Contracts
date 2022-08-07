@@ -71,6 +71,34 @@ namespace Array:
         let (new_arr_len, new_arr) = _new_array()
         return _remove_all_occurences_recursion(arr_len, arr, new_arr_len, new_arr, item_len, item)
     end
+
+    func contains{syscall_ptr : felt*, range_check_ptr, pedersen_ptr : HashBuiltin*}(
+        arr1_len : felt, arr1 : felt*, arr2_len : felt, arr2 : felt*
+    ) -> (res : felt):
+        alloc_locals
+        if arr1_len == 0:
+            return (FALSE)
+        end
+        if arr2_len == 0:
+            return (FALSE)
+        end
+        let (res) = _check_contains(arr1_len, arr1, arr2_len, arr2)
+        return (res)
+    end
+
+    func contains_all{syscall_ptr : felt*, range_check_ptr, pedersen_ptr : HashBuiltin*}(
+        arr1_len : felt, arr1 : felt*, arr2_len : felt, arr2 : felt*
+    ) -> (res : felt):
+        alloc_locals
+        if arr1_len == 0:
+            return (FALSE)
+        end
+        if arr2_len == 0:
+            return (FALSE)
+        end
+        let (res) = _check_contains_all(arr1_len, arr1, arr2_len, arr2)
+        return (res)
+    end
 end
 
 # ---------------------------------------------------------------------------- #
@@ -159,4 +187,31 @@ func _detected_occurence_recursion{
     end
 
     return _detected_occurence_recursion(target, item_len - 1, item)
+end
+
+# ------------------------------ check contains ------------------------------ #
+func _check_contains{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    arr_len : felt, arr : felt*, item_len : felt, item : felt*
+) -> (res : felt):
+    if arr_len == 0:
+        return (FALSE)
+    end
+    let (detected) = _detected_occurence_recursion([arr], item_len, item)
+    if detected == TRUE:
+        return (TRUE)
+    end
+    return _check_contains(arr_len - 1, &arr[1], item_len, item)
+end
+
+func _check_contains_all{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    arr_len : felt, arr : felt*, item_len : felt, item : felt*
+) -> (res : felt):
+    if arr_len == 0:
+        return (TRUE)
+    end
+    let (detected) = _detected_occurence_recursion([arr], item_len, item)
+    if detected == TRUE:
+        return _check_contains_all(arr_len - 1, &arr[1], item_len, item)
+    end
+    return (FALSE)
 end

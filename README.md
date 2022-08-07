@@ -36,6 +36,13 @@ pip install git+https://github.com/0xKahi/SeraphLabs
 | `remove_array_of_items()` | takes 2 arrays and removes all items in 2nd Array from the 1st Array | Array.remove_array_of_items([1,2,3,2,4,5],[2,5])             | [1,3,4]       |
 | `remove_array_of_uints()` | same as `remove_array_of_items()` but for Uint256 arrays             | UintArray.remove_array_of_uints([(1,0),(2,0),(1,0)],[(1,0)]) | [(2,0)]       |
 
+### Comparing Arrays
+
+| function         | description                                                          | example                             | output |
+| :--------------- | :------------------------------------------------------------------- | :---------------------------------- | :----- |
+| `contains()`     | compare 2 arrays if array 1 has elements in array2 return TRUE       | Array.contains([1,2],[2,3])         | TRUE   |
+| `contains_all()` | compare 2 arrays if all of array 1 elements is in array2 return TRUE | Array.contains_all([1,2,3],[1,2,3]) | TRUE   |
+
 # Strings
 
 | libraries                                                |                                  description                                  |

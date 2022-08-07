@@ -57,3 +57,23 @@ async def test_remove_remove_array_of_items(contract_factory):
     test_arr2 = [1, 3, 4, 6, 8, 9, 10]
     res1 = await test_contract.removeArrayOfItems(test_arr1, remove_arr).call()
     assert res1.result == ((test_arr2),)
+
+
+@pytest.mark.asyncio
+async def test_contains(contract_factory):
+    _, accounts, test_contract = contract_factory
+    arr1 = [1, 2, 3]
+    arr2 = [4, 2, 5]
+    arr3 = [5, 6, 7]
+    arr4 = [1, 2, 3, 4]
+    arr5 = [1, 2, 4]
+
+    res1 = await test_contract.contains(arr1, arr2).call()
+    assert res1.result == (1,)
+    res2 = await test_contract.contains(arr1, arr3).call()
+    assert res2.result == (0,)
+
+    res3 = await test_contract.containsAll(arr1, arr4).call()
+    assert res3.result == (1,)
+    res4 = await test_contract.containsAll(arr1, arr5).call()
+    assert res2.result == (0,)

@@ -27,3 +27,19 @@ func removeArrayOfItems{syscall_ptr : felt*, range_check_ptr, pedersen_ptr : Has
     let (arr_len, arr) = Array.remove_array_of_items(arr1_len, arr1, item_len, item)
     return (arr_len, arr)
 end
+
+@view
+func contains{syscall_ptr : felt*, range_check_ptr, pedersen_ptr : HashBuiltin*}(
+    arr1_len : felt, arr1 : felt*, item_len : felt, item : felt*
+) -> (res):
+    let (res) = Array.contains(arr1_len, arr1, item_len, item)
+    return (res)
+end
+
+@view
+func containsAll{syscall_ptr : felt*, range_check_ptr, pedersen_ptr : HashBuiltin*}(
+    arr1_len : felt, arr1 : felt*, item_len : felt, item : felt*
+) -> (res):
+    let (res) = Array.contains_all(arr1_len, arr1, item_len, item)
+    return (res)
+end
