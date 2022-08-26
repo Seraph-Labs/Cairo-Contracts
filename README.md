@@ -50,3 +50,10 @@ pip install git+https://github.com/0xKahi/SeraphLabs
 | [AsciiArray](src/SeraphLabs/strings/AsciiArray.cairo)    |            used to convert variable into an array of ascii numbers            |
 | [JsonString](src/SeraphLabs/strings/JsonString.cairo)    | used to make onchain dynamic json strings to stream line frontend development |
 | [StringObject](src/SeraphLabs/models/StringObject.cairo) |                            object used for strings                            |
+
+# Math
+
+| libraries                                                |                          description                          |
+| :------------------------------------------------------- | :-----------------------------------------------------------: |
+| [Time](src/SeraphLabs/math/Time.cairo)                   | library used to format or calculate felts into time variables |
+| [simple_checks](src/SeraphLabs/math/simple_checks.cairo) |            library used for simple math functions             |
