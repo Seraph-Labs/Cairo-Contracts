@@ -7,7 +7,7 @@ from starkware.cairo.common.math import unsigned_div_rem
 from SeraphLabs.math.simple_checks import is_lt
 
 namespace Time:
-    func sec{syscall_ptr : felt*, range_check_ptr, pedersen_ptr : HashBuiltin*}(num : felt) -> (
+    func min{syscall_ptr : felt*, range_check_ptr, pedersen_ptr : HashBuiltin*}(num : felt) -> (
         res : felt
     ):
         let (sec) = _time_get_data(0)
@@ -15,7 +15,7 @@ namespace Time:
         return (res)
     end
 
-    func min{syscall_ptr : felt*, range_check_ptr, pedersen_ptr : HashBuiltin*}(num : felt) -> (
+    func hour{syscall_ptr : felt*, range_check_ptr, pedersen_ptr : HashBuiltin*}(num : felt) -> (
         res : felt
     ):
         let (sec) = _time_get_data(1)
@@ -23,7 +23,7 @@ namespace Time:
         return (res)
     end
 
-    func hour{syscall_ptr : felt*, range_check_ptr, pedersen_ptr : HashBuiltin*}(num : felt) -> (
+    func day{syscall_ptr : felt*, range_check_ptr, pedersen_ptr : HashBuiltin*}(num : felt) -> (
         res : felt
     ):
         let (sec) = _time_get_data(2)
@@ -31,7 +31,7 @@ namespace Time:
         return (res)
     end
 
-    func day{syscall_ptr : felt*, range_check_ptr, pedersen_ptr : HashBuiltin*}(num : felt) -> (
+    func week{syscall_ptr : felt*, range_check_ptr, pedersen_ptr : HashBuiltin*}(num : felt) -> (
         res : felt
     ):
         let (sec) = _time_get_data(3)
@@ -39,7 +39,7 @@ namespace Time:
         return (res)
     end
 
-    func week{syscall_ptr : felt*, range_check_ptr, pedersen_ptr : HashBuiltin*}(num : felt) -> (
+    func month{syscall_ptr : felt*, range_check_ptr, pedersen_ptr : HashBuiltin*}(num : felt) -> (
         res : felt
     ):
         let (sec) = _time_get_data(4)
@@ -47,18 +47,10 @@ namespace Time:
         return (res)
     end
 
-    func month{syscall_ptr : felt*, range_check_ptr, pedersen_ptr : HashBuiltin*}(num : felt) -> (
-        res : felt
-    ):
-        let (sec) = _time_get_data(5)
-        tempvar res = sec * num
-        return (res)
-    end
-
     func year{syscall_ptr : felt*, range_check_ptr, pedersen_ptr : HashBuiltin*}(num : felt) -> (
         res : felt
     ):
-        let (sec) = _time_get_data(6)
+        let (sec) = _time_get_data(5)
         tempvar res = sec * num
         return (res)
     end
@@ -157,7 +149,6 @@ func _time_get_data(i) -> (time : felt):
     return ([time_addr + i])
 
     data_time:
-    dw 1  # sec
     dw 60  # min
     dw 3600  # hour
     dw 86400  # day
