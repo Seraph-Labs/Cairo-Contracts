@@ -79,7 +79,7 @@ func ownerOf{
 @view
 func getOwnerTokens{
     bitwise_ptr: BitwiseBuiltin*, syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuiltin*
-}(owner: felt) -> (arr_len: felt, arr: Uint256*) {
+}(owner: felt) -> (tokenIds_len: felt, tokenIds: Uint256*) {
     alloc_locals;
     let (arr_len, arr) = ERC721S_getOwnerTokens(owner);
     return (arr_len, arr);

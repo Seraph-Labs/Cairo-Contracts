@@ -19,6 +19,9 @@ namespace IERC721S {
     func totalSupply() -> (supply: Uint256) {
     }
 
+    func getOwnerTokens(owner: felt) -> (tokenIds_len: felt, tokenIds: Uint256*) {
+    }
+
     func tokenByIndex(index: Uint256) -> (tokenId: Uint256) {
     }
 
