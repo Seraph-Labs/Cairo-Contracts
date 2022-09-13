@@ -4,12 +4,13 @@ import pytest_asyncio
 from starkware.starknet.testing.starknet import Starknet
 from utils.openzepplin.utils import str_to_felt, assert_revert, assert_event_emitted
 from utils.argHandler import unpack_tpl, arr_res, string_to_ascii_arr, to_starknet_args
-from utils.accounts_utils import Account
+
+# from utils.accounts_utils import Account
 
 # The path to the contract source code.
 ACCOUNT_FILE = os.path.join("SeraphLabs", "contracts", "Account.cairo")
 MOCK_FILE = os.path.join(
-    "Seraphlabs", "contracts", "mocks", "uint_array_library_test.cairo"
+    "Seraphlabs", "contracts", "mocks", "arrays", "uint_array_library_test.cairo"
 )
 
 FAKE_PKEY = 123456789987654321
@@ -20,11 +21,11 @@ NUM_OF_ACC = 1
 async def account_factory():
     starknet = await Starknet.empty()
     accounts = []
-    for i in range(NUM_OF_ACC):
-        account = Account(FAKE_PKEY + i)
-        await account.create(starknet)
-        accounts.append(account)
-        print(f"Account {i} initalized: {account}")
+    # for i in range(NUM_OF_ACC):
+    #    account = Account(FAKE_PKEY + i)
+    #    await account.create(starknet)
+    #    accounts.append(account)
+    #    print(f"Account {i} initalized: {account}")
     return starknet, accounts
 
 

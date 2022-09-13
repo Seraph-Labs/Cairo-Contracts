@@ -10,12 +10,10 @@ pip install git+https://github.com/0xKahi/SeraphLabs
 
 # Arrays
 
-| libraries                                                |               description               |
-| :------------------------------------------------------- | :-------------------------------------: |
-| [Array](src/SeraphLabs/arrays/Array.cairo)               |     library for manipulating Arrays     |
-| [UintArray](src/SeraphLabs/arrays/UintArray.cairo)       | library for manipulating Uint256 Arrays |
-| [ReverseArray](src/SeraphLabs/arrays/ReverseArray.cairo) |   deprecated use Array.cairo instead    |
-| [ConcatArray](src/SeraphLabs/arrays/ConcatArray.cairo)   |   deprecated use Array.cairo instead    |
+| libraries                                          |               description               |
+| :------------------------------------------------- | :-------------------------------------: |
+| [Array](src/SeraphLabs/arrays/Array.cairo)         |     library for manipulating Arrays     |
+| [UintArray](src/SeraphLabs/arrays/UintArray.cairo) | library for manipulating Uint256 Arrays |
 
 ## Array lib functions
 
