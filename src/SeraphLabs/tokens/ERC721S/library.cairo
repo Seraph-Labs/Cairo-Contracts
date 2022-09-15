@@ -428,10 +428,13 @@ func ERC721S_scalarMint{
     // ------------------- 2. increase token Counter by quantity ------------------- #
     let (local cur_tokenId: Uint256) = TokenCounter.current();
     TokenCounter.incrementBy(_quantity);
+    // ---------------------- check if can add to next seq ---------------------- //
+    let (add_tokenId, add_sAsset) = _check_can_add_to_seq(cur_tokenId, to, _quantity.low);
+    let (local cant_add) = uint256_le(add_tokenId, Uint256(0, 0));
 
     // ------------------- 3. change tokenId asset owner -------------------------- #
     let (local new_tokenId: Uint256) = SafeUint256.add(cur_tokenId, Uint256(1, 0));
-    local new_sAsset: ScalarAsset = ScalarAsset(owner=to, slot=_slotId.low, units=_units, data=0);
+    local new_sAsset: ScalarAsset = ScalarAsset(owner=to * cant_add, slot=_slotId.low, units=_units, data=0);
 
     // ------------------- 4. change owner balance -------------------------------- #
     let (curr_bal) = ERC721S_balances.read(to);
@@ -442,15 +445,37 @@ func ERC721S_scalarMint{
     // if so emit event once and write asset to tokenId
     let (is_qty_one) = uint256_eq(_quantity, Uint256(1, 0));
     if (is_qty_one == TRUE) {
+        if (cant_add == FALSE) {
+            ERC721S_tokenAsset.write(add_tokenId, add_sAsset);
+            ERC721S_tokenAsset.write(new_tokenId, new_sAsset);
+            Transfer.emit(0, to, new_tokenId);
+            return ();
+        }
+
         ERC721S_tokenAsset.write(new_tokenId, new_sAsset);
         Transfer.emit(0, to, new_tokenId);
         return ();
     }
     // ------------------ 6. update tokenId next_seq ------------------------------ #
     // and recursively emit all newly minted tokenId transfer event
-    tempvar asset_seq = _quantity.low - 1;
-    let (local batched_sAsset: ScalarAsset) = ScalarHandler.update_next_seq(new_sAsset, asset_seq);
 
+    if (cant_add == FALSE) {
+        ERC721S_tokenAsset.write(add_tokenId, add_sAsset);
+
+        tempvar syscall_ptr = syscall_ptr;
+        tempvar pedersen_ptr = pedersen_ptr;
+        tempvar range_check_ptr = range_check_ptr;
+        tempvar bitwise_ptr = bitwise_ptr;
+    } else {
+        tempvar syscall_ptr = syscall_ptr;
+        tempvar pedersen_ptr = pedersen_ptr;
+        tempvar range_check_ptr = range_check_ptr;
+        tempvar bitwise_ptr = bitwise_ptr;
+    }
+    tempvar asset_seq = _quantity.low - 1;
+    let (local batched_sAsset: ScalarAsset) = ScalarHandler.add_next_seq(
+        new_sAsset, asset_seq * cant_add
+    );
     // ------------------- 7. check if slotId = 0 ---------------------------------- #
     // if 0 just write to storage without slot_seq
     if (_slotId.low == 0) {
@@ -754,6 +779,45 @@ func _get_owner_and_fId{
     return (owner, f_tokenId);
 }
 
+// checks if can add to next seq instead of storing new owner
+// checks if last tokenId owner is the same as current
+// if yes will return the first tokenId in the previous seq if not will return 0
+// also checks if seq exceeds 50
+func _check_can_add_to_seq{
+    bitwise_ptr: BitwiseBuiltin*, syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuiltin*
+}(cur_tokenId: Uint256, owner: felt, num: felt) -> (f_tokenId: Uint256, sAsset: ScalarAsset) {
+    alloc_locals;
+    let (is_zero) = uint256_le(cur_tokenId, Uint256(0, 0));
+
+    let (temp_sAsset: ScalarAsset) = ERC721S_tokenAsset.read(cur_tokenId);
+    let (temp_is_burnt, _, temp_next_seq) = ScalarHandler.get_scalar_data(temp_sAsset);
+
+    tempvar temp_seq = num + temp_next_seq;
+    tempvar valid_seq = is_le(50, temp_seq);
+    tempvar cant_add = is_le(1, is_zero + temp_is_burnt + valid_seq);
+
+    if (cant_add == TRUE) {
+        return (Uint256(0, 0), ScalarAsset(owner=0, slot=0, units=Uint256(0, 0), data=0));
+    }
+
+    if (temp_sAsset.owner == owner) {
+        let (sAsset: ScalarAsset) = ScalarHandler.add_next_seq(temp_sAsset, num);
+        return (cur_tokenId, sAsset);
+    }
+
+    let (cur_owner, f_tokenId) = _get_owner_and_fId(cur_tokenId);
+    let (local new_sAsset: ScalarAsset) = ERC721S_tokenAsset.read(f_tokenId);
+    let (is_burnt, _, next_seq) = ScalarHandler.get_scalar_data(new_sAsset);
+
+    tempvar temp_seq = num + next_seq;
+    tempvar valid_seq = is_le(50, temp_seq);
+    tempvar cant_add = is_le(1, is_zero + is_burnt + valid_seq);
+    if (owner == cur_owner and cant_add == FALSE) {
+        let (sAsset: ScalarAsset) = ScalarHandler.add_next_seq(new_sAsset, num);
+        return (f_tokenId, sAsset);
+    }
+    return (Uint256(0, 0), ScalarAsset(owner=0, slot=0, units=Uint256(0, 0), data=0));
+}
 // @audit-check ownerLoop
 // f_tokenId = the tokenId at the start of the batch
 func _ERC721S_owner_of_loop{
@@ -1064,6 +1128,8 @@ func _ERC721S_transfer{
         assert _owner = from_;
     }
 
+    // 1.3 check previous tokenId
+    let (local p_tokenId: Uint256) = SafeUint256.sub_le(tokenId, Uint256(1, 0));
     // --------------------- 2. Decrease and Increase balances -------------------- #
     // 2.1 Decrease owner balance
     let (owner_bal) = ERC721S_balances.read(from_);
@@ -1085,10 +1151,20 @@ func _ERC721S_transfer{
     local has_next_seq = is_le(1, cur_next_seq);
 
     if (has_owner == TRUE and has_next_seq == FALSE) {
+        let (add_tokenId, add_sAsset) = _check_can_add_to_seq(p_tokenId, to, 1);
+        let (cant_add) = uint256_le(add_tokenId, Uint256(0, 0));
+
         // 1.1 change tokenid asset owner
-        tempvar new_sAsset: ScalarAsset = ScalarAsset(owner=to, slot=sAsset.slot, units=sAsset.units, data=sAsset.data);
+        tempvar new_sAsset: ScalarAsset = ScalarAsset(owner=to * cant_add, slot=sAsset.slot, units=sAsset.units, data=sAsset.data);
         ERC721S_tokenAsset.write(tokenId, new_sAsset);
 
+        if (cant_add == FALSE) {
+            ERC721S_tokenAsset.write(add_tokenId, add_sAsset);
+
+            _ERC721S_approve(0, tokenId);
+            Transfer.emit(from_, to, tokenId);
+            return ();
+        }
         // 1.2 clear approvals and emit event
         _ERC721S_approve(0, tokenId);
         Transfer.emit(from_, to, tokenId);
@@ -1108,12 +1184,18 @@ func _ERC721S_transfer{
             let (is_the_first) = uint256_eq(tokenId, f_tokenId);
             assert is_the_first = TRUE;
         }
+
+        // check if can add next_seq to previous token
+        let (add_tokenId, add_sAsset) = _check_can_add_to_seq(p_tokenId, to, 1);
+        let (cant_add) = uint256_le(add_tokenId, Uint256(0, 0));
+
         // 4.2 change current tokenId asset
-        // owner = to and set its next_seq=0
+        // owner = to * cant_add and set its next_seq=0
+        // if cant_add = FALSE owner will be set to zero and next seq will be added on the previous token
         let (temp_sAsset: ScalarAsset) = ScalarHandler.update_next_seq(sAsset, 0);
         ERC721S_tokenAsset.write(
             tokenId,
-            ScalarAsset(owner=to, slot=temp_sAsset.slot, units=temp_sAsset.units, data=temp_sAsset.data),
+            ScalarAsset(owner=to * cant_add, slot=temp_sAsset.slot, units=temp_sAsset.units, data=temp_sAsset.data),
         );
 
         // 4.3 change next tokenId asset in seq
@@ -1128,6 +1210,15 @@ func _ERC721S_transfer{
             ScalarAsset(owner=from_, slot=next_sAsset.slot, units=next_sAsset.units, data=next_sAsset.data),
         );
 
+        // if can_add == TRUE
+        // change prev token next seq
+        if (cant_add == FALSE) {
+            ERC721S_tokenAsset.write(add_tokenId, add_sAsset);
+
+            _ERC721S_approve(0, tokenId);
+            Transfer.emit(from_, to, tokenId);
+            return ();
+        }
         // 4.4 clear approvals and emit event
         _ERC721S_approve(0, tokenId);
         Transfer.emit(from_, to, tokenId);

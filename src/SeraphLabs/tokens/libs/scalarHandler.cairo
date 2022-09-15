@@ -392,11 +392,11 @@ namespace ScalarHandler {
         pedersen_ptr: HashBuiltin*,
     }(_asset: ScalarAsset, _num: felt) -> (asset: ScalarAsset) {
         alloc_locals;
-        let data_pack = _asset.data;
-        let (not_valid, is_parent, next_seq) = unpack_data(data_pack);
         if (_num == 0) {
             return (_asset,);
         }
+        let data_pack = _asset.data;
+        let (not_valid, is_parent, next_seq) = unpack_data(data_pack);
         tempvar new_seq = next_seq + _num;
         let (new_data) = pack_data(not_valid, is_parent, new_seq);
         return (

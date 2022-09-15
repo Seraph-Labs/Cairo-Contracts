@@ -133,6 +133,18 @@ def assert_events_emitted(tx_exec_info, events):
         raise BaseException("Event not fired or not fired correctly")
 
 
+def assert_sorted_event_emitted(tx_exec_info, from_address, name, data):
+    """Assert events are fired with correct data."""
+    event_obj = Event(
+        from_address=from_address,
+        keys=[get_selector_from_name(name)],
+        data=data,
+    )
+
+    event_list = tx_exec_info.get_sorted_events()
+    assert event_obj in event_list
+
+
 def _get_path_from_name(name):
     """Return the contract path by contract name."""
     dirs = ["src", "tests/mocks"]

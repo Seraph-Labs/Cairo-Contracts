@@ -3,7 +3,12 @@ import os
 import pytest
 import pytest_asyncio
 from starkware.starknet.testing.starknet import Starknet
-from utils.openzepplin.utils import str_to_felt, assert_revert, assert_event_emitted
+from utils.openzepplin.utils import (
+    str_to_felt,
+    assert_revert,
+    assert_event_emitted,
+    assert_sorted_event_emitted,
+)
 from utils.argHandler import unpack_tpl, arr_res
 from utils.accounts_utils import Account
 
@@ -91,15 +96,14 @@ async def test_safeMint(contract_factory):
     assert _unit1.result == (units_10,)
 
     # check for event emmited
-    assert_event_emitted(
+    assert_sorted_event_emitted(
         tx_info_1,
         from_address=token_contract.contract_address,
         name="Transfer",
         data=[0, user_1.address, *(1, 0)],
     )
-    assert_event_emitted(
+    assert_sorted_event_emitted(
         tx_info_2,
-        order=1,
         from_address=token_contract.contract_address,
         name="Transfer",
         data=[0, user_2.address, *(3, 0)],
@@ -167,21 +171,19 @@ async def test_split(contract_factory):
     # check owner
 
     # check split event
-    # assert_event_emitted(
-    #    tx_info_1,
-    #    order=2,
-    #    from_address=token_contract.contract_address,
-    #    name="Split",
-    #    data=[user_1.address, *(1, 0), *(24, 0), *(1, 0)],
-    # )
+    assert_sorted_event_emitted(
+        tx_info_1,
+        from_address=token_contract.contract_address,
+        name="Split",
+        data=[user_1.address, *(1, 0), *(24, 0), *(1, 0)],
+    )
 
-    # assert_event_emitted(
-    #    tx_info_1,
-    #    order=3,
-    #    from_address=token_contract.contract_address,
-    #    name="Split",
-    #    data=[user_1.address, *(1, 0), *(25, 0), *(2, 0)],
-    # )
+    assert_sorted_event_emitted(
+        tx_info_1,
+        from_address=token_contract.contract_address,
+        name="Split",
+        data=[user_1.address, *(1, 0), *(25, 0), *(2, 0)],
+    )
 
     # check that non-owner cant split
     await assert_revert(
@@ -263,7 +265,7 @@ async def test_approve(contract_factory):
     assert allowance.result == ((2, 0),)
 
     # check for event
-    assert_event_emitted(
+    assert_sorted_event_emitted(
         tx_info_1,
         from_address=token_contract.contract_address,
         name="ApprovalUnits",
@@ -358,19 +360,18 @@ async def test_merge(contract_factory):
     assert own26.result == (user_1.address,)
 
     # check events
-    # assert_event_emitted(
-    #    tx_info_1,
-    #    order=2,
-    #    from_address=token_contract.contract_address,
-    #    name="Merge",
-    #    data=[user_1.address, *(24, 0), *(26, 0), *(1, 0)],
-    # )
-    # assert_event_emitted(
-    #    tx_info_1,
-    #    from_address=token_contract.contract_address,
-    #    name="Transfer",
-    #    data=[user_1.address, 0, *(25, 0)],
-    # )
+    assert_sorted_event_emitted(
+        tx_info_1,
+        from_address=token_contract.contract_address,
+        name="Merge",
+        data=[user_1.address, *(24, 0), *(26, 0), *(1, 0)],
+    )
+    assert_sorted_event_emitted(
+        tx_info_1,
+        from_address=token_contract.contract_address,
+        name="Transfer",
+        data=[user_1.address, 0, *(25, 0)],
+    )
 
 
 # users   [  1 |   2  |   3   |   B   |  1  ]
@@ -426,7 +427,7 @@ async def test_transferUnits(contract_factory):
     assert allowance.result == ((1, 0),)
 
     # check event emmited
-    # assert_event_emitted(
+    # assert_sorted_event_emitted(
     #    tx_info_1,
     #    from_address=token_contract.contract_address,
     #    name="TransferUnits",
