@@ -4,7 +4,7 @@ from starkware.cairo.common.registers import get_label_location
 from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.math_cmp import is_le
 from starkware.cairo.common.math import unsigned_div_rem
-from SeraphLabs.math.simple_checks import is_lt
+from SeraphLabs.math.logicalOpr import LogicalOpr
 
 namespace Time {
     func min{syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuiltin*}(num: felt) -> (
@@ -60,7 +60,7 @@ namespace Time {
     ) -> (year: felt, sec: felt) {
         alloc_locals;
         let (local x) = year(1);
-        let (is_lesser) = is_lt(num, x);
+        let (is_lesser) = LogicalOpr.is_lt(num, x);
         if (is_lesser == TRUE) {
             return (0, num);
         }
@@ -73,7 +73,7 @@ namespace Time {
     ) -> (month: felt, sec: felt) {
         alloc_locals;
         let (local x) = month(1);
-        let (is_lesser) = is_lt(num, x);
+        let (is_lesser) = LogicalOpr.is_lt(num, x);
         if (is_lesser == TRUE) {
             return (0, num);
         }
@@ -86,7 +86,7 @@ namespace Time {
     ) -> (week: felt, sec: felt) {
         alloc_locals;
         let (local x) = week(1);
-        let (is_lesser) = is_lt(num, x);
+        let (is_lesser) = LogicalOpr.is_lt(num, x);
         if (is_lesser == TRUE) {
             return (0, num);
         }
@@ -99,7 +99,7 @@ namespace Time {
     ) {
         alloc_locals;
         let (local x) = day(1);
-        let (is_lesser) = is_lt(num, x);
+        let (is_lesser) = LogicalOpr.is_lt(num, x);
         if (is_lesser == TRUE) {
             return (0, num);
         }
@@ -112,7 +112,7 @@ namespace Time {
     ) -> (hour: felt, sec: felt) {
         alloc_locals;
         let (local x) = hour(1);
-        let (is_lesser) = is_lt(num, x);
+        let (is_lesser) = LogicalOpr.is_lt(num, x);
         if (is_lesser == TRUE) {
             return (0, num);
         }
@@ -125,7 +125,7 @@ namespace Time {
     ) {
         alloc_locals;
         let (local x) = min(1);
-        let (is_lesser) = is_lt(num, x);
+        let (is_lesser) = LogicalOpr.is_lt(num, x);
         if (is_lesser == TRUE) {
             return (0, num);
         }
