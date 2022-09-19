@@ -1145,7 +1145,7 @@ func _ERC721S_remove_lowest_token{
     bitwise_ptr: BitwiseBuiltin*, syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuiltin*
 }(owner: felt, tokenId: Uint256, cur_bal: Uint256) {
     alloc_locals;
-    let (low_tokenId: Uint256) = ERC721S_owner_lowestToken.read(owner);
+    let (local low_tokenId: Uint256) = ERC721S_owner_lowestToken.read(owner);
     let (is_last) = uint256_eq(tokenId, low_tokenId);
     if (is_last != TRUE) {
         return ();
@@ -1186,14 +1186,15 @@ func _ERC721S_transfer{
     let (local p_tokenId: Uint256) = SafeUint256.sub_le(tokenId, Uint256(1, 0));
     // --------------------- 2. Decrease and Increase balances -------------------- #
     // 2.1 Decrease owner balance
-    let (owner_bal) = ERC721S_balances.read(from_);
+    let (local owner_bal) = ERC721S_balances.read(from_);
     let (new_balance: Uint256) = SafeUint256.sub_le(owner_bal, Uint256(1, 0));
     ERC721S_balances.write(from_, new_balance);
     // 2.2 Increase receiver balance
     let (receiver_bal) = ERC721S_balances.read(to);
     let (new_balance: Uint256) = SafeUint256.add(receiver_bal, Uint256(1, 0));
     ERC721S_balances.write(to, new_balance);
-
+    // 2.3 add lowest token to reciever
+    _ERC721S_add_lowest_token(to, tokenId);
     // -------------------------- 3. SCENARIO 1 ------------------------- #
     // scenario 1 = if current tokenId asset is not in a batch
     // asset must have owner and next_seq >= 1
@@ -1209,8 +1210,7 @@ func _ERC721S_transfer{
         let (cant_add) = uint256_le(add_tokenId, Uint256(0, 0));
 
         // 0.1 change owner and reciever lowest token
-        _ERC721S_remove_lowest_token(sAsset.owner, tokenId, owner_bal);
-        _ERC721S_add_lowest_token(to, tokenId);
+        _ERC721S_remove_lowest_token(_owner, tokenId, owner_bal);
         // 1.1 change tokenid asset owner
         tempvar new_sAsset: ScalarAsset = ScalarAsset(owner=to * cant_add, slot=sAsset.slot, units=sAsset.units, data=sAsset.data);
         ERC721S_tokenAsset.write(tokenId, new_sAsset);
@@ -1242,9 +1242,8 @@ func _ERC721S_transfer{
             assert is_the_first = TRUE;
         }
 
-        // 4.1.1 change owner and reciever lowest token
-        _ERC721S_remove_lowest_token(sAsset.owner, tokenId, owner_bal);
-        _ERC721S_add_lowest_token(to, tokenId);
+        // 4.1.1 change owner lowest token
+        _ERC721S_remove_lowest_token(_owner, tokenId, owner_bal);
         // check if can add next_seq to previous token
         let (add_tokenId, add_sAsset) = _check_can_add_to_seq(p_tokenId, to, 1);
         let (cant_add) = uint256_le(add_tokenId, Uint256(0, 0));
