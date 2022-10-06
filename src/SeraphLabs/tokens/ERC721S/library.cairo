@@ -174,7 +174,7 @@ func ERC721S_ownerOf{
     // find the closest asset that stores an owner
     // checks if is burnt or next_seq val equal to zero
     // if not return owner
-    let (owner, _) = _ERC721S_owner_of_loop(tokenId, 0);
+    let (owner, _) = _ERC721S_unsafe_owner_of_loop(tokenId);
     return (owner,);
 }
 
@@ -487,6 +487,7 @@ func ERC721S_scalarMint{
     );
     // ------------------- 7. check if slotId = 0 ---------------------------------- #
     // if 0 just write to storage without slot_seq
+    // ! rewrite
     if (_slotId.low == 0) {
         ERC721S_tokenAsset.write(new_tokenId, batched_sAsset);
         tempvar syscall_ptr = syscall_ptr;
@@ -539,8 +540,8 @@ func ERC721S_scalarBurn{
 }(tokenId: Uint256, skip: felt) {
     alloc_locals;
 
-    // _get_owner_and_fId checks if token exist
-    let (local _owner, local f_tokenId) = _get_owner_and_fId(tokenId);
+    // _ERC721S_owner_of_loop checks if token exist
+    let (local _owner, local f_tokenId) = _ERC721S_owner_of_loop(tokenId);
     let (local owner_bal: Uint256) = ERC721S_balances.read(_owner);
     // ------------------------- 1. decrease owner balance ------------------------ #
     // 2.1 Decrease owner balance and increment burn counter
@@ -633,10 +634,10 @@ func ERC721S_scalarBurn{
 
     // 4.1 safety assertion if this fails that means theres a bug in the code
     // ensures that current tokenId is not first tokenId
-    with_attr error_message("ERC721S: burn scenario 3 error") {
-        let (is_the_first) = uint256_eq(tokenId, f_tokenId);
-        assert is_the_first = FALSE;
-    }
+    // with_attr error_message("ERC721S: burn scenario 3 error") {
+    //    let (is_the_first) = uint256_eq(tokenId, f_tokenId);
+    //    assert is_the_first = FALSE;
+    // }
 
     // 4.2 check if cur tokenId is last Id in batch
     let (local f_sAsset: ScalarAsset) = ERC721S_tokenAsset.read(f_tokenId);
@@ -759,7 +760,47 @@ func ERC721S_changeOwnerBalance{syscall_ptr: felt*, range_check_ptr, pedersen_pt
 //                         internals not to be exported                         #
 // ---------------------------------------------------------------------------- #
 
-func _get_owner_and_fId{
+// checks if can add to next seq instead of storing new owner
+// checks if last tokenId owner is the same as current
+// if yes will return the first tokenId in the previous seq if not will return 0
+// also checks if seq exceeds 50
+func _check_can_add_to_seq{
+    bitwise_ptr: BitwiseBuiltin*, syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuiltin*
+}(cur_tokenId: Uint256, owner: felt, num: felt) -> (f_tokenId: Uint256, sAsset: ScalarAsset) {
+    alloc_locals;
+    let (is_zero) = uint256_le(cur_tokenId, Uint256(0, 0));
+
+    let (temp_sAsset: ScalarAsset) = ERC721S_tokenAsset.read(cur_tokenId);
+    let (cant_add) = LogicalOpr.OR(is_zero, temp_sAsset.data);
+
+    if (cant_add == TRUE) {
+        return (Uint256(0, 0), ScalarAsset(owner=0, slot=0, units=Uint256(0, 0), data=0));
+    }
+
+    if (temp_sAsset.owner == owner) {
+        let (sAsset: ScalarAsset) = ScalarHandler.add_next_seq(temp_sAsset, num);
+        return (cur_tokenId, sAsset);
+    }
+
+    let (cur_owner, f_tokenId) = _ERC721S_owner_of_loop(cur_tokenId);
+
+    if (cur_owner != owner) {
+        return (Uint256(0, 0), ScalarAsset(owner=0, slot=0, units=Uint256(0, 0), data=0));
+    }
+
+    let (next_seq: Uint256) = SafeUint256.sub_le(f_tokenId, cur_tokenId);
+    let (new_seq: Uint256) = SafeUint256.add(next_seq, Uint256(num, 0));
+    let (inValid_seq) = uint256_le(Uint256(51, 0), new_seq);
+
+    if (inValid_seq == FALSE) {
+        let (new_sAsset: ScalarAsset) = ERC721S_tokenAsset.read(f_tokenId);
+        let (sAsset: ScalarAsset) = ScalarHandler.add_next_seq(new_sAsset, num);
+        return (f_tokenId, sAsset);
+    }
+    return (Uint256(0, 0), ScalarAsset(owner=0, slot=0, units=Uint256(0, 0), data=0));
+}
+
+func _ERC721S_owner_of_loop{
     bitwise_ptr: BitwiseBuiltin*, syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuiltin*
 }(tokenId: Uint256) -> (owner: felt, f_tokenId: Uint256) {
     alloc_locals;
@@ -788,54 +829,14 @@ func _get_owner_and_fId{
     // find the closest asset that stores an owner
     // checks if is burnt or next_seq val equal to zero
     // if not return owner
-    let (owner, f_tokenId) = _ERC721S_owner_of_loop(tokenId, 0);
-    return (owner, f_tokenId);
+    return _ERC721S_unsafe_owner_of_loop(tokenId);
 }
 
-// checks if can add to next seq instead of storing new owner
-// checks if last tokenId owner is the same as current
-// if yes will return the first tokenId in the previous seq if not will return 0
-// also checks if seq exceeds 50
-func _check_can_add_to_seq{
-    bitwise_ptr: BitwiseBuiltin*, syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuiltin*
-}(cur_tokenId: Uint256, owner: felt, num: felt) -> (f_tokenId: Uint256, sAsset: ScalarAsset) {
-    alloc_locals;
-    let (is_zero) = uint256_le(cur_tokenId, Uint256(0, 0));
-
-    let (temp_sAsset: ScalarAsset) = ERC721S_tokenAsset.read(cur_tokenId);
-    let (cant_add) = LogicalOpr.OR(is_zero, temp_sAsset.data);
-
-    if (cant_add == TRUE) {
-        return (Uint256(0, 0), ScalarAsset(owner=0, slot=0, units=Uint256(0, 0), data=0));
-    }
-
-    if (temp_sAsset.owner == owner) {
-        let (sAsset: ScalarAsset) = ScalarHandler.add_next_seq(temp_sAsset, num);
-        return (cur_tokenId, sAsset);
-    }
-
-    let (cur_owner, f_tokenId) = _get_owner_and_fId(cur_tokenId);
-
-    if (cur_owner != owner) {
-        return (Uint256(0, 0), ScalarAsset(owner=0, slot=0, units=Uint256(0, 0), data=0));
-    }
-
-    let (local new_sAsset: ScalarAsset) = ERC721S_tokenAsset.read(f_tokenId);
-    let (next_seq) = ScalarHandler.get_next_seq(new_sAsset);
-
-    tempvar temp_seq = num + next_seq;
-    tempvar in_valid_seq = is_le(50, temp_seq);
-    if (in_valid_seq == FALSE) {
-        let (sAsset: ScalarAsset) = ScalarHandler.add_next_seq(new_sAsset, num);
-        return (f_tokenId, sAsset);
-    }
-    return (Uint256(0, 0), ScalarAsset(owner=0, slot=0, units=Uint256(0, 0), data=0));
-}
 // @audit-check ownerLoop
 // f_tokenId = the tokenId at the start of the batch
-func _ERC721S_owner_of_loop{
+func _ERC721S_unsafe_owner_of_loop{
     bitwise_ptr: BitwiseBuiltin*, syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuiltin*
-}(tokenId: Uint256, itr_num: felt) -> (owner: felt, f_tokenId: Uint256) {
+}(tokenId: Uint256) -> (owner: felt, f_tokenId: Uint256) {
     alloc_locals;
 
     // ------------------------- 1. check if tokenId <= 1 ------------------------- #
@@ -847,27 +848,18 @@ func _ERC721S_owner_of_loop{
 
     // --------- 2. decrease tokenId by 1 and increase iteration num by 1 --------- #
     let (local new_tokenId: Uint256) = SafeUint256.sub_lt(tokenId, Uint256(1, 0));
-    tempvar new_itr_num = itr_num + 1;
 
-    // ----- 3. check if asset has_owner && not_burnt && next_seq > 0 if TRUE ----- #
-    // 3.1. check if iteration number <= to asset next_seq
+    // ----------------------- 3. check if token has owner ---------------------- //
     // if not revert for safety reasons means there is an error somewhere
     // if so return current asset owner
     let (local temp_sAsset: ScalarAsset) = ERC721S_tokenAsset.read(new_tokenId);
-    let (has_found) = ScalarHandler.check_has_owner_seq_not_burnt(_asset=temp_sAsset);
 
-    if (has_found == TRUE) {
-        let (cur_next_seq) = ScalarHandler.get_next_seq(temp_sAsset);
-        with_attr error_message("ERC721S: failed to get owner of ") {
-            let is_valid_loop = is_le(new_itr_num, cur_next_seq);
-            assert is_valid_loop = TRUE;
-        }
+    if (temp_sAsset.owner != 0) {
         return (temp_sAsset.owner, new_tokenId);
     }
 
     // ----------------- 4. if all fails go to the next iteration ----------------- #
-    let (_owner, f_id) = _ERC721S_owner_of_loop(tokenId=new_tokenId, itr_num=new_itr_num);
-    return (_owner, f_id);
+    return _ERC721S_unsafe_owner_of_loop(tokenId=new_tokenId);
 }
 
 // @audit-check ownerIndexloop
@@ -1126,8 +1118,8 @@ func _ERC721S_transfer{
     }
 
     // 1.2 check if from_ address owns token
-    // _get_owner_and_fId checks if tokenId exist
-    let (local _owner, local f_tokenId) = _get_owner_and_fId(tokenId);
+    // _ERC721S_owner_of_loop checks if tokenId exist
+    let (local _owner, local f_tokenId) = _ERC721S_owner_of_loop(tokenId);
     with_attr error_message("ERC721S: transfer from incorrect owner") {
         assert _owner = from_;
     }
