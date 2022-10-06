@@ -589,14 +589,14 @@ func _slot_of{
         return (Uint256(slotId, 0), tokenId);
     }
     // ------------- 4. if no slot if found start iterating backwards ------------- #
-    let (slot, f_tokenId) = _slot_of_loop(tokenId, 0);
+    let (slot, f_tokenId) = _slot_of_loop(tokenId);
     return (slot, f_tokenId);
 }
 
 // @audit _slotOf_loop
 func _slot_of_loop{
     bitwise_ptr: BitwiseBuiltin*, syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuiltin*
-}(tokenId: Uint256, itr_num: felt) -> (slotId: Uint256, f_tokenid: Uint256) {
+}(tokenId: Uint256) -> (slotId: Uint256, f_tokenid: Uint256) {
     alloc_locals;
 
     // ------------------------- 1. check if tokenId <= 1 ------------------------- #
@@ -606,25 +606,18 @@ func _slot_of_loop{
         assert not_in_range = FALSE;
     }
 
-    // --------- 2. decrease tokenId by 1 and increase iteration num by 1 --------- #
+    // ------------------------ 2. decrease tokenId by 1 ------------------------ //
     let (local new_tokenId: Uint256) = SafeUint256.sub_lt(tokenId, Uint256(1, 0));
-    tempvar new_itr_num = itr_num + 1;
-
     // ------------------------ 3. check if asset has slot ------------------------ #
     let (local temp_sAsset: ScalarAsset) = ERC721S_getTokenAsset(new_tokenId);
     let slot_exist = is_not_zero(temp_sAsset.slot);
     if (slot_exist == TRUE) {
         let (slotId, slot_seq) = ScalarHandler.get_scalar_slot(temp_sAsset);
-        with_attr error_message("ERC3525; failed to get slotOf") {
-            let valid_loop = is_le(new_itr_num, slot_seq);
-            assert valid_loop = TRUE;
-        }
         return (Uint256(slotId, 0), new_tokenId);
     }
 
     // ----------------- 4. if all fails got to the next iteration ---------------- #
-    let (slot_Id, f_id) = _slot_of_loop(tokenId=new_tokenId, itr_num=new_itr_num);
-    return (slot_Id, f_id);
+    return _slot_of_loop(tokenId=new_tokenId);
 }
 
 // @audit _find_unit_approve
