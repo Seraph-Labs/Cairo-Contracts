@@ -1,1 +1,0 @@
-0x03af2f835629fff38b7a4041039f197d49b053d16e16cde5803129287ac186ab:artifacts/abis/mock_3525.json:mock
