@@ -15,6 +15,16 @@ func StrObj_check{range_check_ptr}(a: StrObj) {
     return ();
 }
 
+// Verifies that the given string is valid and accounts for empty strings as valid StrObj
+func assert_valid_StrObj{range_check_ptr}(a: StrObj) {
+    if (a.val == 0) {
+        assert_le(a.len, 31);
+        return ();
+    }
+    StrObj_check(a);
+    return ();
+}
+
 func StrObj_is_equal{range_check_ptr}(a: StrObj, b: StrObj) -> (res: felt) {
     StrObj_check(a);
     StrObj_check(b);
