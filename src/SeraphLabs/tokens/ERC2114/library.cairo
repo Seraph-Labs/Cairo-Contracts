@@ -333,22 +333,28 @@ func _ERC2114_getAttributesLoop{syscall_ptr: felt*, range_check_ptr, pedersen_pt
 func _ERC2114_scalar_transfer{syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuiltin*}(
     from_: felt, toContract: felt, tokenId: Uint256, to: Uint256
 ) {
-    let (bal: Uint256) = ERC2114_tokenBalance.read(tokenId);
+    let (bal: Uint256) = ERC2114_tokenBalance.read(to);
     let (new_bal: Uint256) = SafeUint256.add(bal, Uint256(1, 0));
 
-    ERC2114_tokenBalance.write(tokenId, new_bal);
+    ERC2114_tokenBalance.write(to, new_bal);
     ERC2114_tokenToToken.write(tokenId, ScalarToken(to, toContract));
-    ScalarTransfer.emit(from_, tokenId, to, toContract);
-    return ();
+    if (toContract == 0) {
+        let (contract_addr) = get_contract_address();
+        ScalarTransfer.emit(from_, tokenId, to, contract_addr);
+        return ();
+    } else {
+        ScalarTransfer.emit(from_, tokenId, to, toContract);
+        return ();
+    }
 }
 
 func _ERC2114_scalar_remove{syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuiltin*}(
     fromTokenId: Uint256, tokenId: Uint256, to: felt
 ) {
-    let (bal: Uint256) = ERC2114_tokenBalance.read(tokenId);
+    let (bal: Uint256) = ERC2114_tokenBalance.read(fromTokenId);
     let (new_bal: Uint256) = SafeUint256.sub_le(bal, Uint256(1, 0));
 
-    ERC2114_tokenBalance.write(tokenId, new_bal);
+    ERC2114_tokenBalance.write(fromTokenId, new_bal);
     ERC2114_tokenToToken.write(tokenId, ScalarToken(Uint256(0, 0), 0));
     ScalarRemove.emit(fromTokenId, tokenId, to);
     return ();
