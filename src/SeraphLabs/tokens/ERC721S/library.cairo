@@ -788,7 +788,7 @@ func _check_can_add_to_seq{
         return (Uint256(0, 0), ScalarAsset(owner=0, slot=0, units=Uint256(0, 0), data=0));
     }
 
-    let (next_seq: Uint256) = SafeUint256.sub_le(f_tokenId, cur_tokenId);
+    let (next_seq: Uint256) = SafeUint256.sub_le(cur_tokenId, f_tokenId);
     let (new_seq: Uint256) = SafeUint256.add(next_seq, Uint256(num, 0));
     let (inValid_seq) = uint256_le(Uint256(51, 0), new_seq);
 
