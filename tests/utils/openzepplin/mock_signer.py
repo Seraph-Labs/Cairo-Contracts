@@ -12,40 +12,31 @@ from nile.signer import (
     get_transaction_hash,
     TRANSACTION_VERSION,
 )
-from utils.openzepplin.utils import to_uint
+from nile.utils import to_uint
 import eth_keys
 
 
 class MockSigner:
     """
     Utility for sending signed transactions to an Account on Starknet.
-
     Parameters
     ----------
-
     private_key : int
-
     Examples
     ---------
     Constructing a MockSigner object
-
     >>> signer = MockSigner(1234)
-
     Sending a transaction
-
     >>> await signer.send_transaction(
             account, contract_address, 'contract_method', [arg_1]
         )
-
     Sending multiple transactions
-
     >>> await signer.send_transactions(
             account, [
                 (contract_address, 'contract_method', [arg_1]),
                 (contract_address, 'another_method', [arg_1, arg_2])
             ]
         )
-
     """
 
     def __init__(self, private_key):
@@ -103,7 +94,6 @@ class MockEthSigner:
     Parameters
     ----------
     private_key : int
-
     """
 
     def __init__(self, private_key):

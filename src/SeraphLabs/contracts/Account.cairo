@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// OpenZeppelin Contracts for Cairo v0.4.0b (account/presets/Account.cairo)
+
 %lang starknet
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin, SignatureBuiltin, BitwiseBuiltin
@@ -10,10 +13,8 @@ from openzeppelin.account.library import Account, AccountCallArray
 //
 
 @constructor
-func constructor{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-    public_key: felt
-) {
-    Account.initializer(public_key);
+func constructor{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(publicKey: felt) {
+    Account.initializer(publicKey);
     return ();
 }
 
