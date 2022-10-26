@@ -5,7 +5,7 @@ helpful libraries for creating starnet contracts
 ## Install
 
 ```
-pip install git+https://github.com/0xKahi/SeraphLabs
+pip install https://github.com/Seraph-Labs/cairo-contracts
 ```
 
 # Arrays
