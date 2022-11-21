@@ -79,6 +79,7 @@ func ERC2114_tokenAttribute(tokenId: Uint256, index: felt) -> (attrId: Uint256) 
 @storage_var
 func ERC2114_tokenAttribute_value(tokenId: Uint256, attrId: Uint256) -> (tokenAttr: TokenAttr) {
 }
+
 // -------------------------------------------------------------------------- //
 //                                 Constructor                                //
 // -------------------------------------------------------------------------- //
