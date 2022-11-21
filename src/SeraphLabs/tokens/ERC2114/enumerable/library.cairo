@@ -63,7 +63,7 @@ func ERC2114Enumerable_scalarTransferFrom{
 }(from_: felt, tokenId: Uint256, to: Uint256) {
     alloc_locals;
     // get balance first
-    let (local balance: Uint256) = ERC2114_tokenBalanceOf(tokenId);
+    let (local balance: Uint256) = ERC2114_tokenBalanceOf(to);
     // trasfer token
     ERC2114_scalarTransferFrom(from_, tokenId, to);
     tempvar SToken: ScalarToken = ScalarToken(tokenId, 0);

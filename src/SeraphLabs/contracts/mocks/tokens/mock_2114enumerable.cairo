@@ -130,8 +130,8 @@ func getApproved{
 func tokenOfTokenByIndex{
     bitwise_ptr: BitwiseBuiltin*, syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuiltin*
 }(tokenId: Uint256, index: Uint256) -> (tokenId: Uint256, from_: felt) {
-    let (tokend, from_) = ERC2114Enumerable_tokenOfTokenByIndex(tokenId, index);
-    return (tokenId, from_);
+    let (token_id, from_) = ERC2114Enumerable_tokenOfTokenByIndex(tokenId, index);
+    return (token_id, from_);
 }
 
 @view
