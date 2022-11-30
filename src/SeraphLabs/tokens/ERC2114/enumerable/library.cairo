@@ -15,6 +15,12 @@ from starkware.cairo.common.uint256 import (
 
 from starkware.cairo.common.math_cmp import is_not_zero, is_le
 from openzeppelin.security.safemath.library import SafeUint256
+
+from openzeppelin.introspection.ERC165.library import ERC165
+
+// -------------------------------- constants ------------------------------- //
+from SeraphLabs.utils.constants import IERC2114_ENUMERABLE_ID
+
 // --------------------------------- models --------------------------------- //
 from SeraphLabs.tokens.ERC2114.libs.scalarToken import ScalarToken
 // ---------------------------------- libs ---------------------------------- //
@@ -35,6 +41,14 @@ func ERC2114Enumerable_tokenOfToken(tokenId: Uint256, index: Uint256) -> (SToken
 func ERC2114Enumerable_tokenIndex(tokenId: Uint256, from_contract: felt) -> (index: Uint256) {
 }
 
+// -------------------------------------------------------------------------- //
+//                                 constructor                                //
+// -------------------------------------------------------------------------- //
+func ERC2114Enumerable_initializer{syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuiltin*}(
+    ) {
+    ERC165.register_interface(IERC2114_ENUMERABLE_ID);
+    return ();
+}
 // -------------------------------------------------------------------------- //
 //                                    view                                    //
 // -------------------------------------------------------------------------- //

@@ -19,7 +19,8 @@ from openzeppelin.security.safemath.library import SafeUint256
 from openzeppelin.introspection.ERC165.library import ERC165
 
 from openzeppelin.introspection.ERC165.IERC165 import IERC165
-
+// -------------------------------- constants ------------------------------- //
+from SeraphLabs.utils.constants import IERC2114_ID
 // ------------------------------- token libs ------------------------------- //
 from SeraphLabs.tokens.ERC721S.library import (
     ERC721S_exist,
@@ -84,7 +85,7 @@ func ERC2114_tokenAttribute_value(tokenId: Uint256, attrId: Uint256) -> (tokenAt
 //                                 Constructor                                //
 // -------------------------------------------------------------------------- //
 func ERC2114_initalizer{syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuiltin*}() {
-    // ! implement ERC2114 register interface
+    ERC165.register_interface(IERC2114_ID);
     return ();
 }
 
