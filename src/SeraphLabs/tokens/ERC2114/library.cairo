@@ -292,11 +292,19 @@ func ERC2114_batchAddAttribute{
         assert values_len = ammounts_len;
     }
     _ERC2114_add_attribute_loop(tokenId, attrIds, values, ammounts, attrIds_len, attr_len);
+    tempvar new_len = attr_len + attrIds_len;
+    ERC2114_tokenAttribute_len.write(tokenId, new_len);
     return ();
 }
 // -------------------------------------------------------------------------- //
 //                                  internals                                 //
 // -------------------------------------------------------------------------- //
+func _ERC2114_atrIdName{syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuiltin*}(
+    attrId: Uint256
+) -> (str: StrObj) {
+    let (str: StrObj) = ERC2114_attrName.read(attrId);
+    return (str,);
+}
 
 func _ERC2114_get_tokenOwner_loop{
     bitwise_ptr: BitwiseBuiltin*, syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuiltin*
