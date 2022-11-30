@@ -58,11 +58,11 @@ def to_starknet_args(data):
     return tuple(items)
 
 
-def convert_hex_to_ascii(h):
-    chars_in_reverse = []
-    while h != 0x0:
-        chars_in_reverse.append(chr(h & 0xFF))
-        h = h >> 8
+def felt_to_ascii(felt):
+    bytes_object = bytes.fromhex(hex(felt)[2:])
+    ascii_string = str(bytes_object.decode("ascii"))
+    return ascii_string
 
-    chars_in_reverse.reverse()
-    return "".join(chars_in_reverse)
+
+def ascii_to_felt(s):
+    return int.from_bytes(s.encode("ascii"), "big")
