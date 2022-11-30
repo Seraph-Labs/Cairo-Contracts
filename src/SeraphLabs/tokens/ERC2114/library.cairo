@@ -30,7 +30,6 @@ from SeraphLabs.tokens.ERC721S.library import (
 )
 // ---------------------------------- libs ---------------------------------- //
 from SeraphLabs.arrays.UintArray import UintArray
-from SeraphLabs.strings.AsciiArray import word_to_ascii
 from SeraphLabs.math.simple_checks import is_uint_valid
 
 from SeraphLabs.models.StringObject import StrObj, StrObj_check, assert_valid_StrObj
