@@ -160,7 +160,7 @@ func attributesAmmount{
 @view
 func attributeValue{
     bitwise_ptr: BitwiseBuiltin*, syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuiltin*
-}(tokenId: Uint256, attrId: Uint256) -> (value_len: felt, value: felt*) {
+}(tokenId: Uint256, attrId: Uint256) -> (Str: StrObj) {
     return ERC2114_attributeValue(tokenId, attrId);
 }
 

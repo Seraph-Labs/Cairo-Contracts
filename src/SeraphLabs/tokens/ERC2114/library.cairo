@@ -148,12 +148,11 @@ func ERC2114_attributeAmmount{
 
 func ERC2114_attributeValue{
     bitwise_ptr: BitwiseBuiltin*, syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuiltin*
-}(tokenId: Uint256, attrId: Uint256) -> (value_len: felt, value: felt*) {
+}(tokenId: Uint256, attrId: Uint256) -> (Str: StrObj) {
     alloc_locals;
     _ERC2114_assert_exist(tokenId);
     let (attrObj: TokenAttr) = ERC2114_tokenAttribute_value.read(tokenId, attrId);
-    let (val_len, val) = word_to_ascii(attrObj.value);
-    return (val_len, val);
+    return (attrObj.value,);
 }
 
 // -------------------------------------------------------------------------- //
