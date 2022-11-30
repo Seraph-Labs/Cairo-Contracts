@@ -5,6 +5,7 @@ import pytest_asyncio
 from starkware.starknet.testing.starknet import Starknet
 from utils.openzepplin.utils import str_to_felt, assert_revert
 from utils.accounts_utils import Account
+from utils.argHandler import ascii_to_felt, felt_to_ascii, unpack_tpl
 
 # The path to the contract source code.
 ACCOUNT_FILE = os.path.join("SeraphLabs", "contracts", "Account.cairo")
@@ -412,3 +413,188 @@ async def test_token_by_index(contract_factory):
         token_contract.tokenByIndex((21, 0)).call(),
         reverted_with="ERC721S: index is out of bounds",
     )
+
+
+# token_o  [0  |  0   |  0  | 17  | 0 ]
+# user     [3 |  1  |  1  |  0  | 1 | 3 |   2  |   1   |  3 |  2 ]
+# tokens   [1 |  2  |  3  | 4-5 | 6 | 7 | 8-15 | 16-19 | 20 | 21]
+@pytest.mark.asyncio
+async def test_add_attribute(contract_factory):
+    _, accounts, token_contract = contract_factory
+
+    user_1 = accounts[0]
+    str1 = ascii_to_felt("hello")
+    str2 = ascii_to_felt("world")
+    str3 = ascii_to_felt("apple")
+    tx_info_1 = await user_1.tx_with_nonce(
+        token_contract.contract_address,
+        "createAttribute",
+        [*(1, 0), *(str1, 5)],
+    )
+
+    await user_1.tx_with_nonce(
+        token_contract.contract_address,
+        "createAttribute",
+        [*(2, 0), *(str2, 5)],
+    )
+
+    await user_1.tx_with_nonce(
+        token_contract.contract_address,
+        "createAttribute",
+        [*(3, 0), *(str3, 5)],
+    )
+
+    # check that attrId cannot be created twice
+    await assert_revert(
+        user_1.tx_with_nonce(
+            token_contract.contract_address,
+            "createAttribute",
+            [*(1, 0), *(str1, 5)],
+        ),
+        reverted_with="ERC2114: attrId already exist",
+    )
+
+    # check that strObj cannot be invalid
+    await assert_revert(
+        user_1.tx_with_nonce(
+            token_contract.contract_address,
+            "createAttribute",
+            [*(4, 0), *(0, 0)],
+        ),
+        reverted_with="ERC2114: String object is invalid",
+    )
+
+    # test event
+    assert_sorted_event_emitted(
+        tx_info_1,
+        from_address=token_contract.contract_address,
+        name="AttributeCreated",
+        data=[*(1, 0), *(str1, 5)],
+    )
+
+    # add attributes
+    tx_info_2 = await user_1.tx_with_nonce(
+        token_contract.contract_address,
+        "addAttribute",
+        [*(2, 0), *(1, 0), *(str2, 5), *(1, 0)],
+    )
+
+    await user_1.tx_with_nonce(
+        token_contract.contract_address,
+        "addAttribute",
+        [*(2, 0), *(2, 0), *(0, 0), *(5, 0)],
+    )
+
+    # test event
+    assert_sorted_event_emitted(
+        tx_info_2,
+        from_address=token_contract.contract_address,
+        name="AttributeAdded",
+        data=[*(2, 0), *(1, 0), *(str2, 5), *(1, 0)],
+    )
+
+    # test view funcs
+    arr1 = await token_contract.attributesOf((2, 0)).call()
+    count1 = await token_contract.attributesCount((2, 0)).call()
+    ammt1 = await token_contract.attributesAmmount((2, 0), (1, 0)).call()
+    ammt2 = await token_contract.attributesAmmount((2, 0), (2, 0)).call()
+    val1 = await token_contract.attributeValue((2, 0), (1, 0)).call()
+    val2 = await token_contract.attributeValue((2, 0), (2, 0)).call()
+    assert arr1.result == ([(1, 0), (2, 0)],)
+    assert count1.result == ((2, 0),)
+    assert ammt1.result == ((1, 0),)
+    assert ammt2.result == ((5, 0),)
+    assert val1.result == ((str2, 5),)
+    assert val2.result == ((0, 0),)
+
+    # assert cant add non existent attribute
+    await assert_revert(
+        user_1.tx_with_nonce(
+            token_contract.contract_address,
+            "addAttribute",
+            [*(2, 0), *(4, 0), *(str2, 5), *(1, 0)],
+        ),
+        reverted_with="ERC2114: attrId does not exist",
+    )
+    # assert attribute ammount cant be invalid
+    await assert_revert(
+        user_1.tx_with_nonce(
+            token_contract.contract_address,
+            "addAttribute",
+            [*(2, 0), *(3, 0), *(str2, 5), *(0, 0)],
+        ),
+        reverted_with="ERC2114: ammount is not a valid uint",
+    )
+    # assert cant add attribute twice
+    await assert_revert(
+        user_1.tx_with_nonce(
+            token_contract.contract_address,
+            "addAttribute",
+            [*(2, 0), *(1, 0), *(str2, 5), *(1, 0)],
+        ),
+        reverted_with="ERC2114: tokenId already owns this attrId",
+    )
+
+
+# token_o  [0  |  0   |  0  | 17  | 0 ]
+# user     [3 |  1  |  1  |  0  | 1 | 3 |   2  |   1   |  3 |  2 ]
+# tokens   [1 |  2  |  3  | 4-5 | 6 | 7 | 8-15 | 16-19 | 20 | 21]
+@pytest.mark.asyncio
+async def test_batch_add_attribute(contract_factory):
+    _, accounts, token_contract = contract_factory
+    user_1 = accounts[0]
+
+    str1 = ascii_to_felt("test1")
+    str2 = ascii_to_felt("test2")
+    str3 = ascii_to_felt("test3")
+    str4 = ascii_to_felt("test4")
+
+    arr1 = [(4, 0), (5, 0), (6, 0), (7, 0)]
+    arr2 = [(str1, 5), (str2, 5), (str3, 5), (str4, 5)]
+    arr3 = [(str1, 5), (str2, 5), (str3, 5), (0, 0)]
+    ammtarr = [(1, 0), (2, 0), (3, 0), (4, 0)]
+    fail_arr1 = [(4, 0), (3, 0), (6, 0), (7, 0)]
+
+    # check that attrId cannot be created twice
+    await assert_revert(
+        user_1.tx_with_nonce(
+            token_contract.contract_address,
+            "batchCreateAttribute",
+            [len(fail_arr1), *unpack_tpl(fail_arr1), len(arr2), *unpack_tpl(arr2)],
+        ),
+        reverted_with="ERC2114: attrId already exist",
+    )
+
+    await user_1.tx_with_nonce(
+        token_contract.contract_address,
+        "batchCreateAttribute",
+        [len(arr1), *unpack_tpl(arr1), len(arr2), *unpack_tpl(arr2)],
+    )
+
+    await user_1.tx_with_nonce(
+        token_contract.contract_address,
+        "batchAddAttribute",
+        [
+            *(2, 0),
+            len(arr1),
+            *unpack_tpl(arr1),
+            len(arr3),
+            *unpack_tpl(arr3),
+            len(ammtarr),
+            *unpack_tpl(ammtarr),
+        ],
+    )
+
+    # test view funcs
+    arr1 = await token_contract.attributesOf((2, 0)).call()
+    count1 = await token_contract.attributesCount((2, 0)).call()
+    ammt1 = await token_contract.attributesAmmount((2, 0), (4, 0)).call()
+    ammt2 = await token_contract.attributesAmmount((2, 0), (6, 0)).call()
+    val1 = await token_contract.attributeValue((2, 0), (5, 0)).call()
+    val2 = await token_contract.attributeValue((2, 0), (7, 0)).call()
+    assert arr1.result == ([(1, 0), (2, 0), (4, 0), (5, 0), (6, 0), (7, 0)],)
+    assert count1.result == ((6, 0),)
+    assert ammt1.result == ((1, 0),)
+    assert ammt2.result == ((3, 0),)
+    assert val1.result == ((str2, 5),)
+    assert val2.result == ((0, 0),)
