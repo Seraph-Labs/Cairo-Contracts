@@ -80,11 +80,7 @@ func ERC2114Enumerable_scalarTransferFrom{
     let (local balance: Uint256) = ERC2114_tokenBalanceOf(to);
     // trasfer token
     ERC2114_scalarTransferFrom(from_, tokenId, to);
-    tempvar SToken: ScalarToken = ScalarToken(tokenId, 0);
-    // write SToken to index which is the old balance
-    ERC2114Enumerable_tokenOfToken.write(to, balance, SToken);
-    // write index to SToken
-    ERC2114Enumerable_tokenIndex.write(tokenId, 0, balance);
+    _ERC2114Enumerable_scalarTransferFrom(tokenId, to, balance);
     return ();
 }
 
@@ -94,6 +90,30 @@ func ERC2114Enumerable_scalarRemoveFrom{
     alloc_locals;
     // remove token
     ERC2114_scalarRemoveFrom(from_, tokenId);
+    _ERC2114Enumerable_scalarRemoveFrom(from_, tokenId);
+    return ();
+}
+
+// -------------------------------------------------------------------------- //
+//                                  internals                                 //
+// -------------------------------------------------------------------------- //
+
+func _ERC2114Enumerable_scalarTransferFrom{
+    syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuiltin*
+}(tokenId: Uint256, to: Uint256, index: Uint256) {
+    alloc_locals;
+    tempvar SToken: ScalarToken = ScalarToken(tokenId, 0);
+    // write SToken to index
+    ERC2114Enumerable_tokenOfToken.write(to, index, SToken);
+    // write index to SToken
+    ERC2114Enumerable_tokenIndex.write(tokenId, 0, index);
+    return ();
+}
+
+func _ERC2114Enumerable_scalarRemoveFrom{
+    bitwise_ptr: BitwiseBuiltin*, syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuiltin*
+}(from_: Uint256, tokenId: Uint256) {
+    alloc_locals;
     // get balance
     let (balance: Uint256) = ERC2114_tokenBalanceOf(from_);
     // get index
