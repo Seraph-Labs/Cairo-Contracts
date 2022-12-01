@@ -20,7 +20,7 @@ from SeraphLabs.tokens.ERC721S.library import (
 )
 
 from SeraphLabs.tokens.ERC3525.library import (
-    ERC3525_initalizer,
+    ERC3525_initializer,
     ERC3525_slotOf,
     ERC3525_supplyOfSlot,
     ERC3525_tokenOfSlotByIndex,
@@ -40,7 +40,7 @@ func constructor{syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuiltin*
     name: felt, symbol: felt
 ) {
     ERC721S_initializer(name, symbol);
-    ERC3525_initalizer();
+    ERC3525_initializer();
     return ();
 }
 

@@ -94,7 +94,7 @@ func ERC3525_units_approval_len(tokenId: Uint256) -> (len: felt) {
 // ---------------------------------------------------------------------------- #
 //                                  constructor                                 #
 // ---------------------------------------------------------------------------- #
-func ERC3525_initalizer{syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuiltin*}() {
+func ERC3525_initializer{syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuiltin*}() {
     ERC165.register_interface(IERC3525_ID);
     return ();
 }
