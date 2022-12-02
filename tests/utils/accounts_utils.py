@@ -1,7 +1,7 @@
 """ used to manage accounts and does easier signing"""
 import os
-from utils.openzepplin.nile_signer import NileSigner
 from utils.openzepplin.mock_signer import MockSigner
+from utils.openzepplin.utils import get_contract_class
 from starkware.crypto.signature.signature import pedersen_hash
 
 # locate the path of account contract
@@ -27,9 +27,8 @@ class Account:
 
     # automatically send transaction and increases nonce
     async def tx_with_nonce(self, to, selector_name, calldata):
-        return await self.signer.send_transactions(
-            self.contract,
-            [(to, selector_name, calldata)],
+        return await self.signer.send_transaction(
+            self.contract, to, selector_name, calldata
         )
 
     # hashes 2 variables and signs it returning sig_r and sig_s
