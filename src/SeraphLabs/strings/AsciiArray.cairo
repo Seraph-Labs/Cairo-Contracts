@@ -1,3 +1,7 @@
+// -------------------------------------------------------------------------- //
+//                        library for converting values                       //
+//                       into an array of ascci-encoded felt                  //
+// -------------------------------------------------------------------------- //
 %lang starknet
 from starkware.cairo.common.cairo_builtins import BitwiseBuiltin, HashBuiltin
 from starkware.cairo.common.math import (
