@@ -1,4 +1,4 @@
-""" ERC721S token test"""
+""" ERC2114 token test"""
 import os
 import pytest
 import pytest_asyncio
