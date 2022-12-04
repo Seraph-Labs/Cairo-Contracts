@@ -104,6 +104,15 @@ func ERC3525_initializer{syscall_ptr: felt*, range_check_ptr, pedersen_ptr: Hash
 func ERC3525_slotOf{
     bitwise_ptr: BitwiseBuiltin*, syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuiltin*
 }(tokenId: Uint256) -> (slot: Uint256) {
+    // ------------------ 1. check if tokenId is a valid Uint256 ------------------ #
+    with_attr error_message("ERC3525: tokenId is not a valid Uint256") {
+        uint256_check(tokenId);
+    }
+    // -------------------------- 2. check if token exist ------------------------- #
+    with_attr error_message("ERC3525: tokenId does not exist") {
+        let (is_exist) = ERC721S_exist(tokenId);
+        assert is_exist = TRUE;
+    }
     let (slot, _) = _slot_of(tokenId);
     return (slot,);
 }
@@ -571,16 +580,7 @@ func _slot_of{
     bitwise_ptr: BitwiseBuiltin*, syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuiltin*
 }(tokenId: Uint256) -> (slot: Uint256, f_tokenId: Uint256) {
     alloc_locals;
-    // ------------------ 1. check if tokenId is a valid Uint256 ------------------ #
-    with_attr error_message("ERC3525: tokenId is not a valid Uint256") {
-        uint256_check(tokenId);
-    }
-    // -------------------------- 2. check if token exist ------------------------- #
-    with_attr error_message("ERC3525: tokenId does not exist") {
-        let (is_exist) = ERC721S_exist(tokenId);
-        assert is_exist = TRUE;
-    }
-    // ------------------ 3. check if scalar asset stores a slot ------------------ #
+    // ------------------ 1. check if scalar asset stores a slot ------------------ #
     // if so return slotId
     let (local sAsset: ScalarAsset) = ERC721S_getTokenAsset(tokenId);
     let has_slot = is_not_zero(sAsset.slot);
@@ -588,7 +588,7 @@ func _slot_of{
         let (slotId) = ScalarHandler.get_slot_id(sAsset);
         return (Uint256(slotId, 0), tokenId);
     }
-    // ------------- 4. if no slot if found start iterating backwards ------------- #
+    // ------------- 1. if no slot if found start iterating backwards ------------- #
     let (slot, f_tokenId) = _slot_of_loop(tokenId);
     return (slot, f_tokenId);
 }
