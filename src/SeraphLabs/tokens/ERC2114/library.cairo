@@ -140,9 +140,10 @@ func ERC2114_attributesCount{
 func ERC2114_attributeAmmount{
     bitwise_ptr: BitwiseBuiltin*, syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuiltin*
 }(tokenId: Uint256, attrId: Uint256) -> (ammount: Uint256) {
+    alloc_locals;
     _ERC2114_assert_exist(tokenId);
-    let (attrObj: TokenAttr) = ERC2114_tokenAttribute_value.read(tokenId, attrId);
-    return (attrObj.ammount,);
+    let (ammount: Uint256) = _ERC2114_attributeAmmount(tokenId, attrId);
+    return (ammount,);
 }
 
 func ERC2114_attributeValue{
@@ -150,8 +151,8 @@ func ERC2114_attributeValue{
 }(tokenId: Uint256, attrId: Uint256) -> (Str: StrObj) {
     alloc_locals;
     _ERC2114_assert_exist(tokenId);
-    let (attrObj: TokenAttr) = ERC2114_tokenAttribute_value.read(tokenId, attrId);
-    return (attrObj.value,);
+    let (Str: StrObj) = _ERC2114_attributeValue(tokenId, attrId);
+    return (Str,);
 }
 
 // -------------------------------------------------------------------------- //
@@ -304,6 +305,20 @@ func _ERC2114_atrIdName{syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashB
 ) -> (str: StrObj) {
     let (str: StrObj) = ERC2114_attrName.read(attrId);
     return (str,);
+}
+
+func _ERC2114_attributeAmmount{syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuiltin*}(
+    tokenId: Uint256, attrId: Uint256
+) -> (ammount: Uint256) {
+    let (attrObj: TokenAttr) = ERC2114_tokenAttribute_value.read(tokenId, attrId);
+    return (attrObj.ammount,);
+}
+
+func _ERC2114_attributeValue{syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuiltin*}(
+    tokenId: Uint256, attrId: Uint256
+) -> (Str: StrObj) {
+    let (attrObj: TokenAttr) = ERC2114_tokenAttribute_value.read(tokenId, attrId);
+    return (attrObj.value,);
 }
 
 func _ERC2114_get_tokenOwner_loop{
