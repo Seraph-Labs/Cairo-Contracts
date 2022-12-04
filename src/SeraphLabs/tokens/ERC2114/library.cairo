@@ -300,7 +300,7 @@ func ERC2114_batchAddAttribute{
 // -------------------------------------------------------------------------- //
 //                                  internals                                 //
 // -------------------------------------------------------------------------- //
-func _ERC2114_atrIdName{syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuiltin*}(
+func _ERC2114_attrIdName{syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuiltin*}(
     attrId: Uint256
 ) -> (str: StrObj) {
     let (str: StrObj) = ERC2114_attrName.read(attrId);
