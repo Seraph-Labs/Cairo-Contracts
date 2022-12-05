@@ -83,7 +83,7 @@ func ERC2114_tokenAttribute_value(tokenId: Uint256, attrId: Uint256) -> (tokenAt
 // -------------------------------------------------------------------------- //
 //                                 Constructor                                //
 // -------------------------------------------------------------------------- //
-func ERC2114_initalizer{syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuiltin*}() {
+func ERC2114_initializer{syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuiltin*}() {
     ERC165.register_interface(IERC2114_ID);
     return ();
 }
