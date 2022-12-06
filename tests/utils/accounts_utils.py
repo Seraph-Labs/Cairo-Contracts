@@ -31,6 +31,9 @@ class Account:
             self.contract, to, selector_name, calldata
         )
 
+    async def batch_tx(self, calls):
+        return await self.signer.send_transactions(self.contract, calls)
+
     # hashes 2 variables and signs it returning sig_r and sig_s
     def hash_and_sign(self, x, y):
         msg_hash = pedersen_hash(x, y)
