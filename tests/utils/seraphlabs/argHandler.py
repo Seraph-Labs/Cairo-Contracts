@@ -56,21 +56,3 @@ def to_starknet_args(data):
             items.append(d)
 
     return tuple(items)
-
-
-def felt_to_ascii(felt):
-    bytes_object = bytes.fromhex(hex(felt)[2:])
-    ascii_string = str(bytes_object.decode("ascii"))
-    return ascii_string
-
-
-def ascii_to_felt(s):
-    return int.from_bytes(s.encode("ascii"), "big")
-
-
-def eth_to_felt(eth):
-    return eth * (10**18)
-
-
-def felt_to_eth(felt):
-    return felt / (10**18)

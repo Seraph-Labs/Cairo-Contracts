@@ -4,7 +4,7 @@ import pytest
 import pytest_asyncio
 from starkware.starknet.testing.starknet import Starknet
 from utils.openzepplin.utils import str_to_felt, assert_revert
-from utils.accounts_utils import Account
+from utils.seraphlabs.accounts_utils import Account
 
 # The path to the contract source code.
 ACCOUNT_FILE = os.path.join("SeraphLabs", "contracts", "Account.cairo")

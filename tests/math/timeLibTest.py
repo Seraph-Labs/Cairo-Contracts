@@ -3,7 +3,12 @@ import pytest
 import pytest_asyncio
 from starkware.starknet.testing.starknet import Starknet
 from utils.openzepplin.utils import str_to_felt, assert_revert, assert_event_emitted
-from utils.argHandler import unpack_tpl, arr_res, string_to_ascii_arr, to_starknet_args
+from utils.seraphlabs.argHandler import (
+    unpack_tpl,
+    arr_res,
+    string_to_ascii_arr,
+    to_starknet_args,
+)
 
 # from utils.accounts_utils import Account
 

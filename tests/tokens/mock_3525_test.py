@@ -7,10 +7,10 @@ from utils.openzepplin.utils import (
     str_to_felt,
     assert_revert,
     assert_event_emitted,
-    assert_sorted_event_emitted,
 )
-from utils.argHandler import unpack_tpl, arr_res
-from utils.accounts_utils import Account
+from utils.seraphlabs.argHandler import unpack_tpl, arr_res
+from utils.seraphlabs.accounts_utils import Account
+from utils.seraphlabs.utils import assert_sorted_event_emitted
 
 # The path to the contract source code.
 ACCOUNT_FILE = os.path.join("SeraphLabs", "contracts", "Account.cairo")

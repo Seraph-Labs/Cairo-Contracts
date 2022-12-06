@@ -4,17 +4,18 @@ import pytest
 import pytest_asyncio
 from starkware.starknet.testing.starknet import Starknet
 from utils.openzepplin.utils import str_to_felt, assert_revert
-from utils.accounts_utils import Account
-from utils.argHandler import ascii_to_felt, felt_to_ascii, unpack_tpl
+from utils.seraphlabs.accounts_utils import Account
+from utils.seraphlabs.argHandler import unpack_tpl
+from utils.seraphlabs.utils import (
+    ascii_to_felt,
+    felt_to_ascii,
+    assert_sorted_event_emitted,
+)
 
 # The path to the contract source code.
 ACCOUNT_FILE = os.path.join("SeraphLabs", "contracts", "Account.cairo")
 MOCK_FILE = os.path.join(
     "SeraphLabs", "contracts", "mocks", "tokens", "mock_2114.cairo"
-)
-from utils.openzepplin.utils import (
-    assert_revert,
-    assert_sorted_event_emitted,
 )
 
 FAKE_PKEY = 123456789987654321
