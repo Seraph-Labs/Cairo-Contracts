@@ -37,7 +37,7 @@ func interger_to_ascii{
     let is_one_digit = is_le(num, 9);
     if (is_one_digit == TRUE) {
         tempvar new_int = num + 48;
-        return (48,);
+        return (new_int,);
     }
     // will reurn an array of ascii encoded digits in reverse
     let (local new_arr_len) = _create_interger_ascii_array(arr=new_arr, inum=num, index=0);
