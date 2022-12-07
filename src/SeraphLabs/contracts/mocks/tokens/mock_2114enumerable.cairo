@@ -43,6 +43,7 @@ from SeraphLabs.tokens.ERC2114.library import (
     ERC2114_batchCreateAttribute,
     ERC2114_addAttribute,
     ERC2114_batchAddAttribute,
+    _ERC2114_assert_notOwnedByToken,
 )
 
 from SeraphLabs.tokens.ERC2114.enumerable.library import (
@@ -183,6 +184,7 @@ func attributeValue{
 func transferFrom{
     bitwise_ptr: BitwiseBuiltin*, syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuiltin*
 }(from_: felt, to: felt, tokenId: Uint256) {
+    _ERC2114_assert_notOwnedByToken(tokenId);
     ERC721S_transferFrom(from_, to, tokenId);
     return ();
 }
