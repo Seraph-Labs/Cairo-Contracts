@@ -21,7 +21,21 @@ pip install https://github.com/Seraph-Labs/cairo-contracts
 | :----------------------------------------------------- | :-------------------------------------------------------: |
 | [ERC721S](src/SeraphLabs/tokens/ERC721S/library.cairo) | library for ERC721S token standard a variation of ERC721A |
 | [ERC3525](src/SeraphLabs/tokens/ERC3525/library.cairo) |            library for ERC3525 token standard             |
-| [ERC2114]()                                            |                         :warning:                         |
+| [ERC2114](src/SeraphLabs/tokens/ERC3525/library.cairo) |            library for ERC2114 token standard             |
+
+### ERC 2114/3525 Usage
+
+> ### ⚠️ WARNING! ⚠️
+>
+> since erc2114 and erc3525 is an extension of erc721
+>
+> some functions have to be implemented when using transfer functions
+>
+> **ERC3525** : implement the `ERC3525_clearUnitApprovals()` function
+> for ERC721S `transferFrom` functon and ERC2114 `scalarTransferFrom`
+>
+> **ERC2114** : implement the `_ERC2114_assert_notOwnedByToken()` function
+> for ERC721S `transferFrom` functon
 
 # Strings
 
