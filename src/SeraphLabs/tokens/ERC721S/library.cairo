@@ -1,5 +1,5 @@
 // ---------------------------------------------------------------------------- #
-//                slightly edited version of openzeppelin erc721                #
+//                         a variation of Azukis erc721A                        #
 //                          to allow for batch minting                          #
 //                  and more gas efficient mints and transfers                  #
 // ---------------------------------------------------------------------------- #
