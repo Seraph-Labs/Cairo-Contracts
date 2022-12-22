@@ -1,19 +1,12 @@
 # Seraph Labs
 
-Libraries for StarkNet smart contracts developed by Seraph Labs
+Libraries for StarkNet development by Seraph Labs.
 
 ## Install
 
 ```
 pip install https://github.com/Seraph-Labs/cairo-contracts
 ```
-
-# Arrays
-
-| Libraries                                          |               Description               |
-| :------------------------------------------------- | :-------------------------------------: |
-| [Array](src/SeraphLabs/arrays/Array.cairo)         |     Library for manipulating Arrays     |
-| [UintArray](src/SeraphLabs/arrays/UintArray.cairo) | Library for manipulating Uint256 Arrays |
 
 # Tokens
 
@@ -35,12 +28,19 @@ pip install https://github.com/Seraph-Labs/cairo-contracts
 > **ERC-2114** : Implement the `_ERC2114_assert_notOwnedByToken()` function
 > for ERC721S `transferFrom` functon
 
+# Arrays
+
+| Libraries                                          |               Description               |
+| :------------------------------------------------- | :-------------------------------------: |
+| [Array](src/SeraphLabs/arrays/Array.cairo)         |     Library for manipulating Arrays     |
+| [UintArray](src/SeraphLabs/arrays/UintArray.cairo) | Library for manipulating uint256 Arrays |
+
 # Strings
 
 | Libraries                                                |                                  Description                                  |
 | :------------------------------------------------------- | :---------------------------------------------------------------------------: |
-| [ASCIIArray](src/SeraphLabs/strings/AsciiArray.cairo)    |           Used  to convert variable into an array of ASCII numbers            |
-| [JSONString](src/SeraphLabs/strings/JsonString.cairo)    | Used to make Onchain Dynamic JSON strings to stream line frontend development |
+| [ASCIIArray](src/SeraphLabs/strings/AsciiArray.cairo)    |           Used  to convert variables into an array of ASCII numbers            |
+| [JSONString](src/SeraphLabs/strings/JsonString.cairo)    | Used to make Onchain Dynamic JSON strings to streamline frontend development |
 | [StringObject](src/SeraphLabs/models/StringObject.cairo) |                            Object used for strings                            |
 
 # Math
