@@ -1,6 +1,6 @@
-# SeraphLabs
+# Seraph Labs
 
-helpful libraries for creating starnet contracts
+Libraries for StarkNet development by Seraph Labs.
 
 ## Install
 
@@ -8,47 +8,45 @@ helpful libraries for creating starnet contracts
 pip install https://github.com/Seraph-Labs/cairo-contracts
 ```
 
-# Arrays
-
-| libraries                                          |               description               |
-| :------------------------------------------------- | :-------------------------------------: |
-| [Array](src/SeraphLabs/arrays/Array.cairo)         |     library for manipulating Arrays     |
-| [UintArray](src/SeraphLabs/arrays/UintArray.cairo) | library for manipulating Uint256 Arrays |
-
 # Tokens
 
-| libraries                                              |                        description                        |
-| :----------------------------------------------------- | :-------------------------------------------------------: |
-| [ERC721S](src/SeraphLabs/tokens/ERC721S/library.cairo) | library for ERC721S token standard a variation of ERC721A |
-| [ERC3525](src/SeraphLabs/tokens/ERC3525/library.cairo) |            library for ERC3525 token standard             |
-| [ERC2114](src/SeraphLabs/tokens/ERC3525/library.cairo) |            library for ERC2114 token standard             |
+| Libraries                                               |                        Description                        |
+| :-----------------------------------------------------  | :-------------------------------------------------------: |
+| [ERC-721S](src/SeraphLabs/tokens/ERC721S/library.cairo) | Library for ERC-721S, a variation of Azuki's ERC-721A.    |
+| [ERC-3525](src/SeraphLabs/tokens/ERC3525/library.cairo) |                  Library for ERC-3525                     |
+| [ERC-2114](src/SeraphLabs/tokens/ERC3525/library.cairo) |                  Library for ERC-2114                     |
 
 ### ERC 2114/3525 Usage
 
 > ### ⚠️ WARNING! ⚠️
 >
-> since erc2114 and erc3525 is an extension of erc721
+> Since ERC-2114 and ERC-3525 is an extension of ERC-721, some functions have to be implemented when using transfer functions:
 >
-> some functions have to be implemented when using transfer functions
->
-> **ERC3525** : implement the `ERC3525_clearUnitApprovals()` function
+> **ERC-3525** : Implement the `ERC3525_clearUnitApprovals()` function
 > for ERC721S `transferFrom` functon and ERC2114 `scalarTransferFrom`
 >
-> **ERC2114** : implement the `_ERC2114_assert_notOwnedByToken()` function
+> **ERC-2114** : Implement the `_ERC2114_assert_notOwnedByToken()` function
 > for ERC721S `transferFrom` functon
+
+# Arrays
+
+| Libraries                                          |               Description               |
+| :------------------------------------------------- | :-------------------------------------: |
+| [Array](src/SeraphLabs/arrays/Array.cairo)         |     Library for manipulating Arrays     |
+| [UintArray](src/SeraphLabs/arrays/UintArray.cairo) | Library for manipulating uint256 Arrays |
 
 # Strings
 
-| libraries                                                |                                  description                                  |
+| Libraries                                                |                                  Description                                  |
 | :------------------------------------------------------- | :---------------------------------------------------------------------------: |
-| [AsciiArray](src/SeraphLabs/strings/AsciiArray.cairo)    |            used to convert variable into an array of ascii numbers            |
-| [JsonString](src/SeraphLabs/strings/JsonString.cairo)    | used to make onchain dynamic json strings to stream line frontend development |
-| [StringObject](src/SeraphLabs/models/StringObject.cairo) |                            object used for strings                            |
+| [ASCIIArray](src/SeraphLabs/strings/AsciiArray.cairo)    |           Used  to convert variables into an array of ASCII numbers            |
+| [JSONString](src/SeraphLabs/strings/JsonString.cairo)    | Used to make Onchain Dynamic JSON strings to streamline frontend development |
+| [StringObject](src/SeraphLabs/models/StringObject.cairo) |                            Object used for strings                            |
 
 # Math
 
-| libraries                                                |                          description                          |
+| Libraries                                                |                          Description                          |
 | :------------------------------------------------------- | :-----------------------------------------------------------: |
-| [Time](src/SeraphLabs/math/Time.cairo)                   | library used to format or calculate felts into time variables |
-| [simple_checks](src/SeraphLabs/math/simple_checks.cairo) |            library used for simple math functions             |
-| [logicalOpr](src/SeraphLabs/math/logicalOpr.cairo)       |            simple library used for basic operators            |
+| [Time](src/SeraphLabs/math/Time.cairo)                   | Library used to format or calculate felts into time variables |
+| [simple_checks](src/SeraphLabs/math/simple_checks.cairo) |            Library used for simple math functions             |
+| [logicalOpr](src/SeraphLabs/math/logicalOpr.cairo)       |            Simple library used for basic operators            |
