@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// SeraphLabs Contracts for Cairo v0.3.0 (arrays/UintArray.cairo)
+
 %lang starknet
 from starkware.cairo.common.cairo_builtins import HashBuiltin, SignatureBuiltin, BitwiseBuiltin
 from starkware.cairo.common.math import assert_not_zero

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// SeraphLabs Contracts for Cairo v0.3.0 (math/simple_checks.cairo)
 %lang starknet
 from starkware.cairo.common.math_cmp import is_le
 from starkware.cairo.common.uint256 import (

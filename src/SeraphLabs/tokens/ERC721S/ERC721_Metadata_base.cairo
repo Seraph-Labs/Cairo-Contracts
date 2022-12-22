@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// SeraphLabs Contracts for Cairo v0.3.0 (tokens/ERC721S/ERC721_Metadata_base.cairo)
 %lang starknet
 
 from starkware.cairo.common.alloc import alloc

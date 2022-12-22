@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: MIT
+// SeraphLabs Contracts for Cairo v0.3.0 (strings/AsciiEncode.cairo)
+
+// some functions ideas taken from
+// https://github.com/topology-gg/caistring
 // -------------------------------------------------------------------------- //
 //                        library for converting values                       //
 //                       into a single ascii encoded felt                     //

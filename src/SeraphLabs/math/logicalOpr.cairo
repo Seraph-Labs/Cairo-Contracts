@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// SeraphLabs Contracts for Cairo v0.3.0 (math/logicalOpr.cairo)
+
 //
 // library for logical operators
 //

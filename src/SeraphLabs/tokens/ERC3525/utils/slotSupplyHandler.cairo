@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// SeraphLabs Contracts for Cairo v0.3.0 (tokens/ERC3525/utils/slotSupplyHandler.cairo)
 %lang starknet
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin

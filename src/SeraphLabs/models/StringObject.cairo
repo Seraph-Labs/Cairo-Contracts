@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// SeraphLabs Contracts for Cairo v0.3.0 (models/StringObject.cairo)
 from starkware.cairo.common.math import assert_le, assert_not_zero
 // represents a 31 char string
 struct StrObj {

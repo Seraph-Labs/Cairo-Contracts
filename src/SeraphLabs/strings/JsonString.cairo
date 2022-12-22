@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: MIT
+// SeraphLabs Contracts for Cairo v0.3.0 (strings/JsonString.cairo)
+// -------------------------------------------------------------------------- //
+//                           library for manipulating                         //
+//                       an array of ascci-encoded felts                      //
+//                            into a Json String                              //
+// -------------------------------------------------------------------------- //
 %lang starknet
 from starkware.cairo.common.cairo_builtins import BitwiseBuiltin, HashBuiltin
 from starkware.cairo.common.alloc import alloc

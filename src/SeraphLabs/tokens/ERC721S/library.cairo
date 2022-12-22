@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// SeraphLabs Contracts for Cairo v0.3.0 (tokens/ERC721S/library.cairo)
 // ---------------------------------------------------------------------------- #
 //                         a variation of Azukis erc721A                        #
 //                          to allow for batch minting                          #

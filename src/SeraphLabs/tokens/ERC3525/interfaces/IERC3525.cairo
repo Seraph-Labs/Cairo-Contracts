@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// SeraphLabs Contracts for Cairo v0.3.0 (tokens/ERC3525/interfaces/IERC3525.cairo)
 %lang starknet
 
 from starkware.cairo.common.uint256 import Uint256

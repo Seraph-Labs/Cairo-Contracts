@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+// SeraphLabs Contracts for Cairo v0.3.0 (tokens/ERC2114/library.cairo)
 %lang starknet
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin, SignatureBuiltin, BitwiseBuiltin

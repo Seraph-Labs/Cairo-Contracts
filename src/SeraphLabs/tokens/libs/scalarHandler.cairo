@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: MIT
+// SeraphLabs Contracts for Cairo v0.3.0 (tokens/libs/scalarHandler.cairo)
+// -------------------------------------------------------------------------- //
+//                   library for shifting data for tokensId                   //
+// -------------------------------------------------------------------------- //
 %lang starknet
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin, SignatureBuiltin, BitwiseBuiltin

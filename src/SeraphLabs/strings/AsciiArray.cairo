@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// SeraphLabs Contracts for Cairo v0.3.0 (strings/AsciiArray.cairo)
 // -------------------------------------------------------------------------- //
 //                        library for converting values                       //
 //                       into an array of ascci-encoded felt                  //

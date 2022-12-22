@@ -5,16 +5,24 @@ Libraries for StarkNet development by Seraph Labs.
 ## Install
 
 ```
-pip install https://github.com/Seraph-Labs/cairo-contracts
+pip install https://github.com/Seraph-Labs/Cairo-Contracts
 ```
 
 # Tokens
 
-| Libraries                                               |                        Description                        |
-| :-----------------------------------------------------  | :-------------------------------------------------------: |
-| [ERC-721S](src/SeraphLabs/tokens/ERC721S/library.cairo) | Library for ERC-721S, a variation of Azuki's ERC-721A.    |
-| [ERC-3525](src/SeraphLabs/tokens/ERC3525/library.cairo) |                  Library for ERC-3525                     |
-| [ERC-2114](src/SeraphLabs/tokens/ERC3525/library.cairo) |                  Library for ERC-2114                     |
+| Libraries                                               |                      Description                       |
+| :------------------------------------------------------ | :----------------------------------------------------: |
+| [ERC-721S](src/SeraphLabs/tokens/ERC721S/library.cairo) | Library for ERC-721S, a variation of Azuki's ERC-721A. |
+| [ERC-3525](src/SeraphLabs/tokens/ERC3525/library.cairo) |                  Library for ERC-3525                  |
+| [ERC-2114](src/SeraphLabs/tokens/ERC3525/library.cairo) |                  Library for ERC-2114                  |
+
+> ### :bangbang: Disclaimer! :bangbang:
+>
+> our current library for ERC3525 is using a older implementation of the token standard
+>
+> so some of the events and function names will be different compared to the current standard
+>
+> this will be updated in the future version
 
 ### ERC 2114/3525 Usage
 
@@ -37,11 +45,12 @@ pip install https://github.com/Seraph-Labs/cairo-contracts
 
 # Strings
 
-| Libraries                                                |                                  Description                                  |
-| :------------------------------------------------------- | :---------------------------------------------------------------------------: |
-| [ASCIIArray](src/SeraphLabs/strings/AsciiArray.cairo)    |           Used  to convert variables into an array of ASCII numbers            |
+| Libraries                                                |                                 Description                                  |
+| :------------------------------------------------------- | :--------------------------------------------------------------------------: |
+| [ASCIIArray](src/SeraphLabs/strings/AsciiArray.cairo)    |           Used to convert variables into an array of ASCII numbers           |
 | [JSONString](src/SeraphLabs/strings/JsonString.cairo)    | Used to make Onchain Dynamic JSON strings to streamline frontend development |
-| [StringObject](src/SeraphLabs/models/StringObject.cairo) |                            Object used for strings                            |
+| [ASCIIEncode](src/SeraphLabs/strings/AsciiEncode.cairo)  |        library for converting values into a single ascii encoded felt        |
+| [StringObject](src/SeraphLabs/models/StringObject.cairo) |                           Object used for strings                            |
 
 # Math
 

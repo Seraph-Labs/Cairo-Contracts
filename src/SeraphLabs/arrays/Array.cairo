@@ -1,12 +1,15 @@
+// SPDX-License-Identifier: MIT
+// SeraphLabs Contracts for Cairo v0.3.0 (arrays/Array.cairo)
+
+// some functions ideas taken from
+// https://github.com/gaetbout/starknet-array-manipulation#add_first
+
 %lang starknet
 from starkware.cairo.common.cairo_builtins import HashBuiltin, SignatureBuiltin, BitwiseBuiltin
 from starkware.cairo.common.math import assert_not_zero
 from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.memcpy import memcpy
-
-// some functions ideas taken from
-// https://github.com/gaetbout/starknet-array-manipulation#add_first
 
 namespace Array {
     func create{syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuiltin*}() -> (
