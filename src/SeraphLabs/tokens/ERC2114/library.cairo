@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: Apache-2.0
+// SPDX-License-Identifier: AGPL-3.0
 // SeraphLabs Contracts for Cairo v0.3.0 (tokens/ERC2114/library.cairo)
 %lang starknet
 
