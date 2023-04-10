@@ -1,0 +1,2 @@
+[crate_roots]
+seraphlabs_utils = "src"

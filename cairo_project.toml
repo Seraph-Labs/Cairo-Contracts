@@ -1,2 +1,3 @@
 [crate_roots]
-seraphlabs = "src"
+seraphlabs_tokens = "seraphlabs/tokens/src"
+seraphlabs_utils = "seraphlabs/utils/src"

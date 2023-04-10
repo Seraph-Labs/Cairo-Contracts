@@ -1,0 +1,4 @@
+[package]
+name = "seraphlabs_utils"
+version = "0.1.0"
+description = "SeraphLabs library for starknet smart contract development written in Cairo 1"
