@@ -32,5 +32,5 @@ trait IERC721Receiver {
 trait IERC721Enumerable{
     fn total_supply() -> u256;
     fn token_by_index(index : u256) -> u256;
-    fn token_of_owner_by_index(owner : felt252, index : u256) -> u256;
+    fn token_of_owner_by_index(owner : ContractAddress, index : u256) -> u256;
 }
