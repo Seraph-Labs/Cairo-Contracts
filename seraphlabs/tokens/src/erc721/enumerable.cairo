@@ -2,6 +2,10 @@
 use super::ERC721;
 use super::interface;
 
+// fn main(){
+//     let x = ERC721Impl::transfer_from();
+// }
+
 // ------------------------------ base library ------------------------------ //
 #[contract]
 mod ERC721Enumerable{
