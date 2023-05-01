@@ -196,8 +196,8 @@ mod ERC721{
         _token_approvals::write(tokenId, Zeroable::zero());
 
         // update balances
-        _balances::write(to, _balances::read(to) + 1_u256);
-        _balances::write(from, _balances::read(from) - 1_u256);
+        _balances::write(to, _balances::read(to) + 1.into());
+        _balances::write(from, _balances::read(from) - 1.into());
 
         // update owner
         _owners::write(tokenId, to);
@@ -233,7 +233,7 @@ mod ERC721{
         assert(!_exist(tokenId),'ERC721: tokenId already exist');
 
         // update balances
-        _balances::write(to, _balances::read(to) + 1_u256);
+        _balances::write(to, _balances::read(to) + 1.into());
         // update owner
         _owners::write(tokenId, to);
         // emit event
@@ -253,7 +253,7 @@ mod ERC721{
         _token_approvals::write(tokenId, Zeroable::zero());
 
         // update balances
-        _balances::write(owner, _balances::read(owner) - 1_u256);
+        _balances::write(owner, _balances::read(owner) - 1.into());
 
         // update owner
         _owners::write(tokenId, Zeroable::zero());
