@@ -2,10 +2,6 @@
 use super::ERC721;
 use super::interface;
 
-// fn main(){
-//     let x = ERC721Impl::transfer_from();
-// }
-
 // ------------------------------ base library ------------------------------ //
 #[contract]
 mod ERC721Enumerable{
@@ -14,17 +10,11 @@ mod ERC721Enumerable{
     use super::interface::IERC721Enumerable;
     use super::ERC721;
     // starknet imports
-    use starknet::get_caller_address;
-    use starknet::contract_address_const;
-    use starknet::ContractAddressIntoFelt252;
-    use starknet::ContractAddressZeroable;
     use starknet::ContractAddress;
-    // corelib
-    use array::ArrayTrait;
+    // corelib imports
     use option::OptionTrait;
     use traits::Into;
     use traits::TryInto;
-    use zeroable::Zeroable;
     use integer::BoundedInt;
 
     // -------------------------------------------------------------------------- //
@@ -82,6 +72,10 @@ mod ERC721Enumerable{
     // -------------------------------------------------------------------------- //
     //                                  externals                                 //
     // -------------------------------------------------------------------------- //
+
+    fn initializer(){
+        //TODO add erc165 functions
+    }
 
     fn transfer_from(from : ContractAddress, to : ContractAddress, tokenId : u256){
         _remove_token_from_owner_enum(from,tokenId);
