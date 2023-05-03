@@ -1,6 +1,5 @@
 // ----------------------------- library imports ---------------------------- //
-use super::ERC721;
-use super::interface;
+use super::{interface, ERC721};
 
 // ------------------------------ base library ------------------------------ //
 #[contract]
@@ -13,8 +12,7 @@ mod ERC721Enumerable{
     use starknet::ContractAddress;
     // corelib imports
     use option::OptionTrait;
-    use traits::Into;
-    use traits::TryInto;
+    use traits::{TryInto, Into};
     use integer::BoundedInt;
 
     // -------------------------------------------------------------------------- //

@@ -8,17 +8,12 @@ mod ERC721{
     // seraphlabs imports
     use seraphlabs_utils::constants;
     use super::interface;
-    // starknet imports
-    use starknet::get_caller_address;
-    use starknet::contract_address_const;
-    use starknet::ContractAddressIntoFelt252;
-    use starknet::ContractAddressZeroable;
-    use starknet::ContractAddress;
-    // others
+    // corelib imports
+    use starknet::{get_caller_address, contract_address_const, ContractAddress, ContractAddressIntoFelt252};
+    use starknet::contract_address::ContractAddressZeroable;
     use array::ArrayTrait;
     use option::OptionTrait;
-    use traits::Into;
-    use traits::TryInto;
+    use traits::{Into, TryInto};
     use zeroable::Zeroable;
 
     // -------------------------------------------------------------------------- //
