@@ -10,7 +10,6 @@ mod ERC721{
     use super::interface;
     // corelib imports
     use starknet::{get_caller_address, contract_address_const, ContractAddress, ContractAddressIntoFelt252};
-    use starknet::contract_address::ContractAddressZeroable;
     use array::ArrayTrait;
     use option::OptionTrait;
     use traits::{Into, TryInto};

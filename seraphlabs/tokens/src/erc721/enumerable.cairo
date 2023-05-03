@@ -1,16 +1,10 @@
-// ----------------------------- library imports ---------------------------- //
-use super::{interface, ERC721};
-
-// ------------------------------ base library ------------------------------ //
 #[contract]
 mod ERC721Enumerable{
     // seraphlabs imports
-    use seraphlabs_utils::constants;
-    use super::interface::IERC721Enumerable;
-    use super::ERC721;
-    // starknet imports
-    use starknet::ContractAddress;
+    use super::super::{ERC721, interface::IERC721Enumerable};
+
     // corelib imports
+    use starknet::ContractAddress;
     use option::OptionTrait;
     use traits::{TryInto, Into};
     use integer::BoundedInt;
