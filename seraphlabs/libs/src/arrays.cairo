@@ -1,27 +1,29 @@
 // ----------------------------- library modules ---------------------------- //
 
 // --------------------------------- imports -------------------------------- //
-use array::{Array, ArrayTrait};
+use array::{Array, ArrayTrait, SpanTrait};
 use traits::{Into,TryInto};
-use core::option::OptionTrait;
+use option::OptionTrait;
+
 
 trait SeraphArrayTrait<T> {
     fn reverse(ref self : Array<T>);
 }
 
-impl ArrayImpl<T, impl TDrop: Drop<T>> of SeraphArrayTrait<T>{
+impl ArrayImpl<T, impl TDrop: Drop<T>, impl TCopy: Copy<T>> of SeraphArrayTrait<T>{
     fn reverse(ref self : Array<T>){
-        let cur_arr_len = self.len();
-        let mut index = 0;
-        loop {
-            if index >= cur_arr_len {
+        if self.len() <=1{
+            return ();
+        }
+
+        let mut span = self.span();
+        loop{
+            if span.len() <= 0{
                 break ();
             }
-            // pop the front value out of the array
-            let front_val = self.pop_front().unwrap();
-            // now append it back to the array
-            self.append(front_val);
-            index += 1;
+            //let val = span.pop_back().unwrap();
+            self.append(*span.pop_back().unwrap());
+            self.pop_front();
         }
     }
 }
