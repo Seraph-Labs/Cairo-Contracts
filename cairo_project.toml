@@ -1,3 +1,4 @@
 [crate_roots]
 seraphlabs_tokens = "seraphlabs/tokens/src"
+seraphlabs_libs = "seraphlabs/libs/src"
 seraphlabs_utils = "seraphlabs/utils/src"

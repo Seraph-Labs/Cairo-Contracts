@@ -1,4 +1,4 @@
-use seraphlabs_utils::arrays::ArrayReverseTrait;
+use seraphlabs_libs::arrays::ArrayReverseTrait;
 use array::ArrayTrait;
 use traits::{Into, TryInto};
 use integer::{u128_safe_divmod, u64_safe_divmod, u32_safe_divmod, u16_safe_divmod, u8_safe_divmod, u128_as_non_zero, u64_as_non_zero, u32_as_non_zero, u16_as_non_zero, u8_as_non_zero};
@@ -26,7 +26,7 @@ impl U128ToAsciiTraitImpl of IntergerToAsciiTrait<u128>{
             new_arr.append(remainder.into() + 48);
             num = quotient;
         };
-        
+        new_arr.reverse();
         new_arr
     }
 }
@@ -49,6 +49,7 @@ impl U64ToAsciiTraitImpl of IntergerToAsciiTrait<u64>{
             num = quotient;
         };
         
+        new_arr.reverse();
         new_arr
     }
 }
@@ -71,6 +72,7 @@ impl U32ToAsciiTraitImpl of IntergerToAsciiTrait<u32>{
             num = quotient;
         };
         
+        new_arr.reverse();
         new_arr
     }
 }
@@ -93,6 +95,7 @@ impl U16ToAsciiTraitImpl of IntergerToAsciiTrait<u16>{
             num = quotient;
         };
         
+        new_arr.reverse();
         new_arr
     }
 }
@@ -115,6 +118,7 @@ impl U8ToAsciiTraitImpl of IntergerToAsciiTrait<u8>{
             num = quotient;
         };
         
+        new_arr.reverse();
         new_arr
     }
 }
