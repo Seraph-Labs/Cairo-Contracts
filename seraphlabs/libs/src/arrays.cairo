@@ -15,14 +15,15 @@ impl ArrayImpl<T, impl TDrop: Drop<T>, impl TCopy: Copy<T>> of SeraphArrayTrait<
         if self.len() <=1{
             return ();
         }
-
+        // create Span so we can pop_back value
         let mut span = self.span();
         loop{
             if span.len() <= 0{
                 break ();
             }
-            //let val = span.pop_back().unwrap();
+            // add last value of span to array
             self.append(*span.pop_back().unwrap());
+            // pop out arrays first value;
             self.pop_front();
         }
     }
