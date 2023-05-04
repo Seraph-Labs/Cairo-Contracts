@@ -1,4 +1,4 @@
-use seraphlabs_libs::arrays::ArrayReverseTrait;
+use seraphlabs_libs::arrays::SeraphArrayTrait;
 use array::ArrayTrait;
 use traits::{Into, TryInto};
 use integer::{u128_safe_divmod, u64_safe_divmod, u32_safe_divmod, u16_safe_divmod, u8_safe_divmod, u128_as_non_zero, u64_as_non_zero, u32_as_non_zero, u16_as_non_zero, u8_as_non_zero};

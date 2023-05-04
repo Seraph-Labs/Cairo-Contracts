@@ -5,11 +5,11 @@ use array::{Array, ArrayTrait};
 use traits::{Into,TryInto};
 use core::option::OptionTrait;
 
-trait ArrayReverseTrait<T> {
+trait SeraphArrayTrait<T> {
     fn reverse(ref self : Array<T>);
 }
 
-impl ArrayReverseImpl<T, impl TDrop: Drop<T>> of ArrayReverseTrait<T>{
+impl ArrayImpl<T, impl TDrop: Drop<T>> of SeraphArrayTrait<T>{
     fn reverse(ref self : Array<T>){
         let cur_arr_len = self.len();
         let mut index = 0;
