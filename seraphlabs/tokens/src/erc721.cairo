@@ -7,7 +7,7 @@ mod enumerable;
 mod ERC721{
     // seraphlabs imports
     use seraphlabs_utils::constants;
-    use seraphlabs_libs::ascii::IntergerToAsciiTrait;
+    use seraphlabs_libs::{ascii::IntergerToAsciiTrait, SeraphArrayTrait};
     use super::interface;
     // corelib imports
     use starknet::{get_caller_address, contract_address_const, ContractAddress, ContractAddressIntoFelt252};
@@ -26,6 +26,8 @@ mod ERC721{
         _balances : LegacyMap::<ContractAddress, u256>,
         _token_approvals : LegacyMap::<u256, ContractAddress>,
         _operator_approvals : LegacyMap::<(ContractAddress,ContractAddress), bool>,
+        _base_uri : LegacyMap::<felt252, felt252>,
+        _base_uri_len : felt252,
     }
 
     // -------------------------------------------------------------------------- //
@@ -50,6 +52,18 @@ mod ERC721{
 
         fn symbol() -> felt252{
             _symbol::read()
+        }
+
+        fn token_uri(token_id : u256) -> Array::<felt252>{
+            // get_base_uri
+            let mut base_uri = _get_base_uri();
+            // get token_id low ascii value
+            // TODO : covert entire u256 instead of just u128
+            let mut ascii = token_id.low.to_ascii();
+            // append it to base_uri array along with suffix
+            base_uri.concat(ref ascii);
+            base_uri.append('.json');
+            base_uri
         }
     }
 
@@ -127,6 +141,11 @@ mod ERC721{
     fn is_approved_for_all(owner: ContractAddress, operator: ContractAddress) -> bool {
         ERC721::is_approved_for_all(owner, operator)
     }
+
+    #[view]
+    fn token_uri(token_id: u256) -> Array::<felt252>{
+        ERC721Metadata::token_uri(token_id)
+    }
     // -------------------------------------------------------------------------- //
     //                                  externals                                 //
     // -------------------------------------------------------------------------- //
@@ -152,6 +171,22 @@ mod ERC721{
         ERC721::transfer_from(from, to, token_id)
     }
 
+    #[external]
+    fn set_base_uri(mut base_uri : Array::<felt252>){
+        let len = base_uri.len();
+        let mut index = 0;
+        loop{
+            match base_uri.pop_front(){
+                Option::Some(value) => {
+                    _base_uri::write(index,value);
+                    index += 1;
+                },
+                Option::None(()) => {break ();},
+            };
+        };
+        // write length to storage
+        _base_uri_len::write(len.into());
+    }
     // -------------------------------------------------------------------------- //
     //                                  Internals                                 //
     // -------------------------------------------------------------------------- //
@@ -257,7 +292,20 @@ mod ERC721{
         Transfer(owner, Zeroable::zero(), token_id);
     }
     
-    //TODO: implemet token_uri function
+    fn _get_base_uri() -> Array::<felt252>{
+        let len = _base_uri_len::read();
+        let mut base_uri = ArrayTrait::<felt252>::new();
+        let mut index = 0;
+        loop{
+            if index == len{
+                break ();
+            }
+            base_uri.append(_base_uri::read(index));
+            index += 1;
+        };
+        base_uri
+    }
+
     // -------------------------------------------------------------------------- //
     //                                   private                                  //
     // -------------------------------------------------------------------------- //
