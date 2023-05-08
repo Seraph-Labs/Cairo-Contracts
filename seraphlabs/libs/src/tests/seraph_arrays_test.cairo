@@ -1,5 +1,5 @@
 use array::ArrayTrait;
-use seraphlabs_libs::arrays::SeraphArrayTrait;
+use seraphlabs_libs::SeraphArrayTrait;
 
 #[test]
 #[available_gas(2000000)]

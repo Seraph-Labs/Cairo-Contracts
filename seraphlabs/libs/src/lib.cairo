@@ -1,4 +1,5 @@
 mod arrays;
+use arrays::SeraphArrayTrait;
 
 mod ascii;
 
