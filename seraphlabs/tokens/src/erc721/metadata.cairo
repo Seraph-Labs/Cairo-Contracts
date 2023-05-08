@@ -29,7 +29,7 @@ mod ERC721Metadata{
             _symbol::read()
         }
 
-        fn token_uri(token_id : u256) -> Array::<felt252>{
+        fn token_uri(token_id : u256) -> Array<felt252>{
             // get_base_uri
             let mut base_uri = _get_base_uri();
             // get token_id low ascii value
@@ -56,7 +56,7 @@ mod ERC721Metadata{
     }
 
     #[view]
-    fn token_uri(token_id: u256) -> Array::<felt252>{
+    fn token_uri(token_id: u256) -> Array<felt252>{
         ERC721Metadata::token_uri(token_id)
     }
     // -------------------------------------------------------------------------- //
@@ -67,7 +67,7 @@ mod ERC721Metadata{
         _symbol::write(symbol);
     }
     
-    fn set_base_uri(mut base_uri : Array::<felt252>){
+    fn set_base_uri(mut base_uri : Array<felt252>){
         let len = base_uri.len();
         let mut index = 0;
         loop{
@@ -86,7 +86,7 @@ mod ERC721Metadata{
     // -------------------------------------------------------------------------- //
     //                                  Internals                                 //
     // -------------------------------------------------------------------------- //
-    fn _get_base_uri() -> Array::<felt252>{
+    fn _get_base_uri() -> Array<felt252>{
         let len = _base_uri_len::read();
         let mut base_uri = ArrayTrait::<felt252>::new();
         let mut index = 0;
