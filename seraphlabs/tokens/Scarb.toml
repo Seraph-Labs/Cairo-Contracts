@@ -7,3 +7,6 @@ description = "SeraphLabs token library for starknet smart contract development 
 [dependencies]
 seraphlabs_libs = {path = "../libs/"}
 seraphlabs_utils = {path = "../utils/"}
+
+[scripts]
+test = "cairo-test --filter seraphlabs_tokens --starknet ."
