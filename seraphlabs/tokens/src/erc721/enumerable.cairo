@@ -1,8 +1,8 @@
 #[contract]
 mod ERC721Enumerable {
     // seraphlabs imports
-    use super::super::{ERC721, interface::IERC721Enumerable};
-
+    use seraphlabs_tokens::erc721::{ERC721, interface::IERC721Enumerable};
+    use seraphlabs_tokens::utils::{constants, erc165::ERC165};
     // corelib imports
     use starknet::ContractAddress;
     use option::OptionTrait;
@@ -62,9 +62,6 @@ mod ERC721Enumerable {
     //                                  externals                                 //
     // -------------------------------------------------------------------------- //
 
-    fn initializer() { //TODO add erc165 functions
-    }
-
     fn transfer_from(from: ContractAddress, to: ContractAddress, token_id: u256) {
         _remove_token_from_owner_enum(from, token_id);
         _add_token_to_owner_enum(to, token_id);
@@ -82,11 +79,20 @@ mod ERC721Enumerable {
     // -------------------------------------------------------------------------- //
     //                                  internals                                 //
     // -------------------------------------------------------------------------- //
+    fn initializer() { 
+        ERC165::register_interface(constants::IERC721_ENUMERABLE_ID);
+    }
 
     fn _mint(to: ContractAddress, token_id: u256) {
         _add_token_to_owner_enum(to, token_id);
         _add_token_to_total_enum(token_id);
         ERC721::_mint(to, token_id);
+    }
+
+    fn _safe_mint(to: ContractAddress, token_id: u256, data: Array<felt252>){
+        _add_token_to_owner_enum(to, token_id);
+        _add_token_to_total_enum(token_id);
+        ERC721::_safe_mint(to, token_id, data);
     }
 
     fn _burn(token_id: u256) {

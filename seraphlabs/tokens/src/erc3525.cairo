@@ -7,13 +7,14 @@ use utils::{ApprovedUnits, ApprovedUnitsTrait, OperatorIndex, OperatorIndexTrait
 #[contract]
 mod ERC3525 {
     // seraphlabs imports
-    use seraphlabs_utils::constants;
+    use seraphlabs_tokens::utils::{constants, erc165::{ERC165, IERC165Dispatcher, IERC165DispatcherTrait}};
     use seraphlabs_tokens::{
         ERC721, ERC721Enumerable as ERC721Enum, erc3525::{
         ApprovedUnits, ApprovedUnitsTrait, OperatorIndex, OperatorIndexTrait
         }
     };
     use super::interface;
+    use interface::{IERC3525ReceiverDispatcher, IERC3525ReceiverDispatcherTrait};
     // corelib imports
     use starknet::{
         get_caller_address, contract_address_const, ContractAddress, ContractAddressIntoFelt252
@@ -90,7 +91,10 @@ mod ERC3525 {
         fn transfer_value_from(from_token_id : u256, to : ContractAddress, value : u256) -> u256 {
             assert (value != 0.into(), 'ERC3525: invalid value');
             let token_id = _transfer_value_to_address(from_token_id, to, value);
-            // TODO add check for ERC3525Received
+            assert(
+                _check_on_erc3525_received(to, get_caller_address(), from_token_id, token_id, value, ArrayTrait::new()),
+                'ERC3525: reciever failed'
+            );
             token_id
         }
     }
@@ -116,7 +120,7 @@ mod ERC3525 {
     // -------------------------------------------------------------------------- //
     //                                  Externals                                 //
     // -------------------------------------------------------------------------- //
-
+    
     fn approve_value(token_id: u256, operator: ContractAddress, value: u256) {
         ERC3525Impl::approve_value(token_id, operator, value)
     }
@@ -133,7 +137,6 @@ mod ERC3525 {
         assert(token_id != 0.into(), 'ERC3525: invalid token_id');
         // mint token
         _mint_new(to, token_id, slot_id, value);
-        //TODO add check for ERC3525Received
     }
 
     fn _mint_value(to_token_id : u256, value : u256){
@@ -147,6 +150,10 @@ mod ERC3525 {
     // -------------------------------------------------------------------------- //
     //                                  Internals                                 //
     // -------------------------------------------------------------------------- //
+    fn initializer(){
+        ERC165::register_interface(constants::IERC3525_ID);
+    }
+
     fn _approve_value(token_id: u256, operator: ContractAddress, value: u256) {
         let index = _find_operator_index(token_id, operator).unwrap();
         unit_level_approvals::write((token_id, index), ApprovedUnitsTrait::new(value, operator));
@@ -220,6 +227,19 @@ mod ERC3525 {
         SlotChanged(token_id, 0.into(), slot_id);
         TransferValue(0.into(), token_id, value);
     }
+
+    fn _clear_value_approvals(token_id : u256){
+        let mut index = 0;
+        loop {
+            // if zero break else clear approval slot
+            let value_approvals = unit_level_approvals::read((token_id, index));
+            if value_approvals.is_zero() {
+                break ();
+            }
+            unit_level_approvals::write((token_id, index), Zeroable::zero());
+            index += 1;
+        }
+    }
     // -------------------------------------------------------------------------- //
     //                                   Private                                  //
     // -------------------------------------------------------------------------- //
@@ -280,14 +300,24 @@ mod ERC3525 {
     }
 
     fn _check_on_erc3525_received(
+        to : ContractAddress,
         operator: ContractAddress,
         from_token_id: u256,
         to_token_id: u256,
         value: u256,
         data: Array<felt252>
     ) -> bool {
-        //TODO finish function
-        bool::True(())
+        let support_interface = IERC165Dispatcher{contract_address: to}.supports_interface(constants::IERC3525_RECEIVER_ID);
+        match support_interface{
+            bool::False(()) => IERC165Dispatcher { contract_address: to }.supports_interface(constants::IACCOUNT_ID),
+            bool::True(()) => {
+                IERC3525ReceiverDispatcher {
+                    contract_address: to
+                }.on_erc3525_received(
+                    operator, from_token_id, to_token_id,value, data
+                ) == constants::IERC3525_RECEIVER_ID
+            },
+        }
     }
 }
 

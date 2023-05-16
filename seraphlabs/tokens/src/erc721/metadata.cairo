@@ -2,6 +2,7 @@
 mod ERC721Metadata {
     use seraphlabs_libs::{ascii::IntergerToAsciiTrait, SeraphArrayTrait};
     use seraphlabs_tokens::erc721::interface;
+    use seraphlabs_tokens::utils::{constants, erc165::ERC165};
     // corelib imports
     use array::ArrayTrait;
     use option::OptionTrait;
@@ -62,10 +63,6 @@ mod ERC721Metadata {
     // -------------------------------------------------------------------------- //
     //                                  Externals                                 //
     // -------------------------------------------------------------------------- //
-    fn initializer(name: felt252, symbol: felt252) {
-        _name::write(name);
-        _symbol::write(symbol);
-    }
 
     fn set_base_uri(mut base_uri: Array<felt252>) {
         let len = base_uri.len();
@@ -88,6 +85,12 @@ mod ERC721Metadata {
     // -------------------------------------------------------------------------- //
     //                                  Internals                                 //
     // -------------------------------------------------------------------------- //
+    fn initializer(name: felt252, symbol: felt252) {
+        _name::write(name);
+        _symbol::write(symbol);
+        ERC165::register_interface(constants::IERC721_METADATA_ID);
+    }
+
     fn _get_base_uri() -> Array<felt252> {
         let len = _base_uri_len::read();
         let mut base_uri = ArrayTrait::<felt252>::new();

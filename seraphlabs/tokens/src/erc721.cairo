@@ -11,8 +11,9 @@ use metadata::ERC721Metadata;
 #[contract]
 mod ERC721 {
     // seraphlabs imports
-    use seraphlabs_utils::constants;
+    use seraphlabs_tokens::utils::{constants, erc165::{ERC165, IERC165Dispatcher, IERC165DispatcherTrait}};
     use super::interface;
+    use interface::{IERC721ReceiverDispatcher, IERC721ReceiverDispatcherTrait};
     // corelib imports
     use starknet::{
         get_caller_address, contract_address_const, ContractAddress, ContractAddressIntoFelt252
@@ -117,6 +118,11 @@ mod ERC721 {
     //                                  externals                                 //
     // -------------------------------------------------------------------------- //
     #[external]
+    fn initializer() { 
+        ERC165::register_interface(constants::IERC721_ID);
+    }
+
+    #[external]
     fn approve(to: ContractAddress, token_id: u256) {
         ERC721::approve(to, token_id)
     }
@@ -141,8 +147,6 @@ mod ERC721 {
     // -------------------------------------------------------------------------- //
     //                                  Internals                                 //
     // -------------------------------------------------------------------------- //
-    fn initializer() { //TODO add erc165 functions
-    }
 
     fn _exist(token_id: u256) -> bool {
         let owner: ContractAddress = _owners::read(token_id);
@@ -253,7 +257,16 @@ mod ERC721 {
     fn _check_on_erc721_received(
         from: ContractAddress, to: ContractAddress, token_id: u256, data: Array<felt252>
     ) -> bool {
-        //TODO finish function
-        bool::True(())
+        let support_interface = IERC165Dispatcher{contract_address: to}.supports_interface(constants::IERC721_RECEIVER_ID);
+        match support_interface{
+            bool::False(()) => IERC165Dispatcher { contract_address: to }.supports_interface(constants::IACCOUNT_ID),
+            bool::True(()) => {
+                IERC721ReceiverDispatcher {
+                    contract_address: to
+                }.on_erc721_received(
+                    get_caller_address(), from, token_id, data
+                ) == constants::IERC721_RECEIVER_ID
+            },
+        }
     }
 }
