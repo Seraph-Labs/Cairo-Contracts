@@ -7,3 +7,4 @@ mod erc3525;
 
 #[cfg(test)]
 mod tests;
+
