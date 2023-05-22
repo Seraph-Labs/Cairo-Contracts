@@ -208,6 +208,8 @@ mod ERC721 {
         assert(!operator.is_zero(), 'ERC721: invalid address');
 
         let caller: ContractAddress = get_caller_address();
+        assert(!caller.is_zero(), 'ERC721: invalid address');
+        
         assert(caller != operator, 'ERC721: owner cant approve self');
 
         _operator_approvals::write((caller, operator), approved);
