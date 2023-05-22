@@ -1,6 +1,6 @@
 #[contract]
-mod Mock721Contract{
-    use seraphlabs_tokens::erc721::{ERC721, ERC721Metadata};
+mod Mock721EnumContract{
+    use seraphlabs_tokens::erc721::{ERC721, ERC721Metadata, ERC721Enumerable as ERC721Enum};
     use starknet::ContractAddress;
     use array::ArrayTrait;
     use option::OptionTrait;
@@ -10,6 +10,7 @@ mod Mock721Contract{
     fn constructor(name : felt252, symbol : felt252){
         ERC721Metadata::initializer(name, symbol);
         ERC721::initializer();
+        ERC721Enum::initializer();
     }
     
     #[view]
@@ -46,6 +47,22 @@ mod Mock721Contract{
     fn is_approved_for_all(owner: ContractAddress, operator: ContractAddress) -> bool {
         ERC721::is_approved_for_all(owner, operator)
     }
+    
+    #[view]
+    fn total_supply() -> u256 {
+        ERC721Enum::total_supply()
+    }
+
+    #[view]
+    fn token_by_index(index: u256) -> u256 {
+        ERC721Enum::token_by_index(index)
+    }
+
+    #[view]
+    fn token_of_owner_by_index(owner: ContractAddress, index: u256) -> u256 {
+        ERC721Enum::token_of_owner_by_index(owner, index)
+    }
+
     // -------------------------------------------------------------------------- //
     //                                  Externals                                 //
     // -------------------------------------------------------------------------- //
@@ -69,21 +86,21 @@ mod Mock721Contract{
     fn safe_transfer_from(
         from: ContractAddress, to: ContractAddress, token_id: u256, data: Array<felt252>
     ) {
-        ERC721::safe_transfer_from(from, to, token_id, data)
+        ERC721Enum::safe_transfer_from(from, to, token_id, data)
     }
 
     #[external]
     fn transfer_from(from: ContractAddress, to: ContractAddress, token_id: u256) {
-        ERC721::transfer_from(from, to, token_id)
+        ERC721Enum::transfer_from(from, to, token_id)
     }
 
     #[external]
     fn mint(to: ContractAddress, token_id: u256) {
-        ERC721::_mint(to, token_id)
+        ERC721Enum::_mint(to, token_id)
     }
 
     #[external]
     fn burn(token_id: u256) {
-        ERC721::_burn(token_id)
+        ERC721Enum::_burn(token_id)
     }
 }

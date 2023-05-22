@@ -1,3 +1,5 @@
 mod mock_721;
+use mock_721::Mock721Contract;
 
-use mock_721::ERC721Contract;
+mod mock_721_enum;
+use mock_721_enum::Mock721EnumContract;
