@@ -155,6 +155,35 @@ mod ERC3525 {
         TransferValue(0.into(), to_token_id, value);
     }
 
+    #[internal]
+    fn _burn(token_id : u256){
+        // function already checks if token_id exist
+        ERC721Enum::_burn(token_id);
+        // clear value approvals
+        _clear_value_approvals(token_id);
+        // get slot and units
+        let slot_id = slot::read(token_id);
+        let value = units::read(token_id);
+        // clear slot and units
+        slot::write(token_id, 0_u256);
+        units::write(token_id, 0_u256);
+        // emit events
+        SlotChanged(token_id, slot_id, 0_u256);
+        TransferValue(token_id, 0_u256, value);
+    }
+
+    #[internal]
+    fn _burn_value(token_id : u256, value : u256){
+        assert (ERC721::_exist(to_token_id), 'ERC3525: invalid tokenId');
+        assert (value != 0_u256, 'ERC3525: invalid value');
+        // decrease token units
+        let token_units = units::read(token_id);
+        assert (token_units >= value, 'ERC3525: insufficient balance');
+        units::write(token_id, token_units - value);
+        // emit event
+        TransferValue(token_id, 0.into(), value);
+    }
+
     // -------------------------------------------------------------------------- //
     //                                  Internals                                 //
     // -------------------------------------------------------------------------- //
