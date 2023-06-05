@@ -117,10 +117,6 @@ mod ERC721 {
     // -------------------------------------------------------------------------- //
     //                                  externals                                 //
     // -------------------------------------------------------------------------- //
-    #[external]
-    fn initializer() { 
-        ERC165::register_interface(constants::IERC721_ID);
-    }
 
     #[external]
     fn approve(to: ContractAddress, token_id: u256) {
@@ -148,11 +144,18 @@ mod ERC721 {
     //                                  Internals                                 //
     // -------------------------------------------------------------------------- //
 
+    #[internal]
+    fn initializer() { 
+        ERC165::register_interface(constants::IERC721_ID);
+    }
+
+    #[internal]
     fn _exist(token_id: u256) -> bool {
         let owner: ContractAddress = _owners::read(token_id);
         !owner.is_zero()
     }
 
+    #[internal]
     fn _owner_of(token_id: u256) -> Option<ContractAddress> {
         let owner: ContractAddress = _owners::read(token_id);
         match owner.is_zero() {
@@ -161,6 +164,7 @@ mod ERC721 {
         }
     }
 
+    #[internal]
     fn _is_approved_or_owner(spender: ContractAddress, token_id: u256) -> bool {
         let owner: ContractAddress = _owner_of(token_id).expect('ERC721: invalid tokenId');
         owner == spender | spender == _token_approvals::read(
@@ -168,6 +172,7 @@ mod ERC721 {
         ) | _operator_approvals::read((owner, spender))
     }
 
+    #[internal]
     fn _transfer(from: ContractAddress, to: ContractAddress, token_id: u256) {
         // ensures tokenId has owner
         let owner: ContractAddress = _owner_of(token_id).expect('ERC721: invalid tokenId');
@@ -190,6 +195,7 @@ mod ERC721 {
         Transfer(from, to, token_id);
     }
 
+    #[internal]
     fn _safe_transfer(
         from: ContractAddress, to: ContractAddress, token_id: u256, data: Array<felt252>
     ) {
@@ -197,6 +203,7 @@ mod ERC721 {
         assert(_check_on_erc721_received(from, to, token_id, data), 'ERC721: reciever failed');
     }
 
+    #[internal]
     fn _approve(to: ContractAddress, token_id: u256) {
         let owner: ContractAddress = _owner_of(token_id).expect('ERC721: invalid tokenId');
         assert(owner != to, 'ERC721: owner cant approve self');
@@ -204,6 +211,7 @@ mod ERC721 {
         Approval(owner, to, token_id);
     }
 
+    #[internal]
     fn _set_approval_for_all(operator: ContractAddress, approved: bool) {
         assert(!operator.is_zero(), 'ERC721: invalid address');
 
@@ -216,6 +224,7 @@ mod ERC721 {
         ApprovalForAll(caller, operator, approved);
     }
 
+    #[internal]
     fn _mint(to: ContractAddress, token_id: u256) {
         assert(!to.is_zero(), 'ERC721: invalid address');
         assert(!_exist(token_id), 'ERC721: tokenId already exist');
@@ -236,6 +245,7 @@ mod ERC721 {
         );
     }
 
+    #[internal]
     fn _burn(token_id: u256) {
         // ensures tokenId has owner
         let owner: ContractAddress = _owner_of(token_id).expect('ERC721: invalid tokenId');
@@ -256,6 +266,7 @@ mod ERC721 {
     // -------------------------------------------------------------------------- //
     //                                   private                                  //
     // -------------------------------------------------------------------------- //
+    #[private]
     fn _check_on_erc721_received(
         from: ContractAddress, to: ContractAddress, token_id: u256, data: Array<felt252>
     ) -> bool {

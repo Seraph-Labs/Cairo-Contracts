@@ -63,7 +63,7 @@ mod ERC721Metadata {
     // -------------------------------------------------------------------------- //
     //                                  Externals                                 //
     // -------------------------------------------------------------------------- //
-
+    #[external]
     fn set_base_uri(mut base_uri: Array<felt252>) {
         let len = base_uri.len();
         let mut index = 0;
@@ -85,12 +85,14 @@ mod ERC721Metadata {
     // -------------------------------------------------------------------------- //
     //                                  Internals                                 //
     // -------------------------------------------------------------------------- //
+    #[internal]
     fn initializer(name: felt252, symbol: felt252) {
         _name::write(name);
         _symbol::write(symbol);
         ERC165::register_interface(constants::IERC721_METADATA_ID);
     }
 
+    #[internal]
     fn _get_base_uri() -> Array<felt252> {
         let len = _base_uri_len::read();
         let mut base_uri = ArrayTrait::<felt252>::new();

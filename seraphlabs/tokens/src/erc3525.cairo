@@ -102,18 +102,22 @@ mod ERC3525 {
     // -------------------------------------------------------------------------- //
     //                               view functions                               //
     // -------------------------------------------------------------------------- //
+    #[view]
     fn value_decimals() -> u8 {
         ERC3525Impl::value_decimals()
     }
 
+    #[view]
     fn value_of(token_id: u256) -> u256 {
         ERC3525Impl::value_of(token_id)
     }
 
+    #[view]
     fn slot_of(token_id: u256) -> u256 {
         ERC3525Impl::slot_of(token_id)
     }
 
+    #[view]
     fn allowance(token_id: u256, operator: ContractAddress) -> u256 {
         ERC3525Impl::allowance(token_id, operator)
     }
@@ -121,14 +125,17 @@ mod ERC3525 {
     //                                  Externals                                 //
     // -------------------------------------------------------------------------- //
     
+    #[external]
     fn approve_value(token_id: u256, operator: ContractAddress, value: u256) {
         ERC3525Impl::approve_value(token_id, operator, value)
     }
 
+    #[external]
     fn transfer_value_from(from_token_id : u256, to : ContractAddress, value : u256) -> u256 {
         ERC3525Impl::transfer_value_from(from_token_id, to, value)
     }
 
+    #[internal]
     fn _mint(to : ContractAddress, token_id : u256, slot_id : u256, value : u256){
         // assert valid to address
         assert(!to.is_zero(), 'ERC3525: invalid to address');
@@ -139,6 +146,7 @@ mod ERC3525 {
         _mint_new(to, token_id, slot_id, value);
     }
 
+    #[internal]
     fn _mint_value(to_token_id : u256, value : u256){
         assert (ERC721::_exist(to_token_id), 'ERC3525: invalid tokenId');
         assert (value != 0.into(), 'ERC3525: invalid value');
@@ -150,16 +158,20 @@ mod ERC3525 {
     // -------------------------------------------------------------------------- //
     //                                  Internals                                 //
     // -------------------------------------------------------------------------- //
+
+    #[internal]
     fn initializer(){
         ERC165::register_interface(constants::IERC3525_ID);
     }
 
+    #[internal]
     fn _approve_value(token_id: u256, operator: ContractAddress, value: u256) {
         let index = _find_operator_index(token_id, operator).unwrap();
         unit_level_approvals::write((token_id, index), ApprovedUnitsTrait::new(value, operator));
         ApprovalValue(token_id, operator, value);
     }
 
+    #[internal]
     fn _spend_allownce(token_id: u256, operator: ContractAddress, value: u256) {
         //* does not check if operator is a zero address
         // method will revert if index returned is rom a empty slot, means operator not approved
@@ -174,6 +186,7 @@ mod ERC3525 {
         ApprovalValue(token_id, operator, value_approvals.units);
     }
 
+    #[internal]
     fn _transfer_value_to_address(from_token_id: u256, to: ContractAddress, value: u256) -> u256 {
         // assert valid to adderss
         assert(!to.is_zero(), 'ERC3525: invalid address');
@@ -190,6 +203,7 @@ mod ERC3525 {
         token_id
     }
 
+    #[internal]
     fn _transfer_value(from_token_id: u256, to_token_id: u256, value: u256) {
         // assert caller is valid
         let caller = get_caller_address();
@@ -218,6 +232,7 @@ mod ERC3525 {
         TransferValue(from_token_id, to_token_id, value);
     }
 
+    #[internal]
     fn _mint_new(to : ContractAddress, token_id : u256, slot_id : u256, value : u256){
         //? internal mint function does not check for assertions or on ERC3525Received
         ERC721Enum::_mint(to, token_id);
@@ -228,6 +243,7 @@ mod ERC3525 {
         TransferValue(0.into(), token_id, value);
     }
 
+    #[internal]
     fn _clear_value_approvals(token_id : u256){
         let mut index = 0;
         loop {
@@ -244,6 +260,7 @@ mod ERC3525 {
     //                                   Private                                  //
     // -------------------------------------------------------------------------- //
 
+    #[private]
     fn _find_operator_index(token_id: u256, operator: ContractAddress) -> OperatorIndex<u16> {
         let mut index: u16 = 0;
         // if operator found break else loop
@@ -260,6 +277,7 @@ mod ERC3525 {
         new_index
     }
 
+    #[private]
     fn _find_same_slot_token_id(from_token_id: u256, to : ContractAddress) -> Option<u256>{
         let mut index = 0;
         let slot = slot::read(from_token_id);
@@ -285,6 +303,7 @@ mod ERC3525 {
         found_token_id
     }
 
+    #[private]
     fn _generate_new_token_id() -> u256{
         //? assumes next tokenId in supply does not exist
         // if not keep incrementing until tokenId does not exist
@@ -299,6 +318,7 @@ mod ERC3525 {
         new_token_id
     }
 
+    #[private]
     fn _check_on_erc3525_received(
         to : ContractAddress,
         operator: ContractAddress,

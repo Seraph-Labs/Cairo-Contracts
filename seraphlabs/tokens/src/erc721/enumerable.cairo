@@ -61,13 +61,14 @@ mod ERC721Enumerable {
     // -------------------------------------------------------------------------- //
     //                                  externals                                 //
     // -------------------------------------------------------------------------- //
-
+    #[external]
     fn transfer_from(from: ContractAddress, to: ContractAddress, token_id: u256) {
         _remove_token_from_owner_enum(from, token_id);
         _add_token_to_owner_enum(to, token_id);
         ERC721::transfer_from(from, to, token_id);
     }
 
+    #[external]
     fn safe_transfer_from(
         from: ContractAddress, to: ContractAddress, token_id: u256, data: Array<felt252>
     ) {
@@ -79,22 +80,26 @@ mod ERC721Enumerable {
     // -------------------------------------------------------------------------- //
     //                                  internals                                 //
     // -------------------------------------------------------------------------- //
+    #[internal]
     fn initializer() { 
         ERC165::register_interface(constants::IERC721_ENUMERABLE_ID);
     }
 
+    #[internal]
     fn _mint(to: ContractAddress, token_id: u256) {
         _add_token_to_owner_enum(to, token_id);
         _add_token_to_total_enum(token_id);
         ERC721::_mint(to, token_id);
     }
 
+    #[internal]
     fn _safe_mint(to: ContractAddress, token_id: u256, data: Array<felt252>){
         _add_token_to_owner_enum(to, token_id);
         _add_token_to_total_enum(token_id);
         ERC721::_safe_mint(to, token_id, data);
     }
 
+    #[internal]
     fn _burn(token_id: u256) {
         let owner = ERC721::owner_of(token_id);
         _remove_token_from_owner_enum(owner, token_id);
@@ -104,6 +109,7 @@ mod ERC721Enumerable {
         ERC721::_burn(token_id);
     }
 
+    #[internal]
     fn _token_of_owner_by_index(owner: ContractAddress, index: u256) -> Option<u256> {
         let token_id = _owner_index_to_token::read((owner, index));
         match token_id == BoundedInt::min() {
@@ -114,6 +120,8 @@ mod ERC721Enumerable {
     // -------------------------------------------------------------------------- //
     //                                   private                                  //
     // -------------------------------------------------------------------------- //
+
+    #[private]
     fn _add_token_to_total_enum(token_id: u256) {
         let supply = _supply::read();
         // add token_id to totals last index
@@ -124,6 +132,7 @@ mod ERC721Enumerable {
         _supply::write(supply + 1.into());
     }
 
+    #[private]
     fn _remove_token_from_total_enum(token_id: u256) {
         // index starts from zero therefore minus 1
         let last_token_index = _supply::read() - 1.into();
@@ -145,6 +154,7 @@ mod ERC721Enumerable {
         _supply::write(last_token_index);
     }
 
+    #[private]
     fn _add_token_to_owner_enum(owner: ContractAddress, token_id: u256) {
         let len = ERC721::balance_of(owner);
         // set token_id to owners last index
@@ -153,6 +163,7 @@ mod ERC721Enumerable {
         _owner_token_to_index::write(token_id, len);
     }
 
+    #[private]
     fn _remove_token_from_owner_enum(owner: ContractAddress, token_id: u256) {
         // index starts from zero therefore minus 1
         let last_token_index = ERC721::balance_of(owner) - 1.into();
