@@ -1,5 +1,6 @@
+use seraphlabs_utils::serde::SpanSerde;
 use starknet::ContractAddress;
-use array::ArrayTrait;
+use array::{ArrayTrait, SpanTrait};
 
 #[abi]
 trait IERC3525 {
@@ -41,6 +42,6 @@ trait IERC3525Receiver {
         from_token_id: u256,
         to_token_id: u256,
         value: u256,
-        data: Array<felt252>
+        data: Span<felt252>
     ) -> u32;
 }

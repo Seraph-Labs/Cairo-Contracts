@@ -19,7 +19,7 @@ mod ERC3525 {
     use starknet::{
         get_caller_address, contract_address_const, ContractAddress, ContractAddressIntoFelt252
     };
-    use array::ArrayTrait;
+    use array::{ArrayTrait, SpanTrait};
     use option::OptionTrait;
     use traits::{Into, TryInto};
     use zeroable::Zeroable;
@@ -91,8 +91,9 @@ mod ERC3525 {
         fn transfer_value_from(from_token_id : u256, to : ContractAddress, value : u256) -> u256 {
             assert (value != 0.into(), 'ERC3525: invalid value');
             let token_id = _transfer_value_to_address(from_token_id, to, value);
+            let data = ArrayTrait::<felt252>::new();
             assert(
-                _check_on_erc3525_received(to, get_caller_address(), from_token_id, token_id, value, ArrayTrait::new()),
+                _check_on_erc3525_received(to, get_caller_address(), from_token_id, token_id, value, data.span()),
                 'ERC3525: reciever failed'
             );
             token_id
@@ -174,8 +175,8 @@ mod ERC3525 {
 
     #[internal]
     fn _burn_value(token_id : u256, value : u256){
-        assert (ERC721::_exist(to_token_id), 'ERC3525: invalid tokenId');
-        assert (value != 0_u256, 'ERC3525: invalid value');
+        assert (ERC721::_exist(token_id), 'ERC3525: invalid tokenId');
+        assert (value > 0_u256, 'ERC3525: invalid value');
         // decrease token units
         let token_units = units::read(token_id);
         assert (token_units >= value, 'ERC3525: insufficient balance');
@@ -354,7 +355,7 @@ mod ERC3525 {
         from_token_id: u256,
         to_token_id: u256,
         value: u256,
-        data: Array<felt252>
+        data: Span<felt252>
     ) -> bool {
         let support_interface = IERC165Dispatcher{contract_address: to}.supports_interface(constants::IERC3525_RECEIVER_ID);
         match support_interface{

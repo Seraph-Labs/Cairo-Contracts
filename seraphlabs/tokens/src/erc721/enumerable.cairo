@@ -70,7 +70,7 @@ mod ERC721Enumerable {
 
     #[external]
     fn safe_transfer_from(
-        from: ContractAddress, to: ContractAddress, token_id: u256, data: Array<felt252>
+        from: ContractAddress, to: ContractAddress, token_id: u256, data: Span<felt252>
     ) {
         _remove_token_from_owner_enum(from, token_id);
         _add_token_to_owner_enum(to, token_id);
@@ -93,7 +93,7 @@ mod ERC721Enumerable {
     }
 
     #[internal]
-    fn _safe_mint(to: ContractAddress, token_id: u256, data: Array<felt252>){
+    fn _safe_mint(to: ContractAddress, token_id: u256, data: Span<felt252>){
         _add_token_to_owner_enum(to, token_id);
         _add_token_to_total_enum(token_id);
         ERC721::_safe_mint(to, token_id, data);
@@ -112,7 +112,7 @@ mod ERC721Enumerable {
     #[internal]
     fn _token_of_owner_by_index(owner: ContractAddress, index: u256) -> Option<u256> {
         let token_id = _owner_index_to_token::read((owner, index));
-        match token_id == BoundedInt::min() {
+        match token_id == BoundedInt::<u256>::min() {
             bool::False(()) => Option::Some(token_id),
             bool::True(()) => Option::None(()),
         }
@@ -129,13 +129,13 @@ mod ERC721Enumerable {
         // add last index to token_id
         _tokens_to_index::write(token_id, supply);
         // add to new_supply
-        _supply::write(supply + 1.into());
+        _supply::write(supply + 1_u256);
     }
 
     #[private]
     fn _remove_token_from_total_enum(token_id: u256) {
         // index starts from zero therefore minus 1
-        let last_token_index = _supply::read() - 1.into();
+        let last_token_index = _supply::read() - 1_u256;
         let cur_token_index = _tokens_to_index::read(token_id);
 
         if last_token_index != cur_token_index {

@@ -18,7 +18,7 @@ mod ERC721 {
     use starknet::{
         get_caller_address, contract_address_const, ContractAddress, ContractAddressIntoFelt252
     };
-    use array::ArrayTrait;
+    use array::{ArrayTrait, SpanTrait};
     use option::OptionTrait;
     use traits::{Into, TryInto};
     use zeroable::Zeroable;
@@ -78,7 +78,7 @@ mod ERC721 {
         }
 
         fn safe_transfer_from(
-            from: ContractAddress, to: ContractAddress, token_id: u256, data: Array::<felt252>
+            from: ContractAddress, to: ContractAddress, token_id: u256, data: Span<felt252>
         ) {
             let caller: ContractAddress = get_caller_address();
             assert(_is_approved_or_owner(caller, token_id), 'ERC721: caller is not approved');
@@ -130,7 +130,7 @@ mod ERC721 {
 
     #[external]
     fn safe_transfer_from(
-        from: ContractAddress, to: ContractAddress, token_id: u256, data: Array<felt252>
+        from: ContractAddress, to: ContractAddress, token_id: u256, data: Span<felt252>
     ) {
         ERC721::safe_transfer_from(from, to, token_id, data)
     }
@@ -197,7 +197,7 @@ mod ERC721 {
 
     #[internal]
     fn _safe_transfer(
-        from: ContractAddress, to: ContractAddress, token_id: u256, data: Array<felt252>
+        from: ContractAddress, to: ContractAddress, token_id: u256, data: Span<felt252>
     ) {
         _transfer(from, to, token_id);
         assert(_check_on_erc721_received(from, to, token_id, data), 'ERC721: reciever failed');
@@ -237,7 +237,7 @@ mod ERC721 {
         Transfer(Zeroable::zero(), to, token_id);
     }
 
-    fn _safe_mint(to: ContractAddress, token_id: u256, data: Array<felt252>) {
+    fn _safe_mint(to: ContractAddress, token_id: u256, data: Span<felt252>) {
         _mint(to, token_id);
         assert(
             _check_on_erc721_received(Zeroable::zero(), to, token_id, data),
@@ -268,7 +268,7 @@ mod ERC721 {
     // -------------------------------------------------------------------------- //
     #[private]
     fn _check_on_erc721_received(
-        from: ContractAddress, to: ContractAddress, token_id: u256, data: Array<felt252>
+        from: ContractAddress, to: ContractAddress, token_id: u256, data: Span<felt252>
     ) -> bool {
         let support_interface = IERC165Dispatcher{contract_address: to}.supports_interface(constants::IERC721_RECEIVER_ID);
         match support_interface{

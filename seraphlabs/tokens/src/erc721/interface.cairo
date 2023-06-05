@@ -1,5 +1,6 @@
+use seraphlabs_utils::serde::SpanSerde;
 use starknet::ContractAddress;
-use array::ArrayTrait;
+use array::{ArrayTrait, SpanTrait};
 
 #[abi]
 trait IERC721 {
@@ -10,7 +11,7 @@ trait IERC721 {
     fn approve(approved: ContractAddress, token_id: u256);
     fn set_approval_for_all(operator: ContractAddress, approved: bool);
     fn safe_transfer_from(
-        from: ContractAddress, to: ContractAddress, token_id: u256, data: Array<felt252>
+        from: ContractAddress, to: ContractAddress, token_id: u256, data: Span<felt252>
     );
     fn transfer_from(from: ContractAddress, to: ContractAddress, token_id: u256);
 }
@@ -25,7 +26,7 @@ trait IERC721MetaData {
 #[abi]
 trait IERC721Receiver {
     fn on_erc721_received(
-        operator: ContractAddress, from: ContractAddress, token_id: u256, data: Array<felt252>
+        operator: ContractAddress, from: ContractAddress, token_id: u256, data: Span<felt252>
     ) -> u32;
 }
 

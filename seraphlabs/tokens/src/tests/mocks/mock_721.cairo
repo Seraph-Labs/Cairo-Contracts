@@ -67,7 +67,7 @@ mod Mock721Contract{
 
     #[external]
     fn safe_transfer_from(
-        from: ContractAddress, to: ContractAddress, token_id: u256, data: Array<felt252>
+        from: ContractAddress, to: ContractAddress, token_id: u256, data: Span<felt252>
     ) {
         ERC721::safe_transfer_from(from, to, token_id, data)
     }
