@@ -12,7 +12,9 @@ use metadata::ERC721Metadata;
 mod ERC721 {
     // seraphlabs imports
     use seraphlabs_utils::serde::SpanSerde;
-    use seraphlabs_tokens::utils::{constants, erc165::{ERC165, IERC165Dispatcher, IERC165DispatcherTrait}};
+    use seraphlabs_tokens::utils::{
+        constants, erc165::{ERC165, IERC165Dispatcher, IERC165DispatcherTrait}
+    };
     use super::interface;
     use interface::{IERC721ReceiverDispatcher, IERC721ReceiverDispatcherTrait};
     // corelib imports
@@ -146,7 +148,7 @@ mod ERC721 {
     // -------------------------------------------------------------------------- //
 
     #[internal]
-    fn initializer() { 
+    fn initializer() {
         ERC165::register_interface(constants::IERC721_ID);
     }
 
@@ -168,9 +170,9 @@ mod ERC721 {
     #[internal]
     fn _is_approved_or_owner(spender: ContractAddress, token_id: u256) -> bool {
         let owner: ContractAddress = _owner_of(token_id).expect('ERC721: invalid tokenId');
-        owner == spender | spender == _token_approvals::read(
-            token_id
-        ) | _operator_approvals::read((owner, spender))
+        owner == spender
+            | spender == _token_approvals::read(token_id)
+            | _operator_approvals::read((owner, spender))
     }
 
     #[internal]
@@ -218,7 +220,7 @@ mod ERC721 {
 
         let caller: ContractAddress = get_caller_address();
         assert(!caller.is_zero(), 'ERC721: invalid address');
-        
+
         assert(caller != operator, 'ERC721: owner cant approve self');
 
         _operator_approvals::write((caller, operator), approved);
@@ -271,15 +273,20 @@ mod ERC721 {
     fn _check_on_erc721_received(
         from: ContractAddress, to: ContractAddress, token_id: u256, data: Span<felt252>
     ) -> bool {
-        let support_interface = IERC165Dispatcher{contract_address: to}.supports_interface(constants::IERC721_RECEIVER_ID);
-        match support_interface{
-            bool::False(()) => IERC165Dispatcher { contract_address: to }.supports_interface(constants::IACCOUNT_ID),
+        let support_interface = IERC165Dispatcher {
+            contract_address: to
+        }.supports_interface(constants::IERC721_RECEIVER_ID);
+        match support_interface {
+            bool::False(()) => IERC165Dispatcher {
+                contract_address: to
+            }.supports_interface(constants::IACCOUNT_ID),
             bool::True(()) => {
                 IERC721ReceiverDispatcher {
                     contract_address: to
-                }.on_erc721_received(
-                    get_caller_address(), from, token_id, data
-                ) == constants::IERC721_RECEIVER_ID
+                }
+                    .on_erc721_received(
+                        get_caller_address(), from, token_id, data
+                    ) == constants::IERC721_RECEIVER_ID
             },
         }
     }

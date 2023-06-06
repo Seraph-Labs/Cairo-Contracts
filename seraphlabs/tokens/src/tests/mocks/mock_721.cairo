@@ -1,5 +1,5 @@
 #[contract]
-mod Mock721Contract{
+mod Mock721Contract {
     use seraphlabs_tokens::erc721::{ERC721, ERC721Metadata};
     use starknet::ContractAddress;
     use array::ArrayTrait;
@@ -7,11 +7,11 @@ mod Mock721Contract{
 
 
     #[constructor]
-    fn constructor(name : felt252, symbol : felt252){
+    fn constructor(name: felt252, symbol: felt252) {
         ERC721Metadata::initializer(name, symbol);
         ERC721::initializer();
     }
-    
+
     #[view]
     fn name() -> felt252 {
         ERC721Metadata::name()
@@ -21,7 +21,7 @@ mod Mock721Contract{
     fn symbol() -> felt252 {
         ERC721Metadata::symbol()
     }
-    
+
     #[view]
     fn token_uri(token_id: u256) -> Array<felt252> {
         ERC721Metadata::token_uri(token_id)
@@ -54,7 +54,7 @@ mod Mock721Contract{
     fn set_base_uri(base_uri: Array<felt252>) {
         ERC721Metadata::set_base_uri(base_uri);
     }
-    
+
     #[external]
     fn approve(to: ContractAddress, token_id: u256) {
         ERC721::approve(to, token_id)

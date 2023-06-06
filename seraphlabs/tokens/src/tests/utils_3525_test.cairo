@@ -34,7 +34,9 @@ fn test_approve_units_storage() {
 
     let units: u256 = 10.into();
     let operator: ContractAddress =
-        0x066b6f9b1da6cfdaf09a5456ab8b61359a08bc2d961533950dc8943ac3d7f301.try_into().unwrap();
+        0x066b6f9b1da6cfdaf09a5456ab8b61359a08bc2d961533950dc8943ac3d7f301
+        .try_into()
+        .unwrap();
 
     ApproveUnitsTest::approve_units(1_u128, units, operator);
     let data = ApproveUnitsTest::get_approved_units(1_u128);
@@ -55,7 +57,9 @@ fn test_approve_units_traits() {
 
     let units: u256 = 10.into();
     let operator: ContractAddress =
-        0x066b6f9b1da6cfdaf09a5456ab8b61359a08bc2d961533950dc8943ac3d7f301.try_into().unwrap();
+        0x066b6f9b1da6cfdaf09a5456ab8b61359a08bc2d961533950dc8943ac3d7f301
+        .try_into()
+        .unwrap();
 
     let data = ApprovedUnitsTrait::new(units, operator);
     let data2 = ApprovedUnitsTrait::new(0.into(), operator);

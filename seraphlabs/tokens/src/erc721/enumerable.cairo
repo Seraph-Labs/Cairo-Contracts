@@ -82,7 +82,7 @@ mod ERC721Enumerable {
     //                                  internals                                 //
     // -------------------------------------------------------------------------- //
     #[internal]
-    fn initializer() { 
+    fn initializer() {
         ERC165::register_interface(constants::IERC721_ENUMERABLE_ID);
     }
 
@@ -94,7 +94,7 @@ mod ERC721Enumerable {
     }
 
     #[internal]
-    fn _safe_mint(to: ContractAddress, token_id: u256, data: Span<felt252>){
+    fn _safe_mint(to: ContractAddress, token_id: u256, data: Span<felt252>) {
         _add_token_to_owner_enum(to, token_id);
         _add_token_to_total_enum(token_id);
         ERC721::_safe_mint(to, token_id, data);

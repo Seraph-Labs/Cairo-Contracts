@@ -1,5 +1,5 @@
 #[contract]
-mod Mock721EnumContract{
+mod Mock721EnumContract {
     use seraphlabs_tokens::erc721::{ERC721, ERC721Metadata, ERC721Enumerable as ERC721Enum};
     use starknet::ContractAddress;
     use array::ArrayTrait;
@@ -7,12 +7,12 @@ mod Mock721EnumContract{
 
 
     #[constructor]
-    fn constructor(name : felt252, symbol : felt252){
+    fn constructor(name: felt252, symbol: felt252) {
         ERC721Metadata::initializer(name, symbol);
         ERC721::initializer();
         ERC721Enum::initializer();
     }
-    
+
     #[view]
     fn name() -> felt252 {
         ERC721Metadata::name()
@@ -22,7 +22,7 @@ mod Mock721EnumContract{
     fn symbol() -> felt252 {
         ERC721Metadata::symbol()
     }
-    
+
     #[view]
     fn token_uri(token_id: u256) -> Array<felt252> {
         ERC721Metadata::token_uri(token_id)
@@ -47,7 +47,7 @@ mod Mock721EnumContract{
     fn is_approved_for_all(owner: ContractAddress, operator: ContractAddress) -> bool {
         ERC721::is_approved_for_all(owner, operator)
     }
-    
+
     #[view]
     fn total_supply() -> u256 {
         ERC721Enum::total_supply()
@@ -71,7 +71,7 @@ mod Mock721EnumContract{
     fn set_base_uri(base_uri: Array<felt252>) {
         ERC721Metadata::set_base_uri(base_uri);
     }
-    
+
     #[external]
     fn approve(to: ContractAddress, token_id: u256) {
         ERC721::approve(to, token_id)

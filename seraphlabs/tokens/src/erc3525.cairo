@@ -8,11 +8,12 @@ use utils::{ApprovedUnits, ApprovedUnitsTrait, OperatorIndex, OperatorIndexTrait
 mod ERC3525 {
     // seraphlabs imports
     use seraphlabs_utils::serde::SpanSerde;
-    use seraphlabs_tokens::utils::{constants, erc165::{ERC165, IERC165Dispatcher, IERC165DispatcherTrait}};
+    use seraphlabs_tokens::utils::{
+        constants, erc165::{ERC165, IERC165Dispatcher, IERC165DispatcherTrait}
+    };
     use seraphlabs_tokens::{
-        ERC721, ERC721Enumerable as ERC721Enum, erc3525::{
-        ApprovedUnits, ApprovedUnitsTrait, OperatorIndex, OperatorIndexTrait
-        }
+        ERC721, ERC721Enumerable as ERC721Enum,
+        erc3525::{ApprovedUnits, ApprovedUnitsTrait, OperatorIndex, OperatorIndexTrait}
     };
     use super::interface;
     use interface::{IERC3525ReceiverDispatcher, IERC3525ReceiverDispatcherTrait};
@@ -89,12 +90,14 @@ mod ERC3525 {
             }
         }
 
-        fn transfer_value_from(from_token_id : u256, to : ContractAddress, value : u256) -> u256 {
-            assert (value != 0.into(), 'ERC3525: invalid value');
+        fn transfer_value_from(from_token_id: u256, to: ContractAddress, value: u256) -> u256 {
+            assert(value != 0.into(), 'ERC3525: invalid value');
             let token_id = _transfer_value_to_address(from_token_id, to, value);
             let data = ArrayTrait::<felt252>::new();
             assert(
-                _check_on_erc3525_received(to, get_caller_address(), from_token_id, token_id, value, data.span()),
+                _check_on_erc3525_received(
+                    to, get_caller_address(), from_token_id, token_id, value, data.span()
+                ),
                 'ERC3525: reciever failed'
             );
             token_id
@@ -126,19 +129,19 @@ mod ERC3525 {
     // -------------------------------------------------------------------------- //
     //                                  Externals                                 //
     // -------------------------------------------------------------------------- //
-    
+
     #[external]
     fn approve_value(token_id: u256, operator: ContractAddress, value: u256) {
         ERC3525Impl::approve_value(token_id, operator, value)
     }
 
     #[external]
-    fn transfer_value_from(from_token_id : u256, to : ContractAddress, value : u256) -> u256 {
+    fn transfer_value_from(from_token_id: u256, to: ContractAddress, value: u256) -> u256 {
         ERC3525Impl::transfer_value_from(from_token_id, to, value)
     }
 
     #[internal]
-    fn _mint(to : ContractAddress, token_id : u256, slot_id : u256, value : u256){
+    fn _mint(to: ContractAddress, token_id: u256, slot_id: u256, value: u256) {
         // assert valid to address
         assert(!to.is_zero(), 'ERC3525: invalid to address');
         // assert token_id does not exist
@@ -149,16 +152,16 @@ mod ERC3525 {
     }
 
     #[internal]
-    fn _mint_value(to_token_id : u256, value : u256){
-        assert (ERC721::_exist(to_token_id), 'ERC3525: invalid tokenId');
-        assert (value != 0.into(), 'ERC3525: invalid value');
+    fn _mint_value(to_token_id: u256, value: u256) {
+        assert(ERC721::_exist(to_token_id), 'ERC3525: invalid tokenId');
+        assert(value != 0.into(), 'ERC3525: invalid value');
         // increase to units
         units::write(to_token_id, units::read(to_token_id) + value);
         TransferValue(0.into(), to_token_id, value);
     }
 
     #[internal]
-    fn _burn(token_id : u256){
+    fn _burn(token_id: u256) {
         // function already checks if token_id exist
         ERC721Enum::_burn(token_id);
         // clear value approvals
@@ -175,12 +178,12 @@ mod ERC3525 {
     }
 
     #[internal]
-    fn _burn_value(token_id : u256, value : u256){
-        assert (ERC721::_exist(token_id), 'ERC3525: invalid tokenId');
-        assert (value > 0_u256, 'ERC3525: invalid value');
+    fn _burn_value(token_id: u256, value: u256) {
+        assert(ERC721::_exist(token_id), 'ERC3525: invalid tokenId');
+        assert(value > 0_u256, 'ERC3525: invalid value');
         // decrease token units
         let token_units = units::read(token_id);
-        assert (token_units >= value, 'ERC3525: insufficient balance');
+        assert(token_units >= value, 'ERC3525: insufficient balance');
         units::write(token_id, token_units - value);
         // emit event
         TransferValue(token_id, 0.into(), value);
@@ -191,7 +194,7 @@ mod ERC3525 {
     // -------------------------------------------------------------------------- //
 
     #[internal]
-    fn initializer(){
+    fn initializer() {
         ERC165::register_interface(constants::IERC3525_ID);
     }
 
@@ -206,9 +209,8 @@ mod ERC3525 {
     fn _spend_allownce(token_id: u256, operator: ContractAddress, value: u256) {
         //* does not check if operator is a zero address
         // method will revert if index returned is rom a empty slot, means operator not approved
-        let index = _find_operator_index(
-            token_id, operator
-        ).expect_contains('ERC3525: operator not approved');
+        let index = _find_operator_index(token_id, operator)
+            .expect_contains('ERC3525: operator not approved');
         let mut value_approvals = unit_level_approvals::read((token_id, index));
         // spend units , method alrady checks for value exceeding units
         value_approvals.spend_units(value);
@@ -242,9 +244,7 @@ mod ERC3525 {
         // checks for tokenId level approval and above
         // if not there check for value level approval and spend allowance
         // functions already check if from_tokenId exist
-        if !ERC721::_is_approved_or_owner(
-            caller, from_token_id
-        ) {
+        if !ERC721::_is_approved_or_owner(caller, from_token_id) {
             _spend_allownce(from_token_id, caller, value);
         }
         // checks if to_token_id exist
@@ -264,7 +264,7 @@ mod ERC3525 {
     }
 
     #[internal]
-    fn _mint_new(to : ContractAddress, token_id : u256, slot_id : u256, value : u256){
+    fn _mint_new(to: ContractAddress, token_id: u256, slot_id: u256, value: u256) {
         //? internal mint function does not check for assertions or on ERC3525Received
         ERC721Enum::_mint(to, token_id);
         slot::write(token_id, slot_id);
@@ -275,7 +275,7 @@ mod ERC3525 {
     }
 
     #[internal]
-    fn _clear_value_approvals(token_id : u256){
+    fn _clear_value_approvals(token_id: u256) {
         let mut index = 0;
         loop {
             // if zero break else clear approval slot
@@ -309,10 +309,10 @@ mod ERC3525 {
     }
 
     #[private]
-    fn _find_same_slot_token_id(from_token_id: u256, to : ContractAddress) -> Option<u256>{
+    fn _find_same_slot_token_id(from_token_id: u256, to: ContractAddress) -> Option<u256> {
         let mut index = 0;
         let slot = slot::read(from_token_id);
-        let found_token_id = loop{
+        let found_token_id = loop {
             // use internal function so function wont revert on out of bounds index
             match ERC721Enum::_token_of_owner_by_index(to, index.into()) {
                 Option::Some(x) => {
@@ -321,7 +321,7 @@ mod ERC3525 {
                     if x == from_token_id | slot::read(x) != slot {
                         index += 1;
                         continue;
-                    } else{
+                    } else {
                         break Option::Some(x);
                     }
                 },
@@ -335,7 +335,7 @@ mod ERC3525 {
     }
 
     #[private]
-    fn _generate_new_token_id() -> u256{
+    fn _generate_new_token_id() -> u256 {
         //? assumes next tokenId in supply does not exist
         // if not keep incrementing until tokenId does not exist
         let supply = ERC721Enum::total_supply();
@@ -351,22 +351,27 @@ mod ERC3525 {
 
     #[private]
     fn _check_on_erc3525_received(
-        to : ContractAddress,
+        to: ContractAddress,
         operator: ContractAddress,
         from_token_id: u256,
         to_token_id: u256,
         value: u256,
         data: Span<felt252>
     ) -> bool {
-        let support_interface = IERC165Dispatcher{contract_address: to}.supports_interface(constants::IERC3525_RECEIVER_ID);
-        match support_interface{
-            bool::False(()) => IERC165Dispatcher { contract_address: to }.supports_interface(constants::IACCOUNT_ID),
+        let support_interface = IERC165Dispatcher {
+            contract_address: to
+        }.supports_interface(constants::IERC3525_RECEIVER_ID);
+        match support_interface {
+            bool::False(()) => IERC165Dispatcher {
+                contract_address: to
+            }.supports_interface(constants::IACCOUNT_ID),
             bool::True(()) => {
                 IERC3525ReceiverDispatcher {
                     contract_address: to
-                }.on_erc3525_received(
-                    operator, from_token_id, to_token_id,value, data
-                ) == constants::IERC3525_RECEIVER_ID
+                }
+                    .on_erc3525_received(
+                        operator, from_token_id, to_token_id, value, data
+                    ) == constants::IERC3525_RECEIVER_ID
             },
         }
     }

@@ -1,17 +1,17 @@
 use seraphlabs_tokens::tests::mocks::Mock721Contract as Mock;
 use starknet::{ContractAddress, contract_address_const};
 use starknet::testing::set_caller_address;
-use traits::{Into,TryInto};
+use traits::{Into, TryInto};
 use option::OptionTrait;
 use array::ArrayTrait;
 
-const NAME : felt252 = 'hello';
-const SYMBOL : felt252 = 'world';
-const BASEURI1 : felt252 = 'arweave.net/';
-const BASEURI2 : felt252 = 'FAKE_EXAMPLE_OF_ARWEAVE_HASH/';
+const NAME: felt252 = 'hello';
+const SYMBOL: felt252 = 'world';
+const BASEURI1: felt252 = 'arweave.net/';
+const BASEURI2: felt252 = 'FAKE_EXAMPLE_OF_ARWEAVE_HASH/';
 
 
-fn setup() -> ContractAddress{
+fn setup() -> ContractAddress {
     let account = contract_address_const::<1>();
     Mock::constructor(NAME, SYMBOL);
     account
@@ -23,7 +23,7 @@ fn set_caller_as_zero() {
 
 #[test]
 #[available_gas(2000000)]
-fn test_constructor(){
+fn test_constructor() {
     Mock::constructor(NAME, SYMBOL);
 
     assert(Mock::name() == NAME, 'name is not set correctly');
@@ -33,7 +33,7 @@ fn test_constructor(){
 
 #[test]
 #[available_gas(2000000)]
-fn test_token_uri(){
+fn test_token_uri() {
     let mut base_uri = ArrayTrait::<felt252>::new();
     base_uri.append(BASEURI1);
     base_uri.append(BASEURI2);
@@ -48,7 +48,7 @@ fn test_token_uri(){
 
 #[test]
 #[available_gas(2000000)]
-fn test_mint(){
+fn test_mint() {
     let account = setup();
     Mock::mint(account, 1.into());
     assert(Mock::balance_of(account) == 1.into(), 'balance is not set correctly');
@@ -58,14 +58,14 @@ fn test_mint(){
 #[test]
 #[available_gas(2000000)]
 #[should_panic(expected: ('ERC721: invalid address', ))]
-fn test_mint_invalid_address(){
+fn test_mint_invalid_address() {
     Mock::mint(contract_address_const::<0>(), 1.into());
 }
 
 #[test]
 #[available_gas(2000000)]
 #[should_panic(expected: ('ERC721: tokenId already exist', ))]
-fn test_mint_existing_token(){
+fn test_mint_existing_token() {
     let account = setup();
     Mock::mint(account, 1.into());
     assert(Mock::balance_of(account) == 1.into(), 'balance is not set correctly');
@@ -75,7 +75,7 @@ fn test_mint_existing_token(){
 
 #[test]
 #[available_gas(2000000)]
-fn test_approve(){
+fn test_approve() {
     let account = setup();
     set_caller_address(account);
     let account2 = contract_address_const::<2>();
@@ -88,7 +88,7 @@ fn test_approve(){
 #[test]
 #[available_gas(2000000)]
 #[should_panic(expected: ('ERC721: invalid owner', ))]
-fn test_only_owner_approve(){
+fn test_only_owner_approve() {
     let account = setup();
     let account2 = contract_address_const::<2>();
     set_caller_address(account);
@@ -102,7 +102,7 @@ fn test_only_owner_approve(){
 #[test]
 #[available_gas(2000000)]
 #[should_panic(expected: ('ERC721: owner cant approve self', ))]
-fn test_approve_to_self(){
+fn test_approve_to_self() {
     let account = setup();
     set_caller_address(account);
 
@@ -112,7 +112,7 @@ fn test_approve_to_self(){
 
 #[test]
 #[available_gas(2000000)]
-fn test_approval_for_all(){
+fn test_approval_for_all() {
     let account = setup();
     let account2 = contract_address_const::<2>();
     set_caller_address(account);
@@ -125,8 +125,8 @@ fn test_approval_for_all(){
 #[test]
 #[available_gas(2000000)]
 #[should_panic(expected: ('ERC721: invalid address', ))]
-fn test_approval_for_all_invalid_operator(){
-    let account =contract_address_const::<1>();
+fn test_approval_for_all_invalid_operator() {
+    let account = contract_address_const::<1>();
     set_caller_address(account);
 
     Mock::mint(account, 1.into());
@@ -136,7 +136,7 @@ fn test_approval_for_all_invalid_operator(){
 #[test]
 #[available_gas(2000000)]
 #[should_panic(expected: ('ERC721: invalid address', ))]
-fn test_approval_for_all_invalid_caller(){
+fn test_approval_for_all_invalid_caller() {
     let account = contract_address_const::<1>();
     let account2 = contract_address_const::<2>();
     set_caller_as_zero();
@@ -148,7 +148,7 @@ fn test_approval_for_all_invalid_caller(){
 #[test]
 #[available_gas(2000000)]
 #[should_panic(expected: ('ERC721: owner cant approve self', ))]
-fn test_approval_for_all_to_self(){
+fn test_approval_for_all_to_self() {
     let account = contract_address_const::<1>();
     set_caller_address(account);
 
@@ -158,7 +158,7 @@ fn test_approval_for_all_to_self(){
 
 #[test]
 #[available_gas(2000000)]
-fn test_transfer(){
+fn test_transfer() {
     let account = setup();
     set_caller_address(account);
     let account2 = contract_address_const::<2>();
@@ -178,7 +178,7 @@ fn test_transfer(){
 #[test]
 #[available_gas(2000000)]
 #[should_panic(expected: ('ERC721: caller is not approved', ))]
-fn test_unapproved_transfer(){
+fn test_unapproved_transfer() {
     let account = contract_address_const::<1>();
     let account2 = contract_address_const::<2>();
     set_caller_address(account2);
@@ -189,7 +189,7 @@ fn test_unapproved_transfer(){
 
 #[test]
 #[available_gas(2000000)]
-fn test_approve_transfer(){
+fn test_approve_transfer() {
     let account = contract_address_const::<1>();
     set_caller_address(account);
     let account2 = contract_address_const::<2>();
@@ -207,8 +207,8 @@ fn test_approve_transfer(){
 
 #[test]
 #[available_gas(2000000)]
-fn test_approval_for_all_transfer(){
-    let account =contract_address_const::<1>();
+fn test_approval_for_all_transfer() {
+    let account = contract_address_const::<1>();
     set_caller_address(account);
     let account2 = contract_address_const::<2>();
     // approve tokenId to account 2
@@ -226,7 +226,7 @@ fn test_approval_for_all_transfer(){
 
 #[test]
 #[available_gas(2000000)]
-fn test_burn(){
+fn test_burn() {
     let account = contract_address_const::<1>();
     set_caller_address(account);
     Mock::mint(account, 1.into());
@@ -237,7 +237,7 @@ fn test_burn(){
 #[test]
 #[available_gas(2000000)]
 #[should_panic(expected: ('ERC721: invalid tokenId', ))]
-fn test_burn_approve(){
+fn test_burn_approve() {
     let account = contract_address_const::<1>();
     set_caller_address(account);
     Mock::mint(account, 1.into());
