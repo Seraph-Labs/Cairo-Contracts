@@ -7,6 +7,7 @@ use utils::{ApprovedUnits, ApprovedUnitsTrait, OperatorIndex, OperatorIndexTrait
 #[contract]
 mod ERC3525 {
     // seraphlabs imports
+    use seraphlabs_utils::serde::SpanSerde;
     use seraphlabs_tokens::utils::{constants, erc165::{ERC165, IERC165Dispatcher, IERC165DispatcherTrait}};
     use seraphlabs_tokens::{
         ERC721, ERC721Enumerable as ERC721Enum, erc3525::{

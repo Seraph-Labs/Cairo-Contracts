@@ -11,6 +11,7 @@ use metadata::ERC721Metadata;
 #[contract]
 mod ERC721 {
     // seraphlabs imports
+    use seraphlabs_utils::serde::SpanSerde;
     use seraphlabs_tokens::utils::{constants, erc165::{ERC165, IERC165Dispatcher, IERC165DispatcherTrait}};
     use super::interface;
     use interface::{IERC721ReceiverDispatcher, IERC721ReceiverDispatcherTrait};

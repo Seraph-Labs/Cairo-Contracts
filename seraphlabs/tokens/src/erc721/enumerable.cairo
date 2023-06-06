@@ -1,6 +1,7 @@
 #[contract]
 mod ERC721Enumerable {
     // seraphlabs imports
+    use seraphlabs_utils::serde::SpanSerde;
     use seraphlabs_tokens::erc721::{ERC721, interface::IERC721Enumerable};
     use seraphlabs_tokens::utils::{constants, erc165::ERC165};
     // corelib imports
