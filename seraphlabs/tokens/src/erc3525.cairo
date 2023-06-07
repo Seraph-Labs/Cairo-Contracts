@@ -36,6 +36,8 @@ mod ERC3525 {
         units: LegacyMap::<u256, u256>,
         // (token_id, index) -> (units, operator)
         unit_level_approvals: LegacyMap::<(u256, u16), ApprovedUnits>,
+        // to track the higest token minted
+        max_token_id: u256,
     }
 
     // -------------------------------------------------------------------------- //
@@ -194,14 +196,35 @@ mod ERC3525 {
     // -------------------------------------------------------------------------- //
 
     #[internal]
-    fn initializer() {
+    fn initializer(value_decimals: u8) {
         ERC165::register_interface(constants::IERC3525_ID);
+        decimals::write(value_decimals);
     }
 
     #[internal]
     fn _approve_value(token_id: u256, operator: ContractAddress, value: u256) {
-        let index = _find_operator_index(token_id, operator).unwrap();
-        unit_level_approvals::write((token_id, index), ApprovedUnitsTrait::new(value, operator));
+        let index = _find_operator_index(token_id, operator);
+        match index {
+            OperatorIndex::Contain(x) => {
+                // if operator already approved update value
+                unit_level_approvals::write(
+                    (token_id, x), ApprovedUnitsTrait::new(value, operator)
+                );
+            },
+            OperatorIndex::Empty(x) => {
+                // if operator not approved add new approval
+                // unless value is zero the skip and dont add approvasls
+                // if value is zero and operator was never registered to save space 
+                // dont add them to the approval array
+                if value == 0_u256 {
+                    return ();
+                }
+
+                unit_level_approvals::write(
+                    (token_id, x), ApprovedUnitsTrait::new(value, operator)
+                );
+            }
+        }
         ApprovalValue(token_id, operator, value);
     }
 
@@ -267,6 +290,9 @@ mod ERC3525 {
     fn _mint_new(to: ContractAddress, token_id: u256, slot_id: u256, value: u256) {
         //? internal mint function does not check for assertions or on ERC3525Received
         ERC721Enum::_mint(to, token_id);
+        // check if token_id is greater than max_token_id
+        _check_max_token_id(token_id);
+
         slot::write(token_id, slot_id);
         units::write(token_id, value);
         // emit event
@@ -336,17 +362,25 @@ mod ERC3525 {
 
     #[private]
     fn _generate_new_token_id() -> u256 {
-        //? assumes next tokenId in supply does not exist
-        // if not keep incrementing until tokenId does not exist
-        let supply = ERC721Enum::total_supply();
-        let mut new_token_id = supply + 1.into();
+        //? gets the current higest token and assumes next token is available
+        // if not loop and find the next available token
+        let highest = max_token_id::read();
+        let mut new_token_id = highest + 1_u256;
         loop {
             if !ERC721::_exist(new_token_id) {
                 break ();
             }
-            new_token_id += 1.into();
+            new_token_id += 1_u256;
         };
         new_token_id
+    }
+
+    #[private]
+    fn _check_max_token_id(token_id: u256) {
+        // if token_id is greater than max_token_id update max_token_id
+        if token_id > max_token_id::read() {
+            max_token_id::write(token_id);
+        }
     }
 
     #[private]
