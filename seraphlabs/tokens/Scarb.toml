@@ -11,3 +11,4 @@ seraphlabs_utils = {path = "../utils/"}
 
 [scripts]
 test = "cairo-test --filter seraphlabs_tokens --starknet ."
+test-3525 = "cairo-test . -f mock_3525_test --starknet"
