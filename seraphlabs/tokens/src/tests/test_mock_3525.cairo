@@ -1,20 +1,14 @@
 use seraphlabs_tokens::tests::mocks::{Mock3525Contract as Mock, ERC3525Receiver as Receiver};
 use seraphlabs_tokens::utils::constants;
+use seraphlabs_utils::testing::{vars, utils};
 use starknet::{ContractAddress, contract_address_const};
 use starknet::testing::set_caller_address;
-use starknet::class_hash::Felt252TryIntoClassHash;
 use traits::{Into, TryInto};
 use option::OptionTrait;
 use array::ArrayTrait;
-use core::result::ResultTrait;
-use zeroable::Zeroable;
 
 fn VALUE_DECIMALS() -> u8 {
     20_u8
-}
-
-fn TOKEN_ID() -> u256 {
-    2114_u256
 }
 
 fn SLOT() -> u256 {
@@ -25,28 +19,8 @@ fn SLOT2() -> u256 {
     8_u256
 }
 
-fn OWNER() -> ContractAddress {
-    contract_address_const::<2114>()
-}
-
-fn USER() -> ContractAddress {
-    contract_address_const::<3525>()
-}
-
-fn OPERATOR() -> ContractAddress {
-    contract_address_const::<721>()
-}
-
-fn INVALID_ADDRESS() -> ContractAddress {
-    Zeroable::zero()
-}
-
 fn RECEIVER() -> ContractAddress {
-    let (address, _) = starknet::deploy_syscall(
-        Receiver::TEST_CLASS_HASH.try_into().unwrap(), 0, ArrayTrait::new().span(), false
-    )
-        .unwrap();
-    address
+    utils::deploy(Receiver::TEST_CLASS_HASH, ArrayTrait::new())
 }
 
 #[test]
@@ -64,16 +38,16 @@ fn test_constructor() {
 #[test]
 #[available_gas(2000000)]
 fn test_balance() {
-    let owner = OWNER();
-    Mock::mint(owner, TOKEN_ID(), SLOT(), 100);
+    let owner = vars::OWNER();
+    Mock::mint(owner, vars::TOKEN_ID(), SLOT(), 100);
     assert(Mock::balance_of(owner) == 1_u256, 'wrong balance');
 }
 
 #[test]
 #[available_gas(2000000)]
 fn test_owner_of() {
-    let token_id = TOKEN_ID();
-    let owner = OWNER();
+    let token_id = vars::TOKEN_ID();
+    let owner = vars::OWNER();
     Mock::mint(owner, token_id, SLOT(), 100);
     assert(Mock::owner_of(token_id) == owner, 'wrong owner');
 }
@@ -81,17 +55,17 @@ fn test_owner_of() {
 #[test]
 #[available_gas(2000000)]
 fn test_slot_of() {
-    let token_id = TOKEN_ID();
+    let token_id = vars::TOKEN_ID();
     let slot = SLOT();
-    Mock::mint(OWNER(), token_id, slot, 100);
+    Mock::mint(vars::OWNER(), token_id, slot, 100);
     assert(Mock::slot_of(token_id) == slot, 'wrong slot');
 }
 
 #[test]
 #[available_gas(2000000)]
 fn test_value_units() {
-    let token_id = TOKEN_ID();
-    Mock::mint(OWNER(), token_id, SLOT(), 100);
+    let token_id = vars::TOKEN_ID();
+    Mock::mint(vars::OWNER(), token_id, SLOT(), 100);
     assert(Mock::value_of(token_id) == 100_u256, 'wrong value units');
 }
 
@@ -99,15 +73,15 @@ fn test_value_units() {
 #[available_gas(2000000)]
 #[should_panic(expected: ('ERC3525: invalid to address', ))]
 fn test_invalid_owner_mint() {
-    Mock::mint(INVALID_ADDRESS(), TOKEN_ID(), SLOT(), 100);
+    Mock::mint(vars::INVALID_ADDRESS(), vars::TOKEN_ID(), SLOT(), 100);
 }
 
 #[test]
 #[available_gas(2000000)]
 #[should_panic(expected: ('ERC3525: token already exist', ))]
 fn test_same_token() {
-    let token_id = TOKEN_ID();
-    let owner = OWNER();
+    let token_id = vars::TOKEN_ID();
+    let owner = vars::OWNER();
     let slot = SLOT();
     Mock::mint(owner, token_id, slot, 100);
     Mock::mint(owner, token_id, slot, 20);
@@ -117,14 +91,14 @@ fn test_same_token() {
 #[available_gas(2000000)]
 #[should_panic(expected: ('ERC3525: invalid token_id', ))]
 fn test_invalid_token_id() {
-    Mock::mint(OWNER(), 0_u256, SLOT(), 100);
+    Mock::mint(vars::OWNER(), 0_u256, SLOT(), 100);
 }
 
 #[test]
 #[available_gas(2000000)]
 fn test_enum() {
-    let token_id = TOKEN_ID();
-    let owner = OWNER();
+    let token_id = vars::TOKEN_ID();
+    let owner = vars::OWNER();
     Mock::mint(owner, token_id, SLOT(), 100);
     assert(Mock::token_by_index(0_u256) == token_id, 'wrong token id');
     assert(Mock::token_of_owner_by_index(owner, 0_u256) == token_id, 'wrong token id');
@@ -134,9 +108,9 @@ fn test_enum() {
 #[test]
 #[available_gas(2000000)]
 fn test_owner_approve_value() {
-    let token_id = TOKEN_ID();
-    let owner = OWNER();
-    let user = USER();
+    let token_id = vars::TOKEN_ID();
+    let owner = vars::OWNER();
+    let user = vars::USER();
     Mock::mint(owner, token_id, SLOT(), 100);
 
     set_caller_address(owner);
@@ -147,10 +121,10 @@ fn test_owner_approve_value() {
 #[test]
 #[available_gas(2000000)]
 fn test_approve_value_from_opeartor() {
-    let token_id = TOKEN_ID();
-    let owner = OWNER();
-    let operator = OPERATOR();
-    let user = USER();
+    let token_id = vars::TOKEN_ID();
+    let owner = vars::OWNER();
+    let operator = vars::OPERATOR();
+    let user = vars::USER();
 
     Mock::mint(owner, token_id, SLOT(), 100);
 
@@ -165,10 +139,10 @@ fn test_approve_value_from_opeartor() {
 #[test]
 #[available_gas(2000000)]
 fn test_approve_from_all_opeartor_approve_value() {
-    let token_id = TOKEN_ID();
-    let owner = OWNER();
-    let operator = OPERATOR();
-    let user = USER();
+    let token_id = vars::TOKEN_ID();
+    let owner = vars::OWNER();
+    let operator = vars::OPERATOR();
+    let user = vars::USER();
     Mock::mint(owner, token_id, SLOT(), 100);
 
     set_caller_address(owner);
@@ -183,8 +157,8 @@ fn test_approve_from_all_opeartor_approve_value() {
 #[available_gas(2000000)]
 #[should_panic(expected: ('ERC3525: approval to owner', ))]
 fn test_approve_value_to_owner() {
-    let token_id = TOKEN_ID();
-    let owner = OWNER();
+    let token_id = vars::TOKEN_ID();
+    let owner = vars::OWNER();
     Mock::mint(owner, token_id, SLOT(), 100);
     set_caller_address(owner);
     Mock::approve_value(token_id, owner, 100);
@@ -194,9 +168,9 @@ fn test_approve_value_to_owner() {
 #[available_gas(2000000)]
 #[should_panic(expected: ('ERC3525: caller not approved', ))]
 fn test_approve_value_from_not_approved() {
-    let token_id = TOKEN_ID();
-    let owner = OWNER();
-    let user = USER();
+    let token_id = vars::TOKEN_ID();
+    let owner = vars::OWNER();
+    let user = vars::USER();
 
     Mock::mint(owner, token_id, SLOT(), 100);
     set_caller_address(user);
@@ -208,8 +182,8 @@ fn test_approve_value_from_not_approved() {
 #[available_gas(20000000)]
 fn test_transfer_value_with_no_token() {
     let reciever = RECEIVER();
-    let token_id = TOKEN_ID();
-    let owner = OWNER();
+    let token_id = vars::TOKEN_ID();
+    let owner = vars::OWNER();
     let slot = SLOT();
 
     Mock::mint(owner, token_id, slot, 100);
@@ -236,8 +210,8 @@ fn test_transfer_value_with_no_token() {
 #[available_gas(20000000)]
 fn test_transfer_value_with_same_slot() {
     let reciever = RECEIVER();
-    let token_id = TOKEN_ID();
-    let owner = OWNER();
+    let token_id = vars::TOKEN_ID();
+    let owner = vars::OWNER();
     let slot = SLOT();
     let slot2 = SLOT2();
     let wrong_slot_token_1 = 20_u256;
@@ -276,9 +250,9 @@ fn test_transfer_value_with_same_slot() {
 #[available_gas(20000000)]
 fn test_approve_unit_level_operator_value_transfer() {
     let reciever = RECEIVER();
-    let token_id = TOKEN_ID();
-    let owner = OWNER();
-    let operator = OPERATOR();
+    let token_id = vars::TOKEN_ID();
+    let owner = vars::OWNER();
+    let operator = vars::OPERATOR();
 
     Mock::mint(owner, token_id, SLOT(), 100);
     set_caller_address(owner);
@@ -296,9 +270,9 @@ fn test_approve_unit_level_operator_value_transfer() {
 #[available_gas(20000000)]
 fn test_approve_operator_value_transfer() {
     let reciever = RECEIVER();
-    let token_id = TOKEN_ID();
-    let owner = OWNER();
-    let operator = OPERATOR();
+    let token_id = vars::TOKEN_ID();
+    let owner = vars::OWNER();
+    let operator = vars::OPERATOR();
 
     Mock::mint(owner, token_id, SLOT(), 100);
     set_caller_address(owner);
@@ -315,9 +289,9 @@ fn test_approve_operator_value_transfer() {
 #[available_gas(20000000)]
 fn test_approve_for_all_operator_value_transfer() {
     let reciever = RECEIVER();
-    let token_id = TOKEN_ID();
-    let owner = OWNER();
-    let operator = OPERATOR();
+    let token_id = vars::TOKEN_ID();
+    let owner = vars::OWNER();
+    let operator = vars::OPERATOR();
 
     Mock::mint(owner, token_id, SLOT(), 100);
     set_caller_address(owner);
@@ -333,10 +307,10 @@ fn test_approve_for_all_operator_value_transfer() {
 #[test]
 #[available_gas(20000000)]
 fn test_721_transfer() {
-    let token_id = TOKEN_ID();
-    let owner = OWNER();
-    let user = USER();
-    let operator = OPERATOR();
+    let token_id = vars::TOKEN_ID();
+    let owner = vars::OWNER();
+    let user = vars::USER();
+    let operator = vars::OPERATOR();
 
     Mock::mint(owner, token_id, SLOT(), 100);
     set_caller_address(owner);
@@ -352,9 +326,9 @@ fn test_721_transfer() {
 #[should_panic(expected: ('ERC3525: operator not approved', ))]
 fn test_unapprove_operator_value_transfer() {
     let reciever = RECEIVER();
-    let token_id = TOKEN_ID();
-    Mock::mint(OWNER(), token_id, SLOT(), 100);
-    set_caller_address(USER());
+    let token_id = vars::TOKEN_ID();
+    Mock::mint(vars::OWNER(), token_id, SLOT(), 100);
+    set_caller_address(vars::USER());
     Mock::transfer_value_from(token_id, reciever, 25);
 }
 
@@ -363,8 +337,8 @@ fn test_unapprove_operator_value_transfer() {
 #[should_panic(expected: ('ERC3525: insufficient balance', ))]
 fn test_exceeding_value_transfer() {
     let reciever = RECEIVER();
-    let token_id = TOKEN_ID();
-    let owner = OWNER();
+    let token_id = vars::TOKEN_ID();
+    let owner = vars::OWNER();
 
     Mock::mint(owner, token_id, SLOT(), 100);
     set_caller_address(owner);
@@ -376,9 +350,9 @@ fn test_exceeding_value_transfer() {
 #[should_panic(expected: ('ERC3525: Insufficient allowance', ))]
 fn test_exceeding_unit_level_approved_operator_value_transfer() {
     let reciever = RECEIVER();
-    let token_id = TOKEN_ID();
-    let owner = OWNER();
-    let operator = OPERATOR();
+    let token_id = vars::TOKEN_ID();
+    let owner = vars::OWNER();
+    let operator = vars::OPERATOR();
 
     Mock::mint(owner, token_id, SLOT(), 100);
     set_caller_address(owner);
@@ -390,8 +364,8 @@ fn test_exceeding_unit_level_approved_operator_value_transfer() {
 #[test]
 #[available_gas(20000000)]
 fn test_mint_value() {
-    let token_id = TOKEN_ID();
-    let owner = OWNER();
+    let token_id = vars::TOKEN_ID();
+    let owner = vars::OWNER();
     Mock::mint(owner, token_id, SLOT(), 100);
     Mock::mint_value(token_id, 2000);
     assert(Mock::value_of(token_id) == 2100, 'wrong value units');
@@ -400,9 +374,9 @@ fn test_mint_value() {
 #[test]
 #[available_gas(20000000)]
 fn test_3525_burn() {
-    let token_id = TOKEN_ID();
-    let owner = OWNER();
-    let operator = OPERATOR();
+    let token_id = vars::TOKEN_ID();
+    let owner = vars::OWNER();
+    let operator = vars::OPERATOR();
 
     Mock::mint(owner, token_id, SLOT(), 100);
     set_caller_address(owner);
@@ -420,8 +394,8 @@ fn test_3525_burn() {
 #[test]
 #[available_gas(20000000)]
 fn test_burn_value() {
-    let token_id = TOKEN_ID();
-    let owner = OWNER();
+    let token_id = vars::TOKEN_ID();
+    let owner = vars::OWNER();
     Mock::mint(owner, token_id, SLOT(), 100);
     Mock::burn_value(token_id, 50);
     assert(Mock::value_of(token_id) == 50_u256, 'wrong value units');
