@@ -1,7 +1,7 @@
 #[contract]
 mod ERC721Metadata {
     use seraphlabs_libs::{ascii::IntergerToAsciiTrait, SeraphArrayTrait};
-    use seraphlabs_tokens::erc721::interface;
+    use seraphlabs_tokens::erc721::{ERC721, interface};
     use seraphlabs_tokens::utils::{constants, erc165::ERC165};
     // corelib imports
     use array::ArrayTrait;
@@ -32,6 +32,8 @@ mod ERC721Metadata {
 
         fn token_uri(token_id: u256) -> Array<felt252> {
             // get_base_uri
+            assert(ERC721::_exist(token_id), 'ERC721Metadata: invalid tokenId');
+
             let mut base_uri = _get_base_uri();
             // get token_id low ascii value
             // TODO : covert entire u256 instead of just u128
