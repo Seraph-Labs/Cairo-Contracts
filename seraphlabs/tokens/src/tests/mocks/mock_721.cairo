@@ -1,6 +1,7 @@
 #[contract]
 mod Mock721Contract {
     use seraphlabs_tokens::erc721::{ERC721, ERC721Metadata};
+    use seraphlabs_tokens::utils::erc165::ERC165;
     use starknet::ContractAddress;
     use array::ArrayTrait;
     use option::OptionTrait;
@@ -10,6 +11,11 @@ mod Mock721Contract {
     fn constructor(name: felt252, symbol: felt252) {
         ERC721Metadata::initializer(name, symbol);
         ERC721::initializer();
+    }
+
+    #[view]
+    fn supports_interface(interface_id: u32) -> bool {
+        ERC165::supports_interface(interface_id)
     }
 
     #[view]
@@ -80,6 +86,11 @@ mod Mock721Contract {
     #[external]
     fn mint(to: ContractAddress, token_id: u256) {
         ERC721::_mint(to, token_id)
+    }
+    
+    #[external]
+    fn safe_mint(to: ContractAddress, token_id: u256, data: Span<felt252>) {
+        ERC721::_safe_mint(to, token_id, data)
     }
 
     #[external]
