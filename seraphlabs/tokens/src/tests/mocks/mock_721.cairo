@@ -87,7 +87,7 @@ mod Mock721Contract {
     fn mint(to: ContractAddress, token_id: u256) {
         ERC721::_mint(to, token_id)
     }
-    
+
     #[external]
     fn safe_mint(to: ContractAddress, token_id: u256, data: Span<felt252>) {
         ERC721::_safe_mint(to, token_id, data)

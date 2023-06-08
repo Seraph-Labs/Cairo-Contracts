@@ -1,4 +1,6 @@
-use seraphlabs_tokens::tests::mocks::{Mock721Contract as Mock, ERC721Receiver as Receiver, NonReceiver};
+use seraphlabs_tokens::tests::mocks::{
+    Mock721Contract as Mock, ERC721Receiver as Receiver, NonReceiver
+};
 use seraphlabs_tokens::utils::constants;
 use seraphlabs_utils::testing::{vars, utils};
 use starknet::{ContractAddress, contract_address_const};
@@ -11,7 +13,7 @@ use core::clone::Clone;
 const NAME: felt252 = 'hello';
 const SYMBOL: felt252 = 'world';
 
-fn DATA(valid : bool) -> Span<felt252>{
+fn DATA(valid: bool) -> Span<felt252> {
     let mut data = ArrayTrait::<felt252>::new();
     match valid {
         bool::False(()) => data.append('fail'),
