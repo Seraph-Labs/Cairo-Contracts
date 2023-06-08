@@ -1,6 +1,7 @@
 #[contract]
 mod Mock721EnumContract {
     use seraphlabs_tokens::erc721::{ERC721, ERC721Metadata, ERC721Enumerable as ERC721Enum};
+    use seraphlabs_tokens::utils::erc165::ERC165;
     use starknet::ContractAddress;
     use array::ArrayTrait;
     use option::OptionTrait;
@@ -11,6 +12,11 @@ mod Mock721EnumContract {
         ERC721Metadata::initializer(name, symbol);
         ERC721::initializer();
         ERC721Enum::initializer();
+    }
+
+    #[view]
+    fn supports_interface(interface_id: u32) -> bool {
+        ERC165::supports_interface(interface_id)
     }
 
     #[view]
