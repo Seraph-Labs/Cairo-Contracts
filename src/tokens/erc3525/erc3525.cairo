@@ -67,21 +67,22 @@ mod ERC3525 {
     }
 
     #[external(v0)]
-    impl IERC3525Impl of interface::IERC3525<ContractState>{
-
-        fn value_decimals(self : @ContractState, ) -> u8 {
+    impl IERC3525Impl of interface::IERC3525<ContractState> {
+        fn value_decimals(self: @ContractState, ) -> u8 {
             self.decimals.read()
         }
 
-        fn value_of(self : @ContractState, token_id: u256) -> u256 {
+        fn value_of(self: @ContractState, token_id: u256) -> u256 {
             self.units.read(token_id)
         }
 
-        fn slot_of(self : @ContractState, token_id: u256) -> u256 {
+        fn slot_of(self: @ContractState, token_id: u256) -> u256 {
             self.slot.read(token_id)
         }
 
-        fn approve_value(ref self : ContractState, token_id: u256, operator: ContractAddress, value: u256) {
+        fn approve_value(
+            ref self: ContractState, token_id: u256, operator: ContractAddress, value: u256
+        ) {
             let caller = get_caller_address();
             assert(!caller.is_zero(), 'ERC3525: invalid caller');
             assert(!operator.is_zero(), 'ERC3525: invalid operator');
@@ -91,11 +92,14 @@ mod ERC3525 {
             // assert owner is not operator
             assert(owner != operator, 'ERC3525: approval to owner');
             // assert caller is approved or owner 
-            assert(ERC721::InternalImpl::_is_approved_or_owner(@unsafe_state, caller, token_id), 'ERC3525: caller not approved');
+            assert(
+                ERC721::InternalImpl::_is_approved_or_owner(@unsafe_state, caller, token_id),
+                'ERC3525: caller not approved'
+            );
             self._approve_value(token_id, operator, value);
         }
 
-        fn allowance(self : @ContractState, token_id: u256, operator: ContractAddress) -> u256 {
+        fn allowance(self: @ContractState, token_id: u256, operator: ContractAddress) -> u256 {
             let index = self._find_operator_index(token_id, operator);
             match index {
                 OperatorIndex::Contain(x) => {
@@ -107,14 +111,17 @@ mod ERC3525 {
             }
         }
 
-        fn transfer_value_from(ref self : ContractState, from_token_id: u256, to: ContractAddress, value: u256) -> u256 {
+        fn transfer_value_from(
+            ref self: ContractState, from_token_id: u256, to: ContractAddress, value: u256
+        ) -> u256 {
             assert(value != 0.into(), 'ERC3525: invalid value');
             let token_id = self._transfer_value_to_address(from_token_id, to, value);
             let data = ArrayTrait::<felt252>::new();
             assert(
-                self._check_on_erc3525_received(
-                    to, get_caller_address(), from_token_id, token_id, value, data.span()
-                ),
+                self
+                    ._check_on_erc3525_received(
+                        to, get_caller_address(), from_token_id, token_id, value, data.span()
+                    ),
                 'ERC3525: reciever failed'
             );
             token_id
@@ -123,8 +130,7 @@ mod ERC3525 {
 
     #[generate_trait]
     impl InternalImpl of InternalTrait {
-
-        fn initializer(ref self : ContractState, value_decimals: u8) {
+        fn initializer(ref self: ContractState, value_decimals: u8) {
             let mut unsafe_state = SRC5::unsafe_new_contract_state();
             SRC5::InternalImpl::register_interface(ref unsafe_state, constants::IERC3525_ID);
             self.decimals.write(value_decimals);
@@ -159,7 +165,7 @@ mod ERC3525 {
             self.emit(TransferValue { from_token_id: 0.into(), to_token_id, value })
         }
 
-        fn _burn(ref self : ContractState, token_id: u256) {
+        fn _burn(ref self: ContractState, token_id: u256) {
             let mut unsafe_state = ERC721Enum::unsafe_new_contract_state();
             // function already checks if token_id exist
             ERC721Enum::InternalImpl::_burn(ref unsafe_state, token_id);
@@ -176,9 +182,11 @@ mod ERC3525 {
             self.emit(TransferValue { from_token_id: token_id, to_token_id: 0_u256, value });
         }
 
-        fn _burn_value(ref self : ContractState, token_id: u256, value: u256) {
+        fn _burn_value(ref self: ContractState, token_id: u256, value: u256) {
             let unsafe_state = ERC721::unsafe_new_contract_state();
-            assert(ERC721::InternalImpl::_exist(@unsafe_state, token_id), 'ERC3525: invalid tokenId');
+            assert(
+                ERC721::InternalImpl::_exist(@unsafe_state, token_id), 'ERC3525: invalid tokenId'
+            );
             assert(value > 0_u256, 'ERC3525: invalid value');
             // decrease token units
             let token_units = self.units.read(token_id);
@@ -188,14 +196,16 @@ mod ERC3525 {
             self.emit(TransferValue { from_token_id: token_id, to_token_id: 0_u256, value });
         }
 
-        fn _approve_value(ref self : ContractState, token_id: u256, operator: ContractAddress, value: u256) {
+        fn _approve_value(
+            ref self: ContractState, token_id: u256, operator: ContractAddress, value: u256
+        ) {
             let index = self._find_operator_index(token_id, operator);
             match index {
                 OperatorIndex::Contain(x) => {
                     // if operator already approved update value
-                    self.unit_level_approvals.write(
-                        (token_id, x), ApprovedUnitsTrait::new(value, operator)
-                    );
+                    self
+                        .unit_level_approvals
+                        .write((token_id, x), ApprovedUnitsTrait::new(value, operator));
                 },
                 OperatorIndex::Empty(x) => {
                     // if operator not approved add new approval
@@ -206,18 +216,21 @@ mod ERC3525 {
                         return ();
                     }
 
-                    self.unit_level_approvals.write(
-                        (token_id, x), ApprovedUnitsTrait::new(value, operator)
-                    );
+                    self
+                        .unit_level_approvals
+                        .write((token_id, x), ApprovedUnitsTrait::new(value, operator));
                 }
             }
             self.emit(ApprovalValue { token_id, operator, value });
         }
 
-        fn _spend_allownce(ref self : ContractState, token_id: u256, operator: ContractAddress, value: u256) {
+        fn _spend_allownce(
+            ref self: ContractState, token_id: u256, operator: ContractAddress, value: u256
+        ) {
             //* does not check if operator is a zero address
             // method will revert if index returned is rom a empty slot, means operator not approved
-            let index = self._find_operator_index(token_id, operator)
+            let index = self
+                ._find_operator_index(token_id, operator)
                 .expect_contains('ERC3525: operator not approved');
             let mut value_approvals = self.unit_level_approvals.read((token_id, index));
             // spend units , method alrady checks for value exceeding units
@@ -228,7 +241,7 @@ mod ERC3525 {
         }
 
         fn _transfer_value_to_address(
-            ref self : ContractState, from_token_id: u256, to: ContractAddress, value: u256
+            ref self: ContractState, from_token_id: u256, to: ContractAddress, value: u256
         ) -> u256 {
             // assert valid to adderss
             assert(!to.is_zero(), 'ERC3525: invalid address');
@@ -245,7 +258,9 @@ mod ERC3525 {
             token_id
         }
 
-        fn _transfer_value(ref self : ContractState, from_token_id: u256, to_token_id: u256, value: u256) {
+        fn _transfer_value(
+            ref self: ContractState, from_token_id: u256, to_token_id: u256, value: u256
+        ) {
             // assert caller is valid
             let caller = get_caller_address();
             assert(!caller.is_zero(), 'ERC3525: invalid caller');
@@ -257,12 +272,15 @@ mod ERC3525 {
                 self._spend_allownce(from_token_id, caller, value);
             }
             // checks if to_token_id exist
-            assert(ERC721::InternalImpl::_exist(@unsafe_state, to_token_id), 'ERC3525: invalid tokenId');
+            assert(
+                ERC721::InternalImpl::_exist(@unsafe_state, to_token_id), 'ERC3525: invalid tokenId'
+            );
             // assert from and to tokenIds are different
             assert(from_token_id != to_token_id, 'ERC3525: cant transfer self');
             // checks tokenIds have the same slot
             assert(
-                self.slot.read(from_token_id) == self.slot.read(to_token_id), 'ERC3525: different slots'
+                self.slot.read(from_token_id) == self.slot.read(to_token_id),
+                'ERC3525: different slots'
             );
             // asserts that value does not exceend balance
             let from_units = self.units.read(from_token_id);
@@ -274,7 +292,9 @@ mod ERC3525 {
             self.emit(TransferValue { from_token_id, to_token_id, value });
         }
 
-        fn _mint_new(ref self : ContractState, to: ContractAddress, token_id: u256, slot_id: u256, value: u256) {
+        fn _mint_new(
+            ref self: ContractState, to: ContractAddress, token_id: u256, slot_id: u256, value: u256
+        ) {
             //? internal mint function does not check for assertions or on ERC3525Received
             let mut unsafe_state = ERC721Enum::unsafe_new_contract_state();
             ERC721Enum::InternalImpl::_mint(ref unsafe_state, to, token_id);
@@ -288,7 +308,7 @@ mod ERC3525 {
             self.emit(TransferValue { from_token_id: 0.into(), to_token_id: token_id, value });
         }
 
-        fn _clear_value_approvals(ref self : ContractState, token_id: u256) {
+        fn _clear_value_approvals(ref self: ContractState, token_id: u256) {
             let mut index = 0;
             loop {
                 // if zero break else clear approval slot
