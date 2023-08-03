@@ -5,7 +5,7 @@ use seraphlabs::tokens::tests::mocks::receivers_mock::{Mock721Receiver as Receiv
 use seraphlabs::tokens::constants;
 use seraphlabs::utils::testing::{vars, helper};
 use starknet::ContractAddress;
-use starknet::testing::{ set_caller_address, set_contract_address };
+use starknet::testing::{set_caller_address, set_contract_address};
 use traits::{Into, TryInto};
 use option::OptionTrait;
 use array::ArrayTrait;
@@ -87,7 +87,7 @@ fn test_balance_of() {
     let mock = IERC721MockDispatcher { contract_address: mock_address };
 
     let owner = vars::OWNER();
-    
+
     mock.mint(owner, vars::TOKEN_ID());
     assert(mock.balance_of(owner) == 1_u256, 'wrong balance');
 }
@@ -158,7 +158,7 @@ fn test_approve() {
 
 #[test]
 #[available_gas(2000000)]
-#[should_panic(expected: ('ERC721: invalid owner','ENTRYPOINT_FAILED' ))]
+#[should_panic(expected: ('ERC721: invalid owner', 'ENTRYPOINT_FAILED'))]
 fn test_only_owner_approve() {
     let mock_address = setup();
     let mock = IERC721MockDispatcher { contract_address: mock_address };

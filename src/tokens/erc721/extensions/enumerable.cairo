@@ -1,5 +1,5 @@
 #[starknet::contract]
-mod ERC721Enumerable{
+mod ERC721Enumerable {
     use seraphlabs::tokens::constants;
     use seraphlabs::tokens::erc721::interface;
     use seraphlabs::tokens::erc721::ERC721;
@@ -22,30 +22,36 @@ mod ERC721Enumerable{
 
     #[external(v0)]
     impl IERC721EnumImpl of interface::IERC721Enumerable<ContractState> {
-        fn total_supply(self : @ContractState) -> u256 {
+        fn total_supply(self: @ContractState) -> u256 {
             self._supply.read()
         }
 
-        fn token_by_index(self : @ContractState, index: u256) -> u256 {
+        fn token_by_index(self: @ContractState, index: u256) -> u256 {
             // assert index is not out of bounds
             let supply = self._supply.read();
             assert(index < supply, 'ERC721Enum: index out of bounds');
             self._index_to_tokens.read(index)
         }
 
-        fn token_of_owner_by_index(self : @ContractState, owner: ContractAddress, index: u256) -> u256 {
+        fn token_of_owner_by_index(
+            self: @ContractState, owner: ContractAddress, index: u256
+        ) -> u256 {
             self._token_of_owner_by_index(owner, index).expect('ERC721Enum: index out of bounds')
         }
     }
 
     #[generate_trait]
-    impl InternalImpl of InternalTrait{
-        fn initializer(ref self : ContractState) {
+    impl InternalImpl of InternalTrait {
+        fn initializer(ref self: ContractState) {
             let mut unsafe_state = SRC5::unsafe_new_contract_state();
-            SRC5::InternalImpl::register_interface(ref unsafe_state, constants::IERC721_ENUMERABLE_ID);
+            SRC5::InternalImpl::register_interface(
+                ref unsafe_state, constants::IERC721_ENUMERABLE_ID
+            );
         }
 
-        fn transfer_from(ref self : ContractState, from: ContractAddress, to: ContractAddress, token_id: u256) {
+        fn transfer_from(
+            ref self: ContractState, from: ContractAddress, to: ContractAddress, token_id: u256
+        ) {
             self._remove_token_from_owner_enum(from, token_id);
             self._add_token_to_owner_enum(to, token_id);
 
@@ -54,7 +60,11 @@ mod ERC721Enumerable{
         }
 
         fn safe_transfer_from(
-            ref self : ContractState, from: ContractAddress, to: ContractAddress, token_id: u256, data: Span<felt252>
+            ref self: ContractState,
+            from: ContractAddress,
+            to: ContractAddress,
+            token_id: u256,
+            data: Span<felt252>
         ) {
             self._remove_token_from_owner_enum(from, token_id);
             self._add_token_to_owner_enum(to, token_id);
@@ -63,21 +73,23 @@ mod ERC721Enumerable{
             ERC721::IERC721Impl::safe_transfer_from(ref unsafe_state, from, to, token_id, data)
         }
 
-        fn _mint(ref self : ContractState, to: ContractAddress, token_id: u256) {
+        fn _mint(ref self: ContractState, to: ContractAddress, token_id: u256) {
             self._add_token_to_owner_enum(to, token_id);
             self._add_token_to_total_enum(token_id);
             let mut unsafe_state = ERC721::unsafe_new_contract_state();
             ERC721::InternalImpl::_mint(ref unsafe_state, to, token_id);
         }
 
-        fn _safe_mint(ref self : ContractState, to: ContractAddress, token_id: u256, data: Span<felt252>) {
+        fn _safe_mint(
+            ref self: ContractState, to: ContractAddress, token_id: u256, data: Span<felt252>
+        ) {
             self._add_token_to_owner_enum(to, token_id);
             self._add_token_to_total_enum(token_id);
             let mut unsafe_state = ERC721::unsafe_new_contract_state();
-            ERC721::InternalImpl::_safe_mint(ref unsafe_state,to, token_id, data);
+            ERC721::InternalImpl::_safe_mint(ref unsafe_state, to, token_id, data);
         }
 
-        fn _burn(ref self : ContractState, token_id: u256) {
+        fn _burn(ref self: ContractState, token_id: u256) {
             let mut unsafe_state = ERC721::unsafe_new_contract_state();
             let owner = ERC721::IERC721Impl::owner_of(@unsafe_state, token_id);
 
@@ -88,18 +100,20 @@ mod ERC721Enumerable{
             ERC721::InternalImpl::_burn(ref unsafe_state, token_id);
         }
 
-        fn _token_of_owner_by_index(self : @ContractState, owner: ContractAddress, index: u256) -> Option<u256> {
+        fn _token_of_owner_by_index(
+            self: @ContractState, owner: ContractAddress, index: u256
+        ) -> Option<u256> {
             let token_id = self._owner_index_to_token.read((owner, index));
             match token_id == BoundedInt::<u256>::min() {
                 bool::False(()) => Option::Some(token_id),
                 bool::True(()) => Option::None(()),
             }
         }
-    }    
+    }
 
     #[generate_trait]
-    impl PrivateImpl of PrivateTrait{
-        fn _add_token_to_total_enum(ref self : ContractState,token_id: u256) {
+    impl PrivateImpl of PrivateTrait {
+        fn _add_token_to_total_enum(ref self: ContractState, token_id: u256) {
             let supply = self._supply.read();
             // add token_id to totals last index
             self._index_to_tokens.write(supply, token_id);
@@ -109,7 +123,7 @@ mod ERC721Enumerable{
             self._supply.write(supply + 1_u256);
         }
 
-        fn _remove_token_from_total_enum(ref self : ContractState, token_id: u256) {
+        fn _remove_token_from_total_enum(ref self: ContractState, token_id: u256) {
             // index starts from zero therefore minus 1
             let last_token_index = self._supply.read() - 1_u256;
             let cur_token_index = self._tokens_to_index.read(token_id);
@@ -130,19 +144,23 @@ mod ERC721Enumerable{
             self._supply.write(last_token_index);
         }
 
-        fn _add_token_to_owner_enum(ref self : ContractState, owner: ContractAddress, token_id: u256) {
+        fn _add_token_to_owner_enum(
+            ref self: ContractState, owner: ContractAddress, token_id: u256
+        ) {
             let unsafe_state = ERC721::unsafe_new_contract_state();
-            let len = ERC721::IERC721Impl::balance_of(@unsafe_state,owner);
+            let len = ERC721::IERC721Impl::balance_of(@unsafe_state, owner);
             // set token_id to owners last index
             self._owner_index_to_token.write((owner, len), token_id);
             // set index to owners token_id
             self._owner_token_to_index.write(token_id, len);
         }
 
-        fn _remove_token_from_owner_enum(ref self : ContractState, owner: ContractAddress, token_id: u256) {
+        fn _remove_token_from_owner_enum(
+            ref self: ContractState, owner: ContractAddress, token_id: u256
+        ) {
             // index starts from zero therefore minus 1
             let unsafe_state = ERC721::unsafe_new_contract_state();
-            let last_token_index = ERC721::IERC721Impl::balance_of(@unsafe_state,owner) - 1.into();
+            let last_token_index = ERC721::IERC721Impl::balance_of(@unsafe_state, owner) - 1.into();
             let cur_token_index = self._owner_token_to_index.read(token_id);
 
             if last_token_index != cur_token_index {
