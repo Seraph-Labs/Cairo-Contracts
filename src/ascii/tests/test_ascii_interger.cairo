@@ -2,7 +2,37 @@ use array::ArrayTrait;
 use traits::{Into, TryInto};
 use integer::BoundedInt;
 use seraphlabs::ascii::IntergerToAsciiTrait;
+use seraphlabs::ascii::IntergerToAsciiArrayTrait;
+use debug::PrintTrait;
 
+#[test]
+#[available_gas(2000000000)]
+fn u256_to_ascii() {
+    // ------------------------------ max u256 test ----------------------------- //
+    // max u256 int in cairo is GitHub Copilot: The maximum u256 number in Cairo is `
+    // 115792089237316195423570985008687907853269984665640564039457584007913129639935`.
+    let num: u256 = BoundedInt::max();
+    let ascii: Array<felt252> = num.to_ascii();
+    assert(ascii.len() == 3, 'max u256 wrong len');
+    assert(*ascii.at(0) == '1157920892373161954235709850086', 'max u256 wrong first felt');
+    assert(*ascii.at(1) == '8790785326998466564056403945758', 'max u256 wrong second felt');
+    assert(*ascii.at(2) == '4007913129639935', 'max u256 wrong third felt');
+    // ------------------------------ min u256 test ----------------------------- //
+    let num: u256 = BoundedInt::min();
+    let ascii: Array<felt252> = num.to_ascii();
+
+    assert(ascii.len() == 1, 'min u256 wrong len');
+    assert(*ascii.at(0) == '0', 'min u256 wrong felt');
+    // ---------------------------- 31 char u256 test --------------------------- //
+    let ascii: Array<felt252> = 1157920892373161954235709850086_u256.to_ascii();
+    assert(ascii.len() == 1, 'u256 31 char wrong len');
+    assert(*ascii.at(0) == '1157920892373161954235709850086', '31 char u256 wrong felt');
+    // ---------------------------- 62 cahr u256 test --------------------------- //
+    let ascii: Array<felt252> = 11579208923731619542357098500868790785326998466564056403945758_u256.to_ascii();
+    assert(ascii.len() == 2, 'u256 31 char wrong len');
+    assert(*ascii.at(0) == '1157920892373161954235709850086', '31 char u256 wrong felt');
+    assert(*ascii.at(1) == '8790785326998466564056403945758', '62 char u256 wrong felt');
+}
 
 #[test]
 #[available_gas(2000000)]
@@ -10,19 +40,19 @@ fn u128_to_ascii() {
     // ------------------------------ max u128 test ----------------------------- //
     // max u128 int in cairo is 340282366920938463463374607431768211455
     let num: u128 = BoundedInt::max();
-    let ascii = num.to_ascii();
+    let ascii: Array<felt252> = num.to_ascii();
 
     assert(ascii.len() == 2, 'max u128 wrong len');
     assert(*ascii.at(0) == '3402823669209384634633746074317', 'max u128 wrong first felt');
     assert(*ascii.at(1) == '68211455', 'max u128 wrong second felt');
     // ------------------------------ min u128 test ----------------------------- //
     let num: u128 = BoundedInt::min();
-    let ascii = num.to_ascii();
+    let ascii: Array<felt252> = num.to_ascii();
 
     assert(ascii.len() == 1, 'min u128 wrong len');
     assert(*ascii.at(0) == '0', 'min u128 wrong felt');
     // ---------------------------- 31 char u128 test --------------------------- //
-    let ascii = 3402823669209384634633746074317_u128.to_ascii();
+    let ascii: Array<felt252> = 3402823669209384634633746074317_u128.to_ascii();
     assert(ascii.len() == 1, 'u128 31 char wrong len');
     assert(*ascii.at(0) == '3402823669209384634633746074317', '31 char u128 wrong felt');
 }
