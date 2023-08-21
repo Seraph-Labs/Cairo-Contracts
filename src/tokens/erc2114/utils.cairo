@@ -100,7 +100,7 @@ impl AttrPackImpl of AttrPackTrait {
     fn new(ref attr_ids: Span<u64>) -> AttrPack {
         // make sure attr_id span is not empty and len is < 3
         if attr_ids.is_empty() || attr_ids.len() > 3 {
-            panic_with_felt252('ERC2114: Invalid attr_id pack');
+            panic_with_felt252('ERC2114: Invalid attr id pack');
         }
 
         let mut len: u8 = 0;
@@ -119,6 +119,11 @@ impl AttrPackImpl of AttrPackTrait {
             };
         };
         AttrPack { pack: pack, len: len }
+    }
+
+    // @dev checks if pack is valid for storing
+    fn is_valid(self: AttrPack) -> bool {
+        self.len.is_non_zero() && self.len <= 3 && self.pack.is_non_zero()
     }
 
     // @dev checks if pack contains attr_id
