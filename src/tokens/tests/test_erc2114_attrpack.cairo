@@ -173,8 +173,11 @@ fn test_add_to_pack() {
     let mock_address = setup();
     let mock = IMockDispatcher { contract_address: mock_address };
 
-    mock.pack_to_storage(1, array![2114].span());
     let mut attr_pack = mock.get_attr_pack(1);
+    assert(attr_pack.len == 0, 'invalid len');
+    assert(attr_pack.pack == 0, 'invalid pack');
+
+    attr_pack.add_to_pack(2114);
     assert(attr_pack.len == 1, 'invalid len');
     assert(attr_pack.get_attr_id(0) == 2114, 'invalid attr at pos 0');
 
