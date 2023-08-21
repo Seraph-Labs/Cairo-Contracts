@@ -4,4 +4,4 @@ version = "0.1.0"
 description = "SeraphLabs Starknet Libraries"
 
 [dependencies]
-starknet = "2.1.0-rc2"
+starknet = ">=2.1.0"
