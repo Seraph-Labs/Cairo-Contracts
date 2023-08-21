@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: AGPL-3.0
+// SeraphLabs Contracts for Cairo >=v2.1.0 (tokens/erc2114/erc2114.cairo)
 #[starknet::contract]
 mod ERC2114 {
     use seraphlabs::tokens::constants;

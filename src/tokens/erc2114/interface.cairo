@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: AGPL-3.0
+// SeraphLabs Contracts for Cairo >=v2.1.0 (tokens/erc2114/interface.cairo)
 use seraphlabs::tokens::erc2114::utils::AttrType;
 use starknet::ContractAddress;
 use array::{ArrayTrait, SpanTrait, SpanSerde};

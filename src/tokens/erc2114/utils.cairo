@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: AGPL-3.0
+// SeraphLabs Contracts for Cairo >=v2.1.0 (tokens/erc2114/utils.cairo)
 use starknet::ContractAddress;
 use starknet::storage_access::StorePacking;
 use traits::{Into, TryInto, Felt252DictValue};
