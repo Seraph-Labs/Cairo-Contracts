@@ -1,4 +1,4 @@
-use array::{Array, ArrayTrait, SpanTrait};
+use array::{ArrayTrait, SpanTrait};
 use traits::{Into, TryInto};
 use option::OptionTrait;
 
@@ -16,13 +16,17 @@ impl ArrayImpl<T, impl TDrop: Drop<T>, impl TCopy: Copy<T>> of SeraphArrayTrait<
         // create Span so we can pop_back value
         let mut span = self.span();
         loop {
-            if span.len() <= 0 {
-                break ();
-            }
-            // add last value of span to array
-            self.append(*span.pop_back().unwrap());
-            // pop out arrays first value;
-            self.pop_front();
+            match span.pop_back() {
+                Option::Some(val) => {
+                    // add last value of span to array
+                    self.append(*val);
+                    // pop out arrays first value;
+                    self.pop_front();
+                },
+                Option::None(()) => {
+                    break;
+                },
+            };
         }
     }
 
@@ -37,3 +41,6 @@ impl ArrayImpl<T, impl TDrop: Drop<T>, impl TCopy: Copy<T>> of SeraphArrayTrait<
         }
     }
 }
+
+#[generate_trait]
+impl SpanImpl<T, impl TDrop: Drop<T>, impl TCopy: Copy<T>> of SeraphSpanTrait<T> {}
