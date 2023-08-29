@@ -68,7 +68,7 @@ mod ERC3525 {
 
     #[external(v0)]
     impl IERC3525Impl of interface::IERC3525<ContractState> {
-        fn value_decimals(self: @ContractState, ) -> u8 {
+        fn value_decimals(self: @ContractState,) -> u8 {
             self.decimals.read()
         }
 
@@ -405,17 +405,13 @@ mod ERC3525 {
             value: u256,
             data: Span<felt252>
         ) -> bool {
-            let support_interface = ISRC5Dispatcher {
-                contract_address: to
-            }.supports_interface(constants::IERC3525_RECEIVER_ID);
+            let support_interface = ISRC5Dispatcher { contract_address: to }
+                .supports_interface(constants::IERC3525_RECEIVER_ID);
             match support_interface {
-                bool::False(()) => ISRC5Dispatcher {
-                    contract_address: to
-                }.supports_interface(constants::ISRC6_ID),
+                bool::False(()) => ISRC5Dispatcher { contract_address: to }
+                    .supports_interface(constants::ISRC6_ID),
                 bool::True(()) => {
-                    IERC3525ReceiverDispatcher {
-                        contract_address: to
-                    }
+                    IERC3525ReceiverDispatcher { contract_address: to }
                         .on_erc3525_received(
                             operator, from_token_id, to_token_id, value, data
                         ) == constants::IERC3525_RECEIVER_ID

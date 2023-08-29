@@ -247,17 +247,13 @@ mod ERC721 {
             token_id: u256,
             data: Span<felt252>
         ) -> bool {
-            let support_interface = ISRC5Dispatcher {
-                contract_address: to
-            }.supports_interface(constants::IERC721_RECEIVER_ID);
+            let support_interface = ISRC5Dispatcher { contract_address: to }
+                .supports_interface(constants::IERC721_RECEIVER_ID);
             match support_interface {
-                bool::False(()) => ISRC5Dispatcher {
-                    contract_address: to
-                }.supports_interface(constants::ISRC6_ID),
+                bool::False(()) => ISRC5Dispatcher { contract_address: to }
+                    .supports_interface(constants::ISRC6_ID),
                 bool::True(()) => {
-                    IERC721ReceiverDispatcher {
-                        contract_address: to
-                    }
+                    IERC721ReceiverDispatcher { contract_address: to }
                         .on_erc721_received(
                             get_caller_address(), from, token_id, data
                         ) == constants::IERC721_RECEIVER_ID
