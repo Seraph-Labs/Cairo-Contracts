@@ -56,7 +56,7 @@ mod Mock {
 
         fn pack_to_storage(ref self: ContractState, index: u64, attr_ids: Span<u64>) {
             let mut attr_ids = attr_ids;
-            let attr_pack = AttrPackTrait::new(ref attr_ids);
+            let attr_pack = AttrPackTrait::new(attr_ids);
             self.packed_attr.write(index, attr_pack);
         }
 
@@ -191,4 +191,29 @@ fn test_add_to_pack() {
     assert(attr_pack.get_attr_id(0) == 2114, 'invalid attr at pos 0');
     assert(attr_pack.get_attr_id(1) == BoundedInt::max(), 'invalid attr at pos 1');
     assert(attr_pack.get_attr_id(2) == 2000000, 'invalid attr at pos 2');
+}
+
+#[test]
+#[available_gas(2000000)]
+fn test_add_batch_to_pack() {
+    let mock_address = setup();
+    let mock = IMockDispatcher { contract_address: mock_address };
+
+    let mut attr_pack = mock.get_attr_pack(1);
+    assert(attr_pack.len == 0, 'invalid len');
+    assert(attr_pack.pack == 0, 'invalid pack');
+
+    attr_pack.add_batch_to_pack(array![2114, BoundedInt::<u64>::max(), 2000000].span());
+    assert(attr_pack.len == 3, 'invalid len');
+    assert(attr_pack.get_attr_id(0) == 2114, 'invalid attr at pos 0');
+    assert(attr_pack.get_attr_id(1) == BoundedInt::max(), 'invalid attr at pos 1');
+    assert(attr_pack.get_attr_id(2) == 2000000, 'invalid attr at pos 2');
+}
+
+#[test]
+#[available_gas(2000000)]
+#[should_panic(expected: ('ERC2114: AttrPack is full',))]
+fn test_add_batch_to_pack_full() {
+    let mut attr_pack = AttrPackTrait::new(array![2114].span());
+    attr_pack.add_batch_to_pack(array![21142, BoundedInt::<u64>::max(), 2000000].span());
 }

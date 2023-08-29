@@ -42,7 +42,7 @@ impl AttrBaseImpl of AttrBaseTrait {
             panic_with_felt252('ERC2114: Invalid attribute')
         }
 
-        AttrBase { name: name, val_type: val_type,  }
+        AttrBase { name: name, val_type: val_type, }
     }
     #[inline(always)]
     fn is_valid(self: AttrBase) -> bool {
@@ -97,7 +97,7 @@ impl AttrPackImpl of AttrPackTrait {
     // @dev creates a new pack from an array of attr_ids
     //  `attr_ids` MUST NOT be empty, contain zeros or have a len bigger than 3 or have duplicates 
     //   this function DOES NOT check if have repreats must check externaly
-    fn new(ref attr_ids: Span<u64>) -> AttrPack {
+    fn new(mut attr_ids: Span<u64>) -> AttrPack {
         // make sure attr_id span is not empty and len is < 3
         if attr_ids.is_empty() || attr_ids.len() > 3 {
             panic_with_felt252('ERC2114: Invalid attr id pack');
@@ -189,6 +189,20 @@ impl AttrPackImpl of AttrPackTrait {
         self.len += 1;
     }
 
+    fn add_batch_to_pack(ref self: AttrPack, mut attr_ids: Span<u64>) {
+        loop {
+            match attr_ids.pop_front() {
+                Option::Some(val) => {
+                    // if attr_ids len exceeds max of 3 this will panic
+                    self.add_to_pack(*val);
+                },
+                Option::None(_) => {
+                    break;
+                },
+            };
+        };
+    }
+
     // @dev removes an attr_id from pack if it exists
     fn remove_from_pack(ref self: AttrPack, attr_id: u64) {
         if self.len == 0 {
@@ -226,8 +240,7 @@ impl AttrPackImpl of AttrPackTrait {
                 self = AttrPack { pack: 0, len: 0 };
             },
             _ => {
-                let mut attr_ids_span = attr_ids.span();
-                self = AttrPackImpl::new(ref attr_ids_span);
+                self = AttrPackImpl::new(attr_ids.span());
             }
         }
     }
