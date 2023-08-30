@@ -52,9 +52,7 @@ mod ERC721Enumerable {
         fn transfer_from(
             ref self: ContractState, from: ContractAddress, to: ContractAddress, token_id: u256
         ) {
-            self._remove_token_from_owner_enum(from, token_id);
-            self._add_token_to_owner_enum(to, token_id);
-
+            self._transfer(from, to, token_id);
             let mut unsafe_state = ERC721::unsafe_new_contract_state();
             ERC721::IERC721Impl::transfer_from(ref unsafe_state, from, to, token_id);
         }
@@ -66,11 +64,17 @@ mod ERC721Enumerable {
             token_id: u256,
             data: Span<felt252>
         ) {
-            self._remove_token_from_owner_enum(from, token_id);
-            self._add_token_to_owner_enum(to, token_id);
-
+            self._transfer(from, to, token_id);
             let mut unsafe_state = ERC721::unsafe_new_contract_state();
             ERC721::IERC721Impl::safe_transfer_from(ref unsafe_state, from, to, token_id, data)
+        }
+
+        // @dev transfer function that only edits the enum storage and not 721 storage
+        fn _transfer(
+            ref self: ContractState, from: ContractAddress, to: ContractAddress, token_id: u256
+        ) {
+            self._remove_token_from_owner_enum(from, token_id);
+            self._add_token_to_owner_enum(to, token_id);
         }
 
         fn _mint(ref self: ContractState, to: ContractAddress, token_id: u256) {
