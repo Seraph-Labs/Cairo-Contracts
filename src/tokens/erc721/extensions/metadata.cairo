@@ -41,7 +41,7 @@ mod ERC721Metadata {
             // get token_id low ascii value
             let mut ascii: Array<felt252> = token_id.to_ascii();
             // append it to base_uri array along with suffix
-            base_uri.concat(ref ascii);
+            base_uri.append_array(ref ascii);
             base_uri.append('.json');
             base_uri
         }

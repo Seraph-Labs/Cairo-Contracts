@@ -3,11 +3,7 @@ use traits::{Into, TryInto};
 use option::OptionTrait;
 
 
-trait SeraphArrayTrait<T> {
-    fn reverse(ref self: Array<T>);
-    fn concat(ref self: Array<T>, ref arr: Array<T>);
-}
-
+#[generate_trait]
 impl ArrayImpl<T, impl TDrop: Drop<T>, impl TCopy: Copy<T>> of SeraphArrayTrait<T> {
     fn reverse(ref self: Array<T>) {
         if self.len() <= 1 {
@@ -30,10 +26,21 @@ impl ArrayImpl<T, impl TDrop: Drop<T>, impl TCopy: Copy<T>> of SeraphArrayTrait<
         }
     }
 
-    fn concat(ref self: Array<T>, ref arr: Array<T>) {
+    fn append_array(ref self: Array<T>, ref values: Array<T>) {
         loop {
-            match arr.pop_front() {
+            match values.pop_front() {
                 Option::Some(val) => self.append(val),
+                Option::None(()) => {
+                    break ();
+                },
+            };
+        }
+    }
+
+    fn append_span(ref self: Array<T>, ref values: Span<T>) {
+        loop {
+            match values.pop_front() {
+                Option::Some(val) => self.append(*val),
                 Option::None(()) => {
                     break ();
                 },
