@@ -158,7 +158,7 @@ mod ERC2114 {
             let unsafe_state = ERC721::unsafe_new_contract_state();
             assert(
                 ERC721::InternalImpl::_exist(@unsafe_state, to_token_id),
-                'ERC2114: invalid token id'
+                'ERC2114: invalid token_id'
             );
             // assert token id has no parent
             self._assert_token_no_parent(token_id);
@@ -176,7 +176,7 @@ mod ERC2114 {
             let mut unsafe_state = ERC721::unsafe_new_contract_state();
             // assert token id is valid
             assert(
-                ERC721::InternalImpl::_exist(@unsafe_state, token_id), 'ERC2114: invalid token id'
+                ERC721::InternalImpl::_exist(@unsafe_state, token_id), 'ERC2114: invalid token_id'
             );
             // assert token id is child of from_token_id and from_token_id is non zero
             assert(
@@ -223,7 +223,7 @@ mod ERC2114 {
                 let trait_catalog = self._get_trait_catalog();
                 assert(
                     trait_catalog.trait_list_count() >= attr_base.get_list_id(),
-                    'ERC2114: invalid list id'
+                    'ERC2114: invalid list_id'
                 );
             }
             // add attr_base to storage
@@ -295,7 +295,7 @@ mod ERC2114 {
             // assert token_id exist
             let unsafe_state = ERC721::unsafe_new_contract_state();
             assert(
-                ERC721::InternalImpl::_exist(@unsafe_state, token_id), 'ERC2114: invalid token id'
+                ERC721::InternalImpl::_exist(@unsafe_state, token_id), 'ERC2114: invalid token_id'
             );
             // if attr_ids is empty return
             if attr_ids.len().is_zero() {
@@ -319,7 +319,7 @@ mod ERC2114 {
             // assert token_id exist
             let unsafe_state = ERC721::unsafe_new_contract_state();
             assert(
-                ERC721::InternalImpl::_exist(@unsafe_state, token_id), 'ERC2114: invalid token id'
+                ERC721::InternalImpl::_exist(@unsafe_state, token_id), 'ERC2114: invalid token_id'
             );
             // if attr_ids is empty return
             if attr_ids.len().is_zero() {
@@ -379,7 +379,7 @@ mod ERC2114 {
         // index is based on len of pack to determine if new index is needed or not
         fn _find_slot_for_attr_pack(self: @ContractState, token_id: u256, ammount: u8) -> u64 {
             // assert ammount needed to store is valid
-            assert(ammount > 0 && ammount <= 3, 'ERC2114: invalid attr id pack');
+            assert(ammount > 0 && ammount <= 3, 'ERC2114: invalid attr_id pack');
             let mut index: u64 = 0;
             loop {
                 if self.index_to_token_attr_pack.read((token_id, index)).len + ammount <= 3 {
@@ -398,7 +398,7 @@ mod ERC2114 {
             loop {
                 let attr_pack = self.index_to_token_attr_pack.read((token_id, index));
                 // if attr pack is not valid means index is out of bounds
-                assert(attr_pack.is_valid(), 'ERC2114: failed to find attr id');
+                assert(attr_pack.is_valid(), 'ERC2114: failed to find attr_id');
                 if attr_pack.has_attr(attr_id) {
                     break;
                 }
@@ -501,7 +501,7 @@ mod ERC2114 {
             // assert attr_id value has been set to zero
             assert(
                 self.token_attr_value.read((token_id, attr_id)).is_zero(),
-                'ERC2114: attr id cant remove'
+                'ERC2114: attr_id cant remove'
             );
             // get index that stores attr_id
             let index = self._find_index_of_attr_in_token(token_id, attr_id);
@@ -557,7 +557,7 @@ mod ERC2114 {
                             AttrType::String(_) => {
                                 // assert cur_value is zero to ensure attr id is not own
                                 // as string type attributes cant be added only updated
-                                assert(cur_value.is_non_zero(), 'ERC2114: attrr id already exist');
+                                assert(cur_value.is_non_zero(), 'ERC2114: attr_id already exist');
                                 // string type attr_id values cant be summable so return value
                                 value
                             },
@@ -567,7 +567,7 @@ mod ERC2114 {
                             }
                         };
                         // assert new value is not zero
-                        assert(new_value.is_non_zero(), 'ERC2114: invalid attr id value');
+                        assert(new_value.is_non_zero(), 'ERC2114: invalid attr_id value');
                         // if new_value equals value means attr_id is new and does not exist with token
                         // so append it to new_attr_ids 
                         if new_value == value {
@@ -604,23 +604,24 @@ mod ERC2114 {
                 match attr_ids.pop_front() {
                     Option::Some(attr_id) => {
                         let value = *values.pop_front().unwrap();
-
+                        let cur_value = self.token_attr_value.read((token_id, *attr_id));
+                        // assert cur_value is non zero
+                        assert(cur_value.is_non_zero(), 'ERC2114: attr_id not in token');
                         // assert attr_id is of type Number and subtracted value does not exceed current value
                         // assert attr_id is of String Type only can swap to zero cannot subtract
                         let new_value = match self.attr_base.read(*attr_id).val_type {
                             AttrType::Empty => {
-                                panic_with_felt252('ERC2114: invalid attr id type');
+                                panic_with_felt252('ERC2114: invalid attr_id type');
                                 0
                             },
                             AttrType::String(_) => {
-                                assert(value.is_zero(), 'ERC2114: invalid attr id value');
+                                assert(value.is_zero(), 'ERC2114: invalid attr_id value');
                                 value
                             },
                             AttrType::Number(_) => {
-                                let cur_value = self.token_attr_value.read((token_id, *attr_id));
                                 assert(
                                     Into::<felt252, u256>::into(value) <= cur_value.into(),
-                                    'ERC2114: invalid attr id value'
+                                    'ERC2114: invalid attr_id value'
                                 );
                                 cur_value - value
                             }
@@ -671,7 +672,7 @@ mod ERC2114 {
                         ._get_trait_catalog()
                         .trait_list_value_by_index(list_id, value)
                         .is_non_zero(),
-                    'ERC2114: invalid attr id value'
+                    'ERC2114: invalid attr_id value'
                 );
             }
 
