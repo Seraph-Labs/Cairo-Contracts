@@ -8,10 +8,6 @@ mod ERC721 {
     use starknet::{
         get_caller_address, contract_address_const, ContractAddress, ContractAddressIntoFelt252
     };
-    use array::{ArrayTrait, SpanTrait};
-    use option::OptionTrait;
-    use traits::{Into, TryInto};
-    use zeroable::Zeroable;
 
     #[storage]
     struct Storage {

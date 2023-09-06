@@ -3,10 +3,6 @@ use starknet::{
     storage_base_address_from_felt252, storage_write_syscall, storage_address_from_base_and_offset
 };
 use starknet::{ContractAddress, contract_address::ContractAddressIntoFelt252};
-use traits::{Into, TryInto};
-use core::traits::Default;
-use option::OptionTrait;
-use zeroable::Zeroable;
 use integer::BoundedInt;
 
 // -------------------------------------------------------------------------- //

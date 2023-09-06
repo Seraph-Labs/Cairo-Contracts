@@ -17,10 +17,6 @@ mod ERC2114 {
         get_caller_address, get_contract_address, ContractAddress, ContractAddressIntoFelt252
     };
     use starknet::storage_access::StorePacking;
-    use array::{ArrayTrait, SpanTrait};
-    use option::OptionTrait;
-    use traits::{Into, TryInto, DivRem};
-    use zeroable::Zeroable;
 
     #[storage]
     struct Storage {

@@ -5,11 +5,6 @@ mod ERC721Metadata {
     use seraphlabs::tokens::constants;
     use seraphlabs::tokens::erc721::{ERC721, interface};
     use seraphlabs::tokens::src5::SRC5;
-    // corelib imports
-    use array::ArrayTrait;
-    use option::OptionTrait;
-    use traits::{Into, TryInto};
-    use zeroable::Zeroable;
 
     #[storage]
     struct Storage {

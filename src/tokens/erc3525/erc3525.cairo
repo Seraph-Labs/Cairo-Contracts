@@ -13,10 +13,6 @@ mod ERC3525 {
     use starknet::{
         get_caller_address, contract_address_const, ContractAddress, ContractAddressIntoFelt252
     };
-    use array::{ArrayTrait, SpanTrait};
-    use option::OptionTrait;
-    use traits::{Into, TryInto};
-    use zeroable::Zeroable;
     use integer::BoundedInt;
 
     #[storage]

@@ -7,8 +7,6 @@ mod ERC721Enumerable {
 
     use starknet::ContractAddress;
     use array::SpanSerde;
-    use option::OptionTrait;
-    use traits::{TryInto, Into};
     use integer::BoundedInt;
 
     #[storage]
