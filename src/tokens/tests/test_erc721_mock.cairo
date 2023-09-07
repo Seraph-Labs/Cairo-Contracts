@@ -223,7 +223,7 @@ fn test_approval_for_all_invalid_operator() {
 
 #[test]
 #[available_gas(2000000)]
-#[should_panic(expected: ('ERC721: invalid address', 'ENTRYPOINT_FAILED'))]
+#[should_panic(expected: ('ERC721: invalid caller', 'ENTRYPOINT_FAILED'))]
 fn test_approval_for_all_invalid_caller() {
     let mock_address = setup();
     let mock = IERC721MockDispatcher { contract_address: mock_address };
