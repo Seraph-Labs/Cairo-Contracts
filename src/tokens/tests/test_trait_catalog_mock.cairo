@@ -15,18 +15,18 @@ fn setup() -> ContractAddress {
 
 #[test]
 #[available_gas(2000000)]
-fn test_constructor(){
+fn test_constructor() {
     let mock_address = setup();
-    let mock = ISRC5Dispatcher{ contract_address : mock_address};
+    let mock = ISRC5Dispatcher { contract_address: mock_address };
     assert(mock.supports_interface(constants::ITRAIT_CATALOG_ID), 'wrong Interface ID');
 }
 
 
 #[test]
 #[available_gas(2000000000)]
-fn test_generate_trait_list(){
+fn test_generate_trait_list() {
     let mock_address = setup();
-    let mock = ITraitCatalogDispatcher{ contract_address : mock_address};
+    let mock = ITraitCatalogDispatcher { contract_address: mock_address };
 
     let values_1 = array!['fire', 'water', 'grass'].span();
     let values_2 = array!['normal', 'fighting'].span();
@@ -56,9 +56,9 @@ fn test_generate_trait_list(){
 #[test]
 #[available_gas(2000000)]
 #[should_panic(expected: ('TraitCatalog: invalid values', 'ENTRYPOINT_FAILED'))]
-fn test_generate_trait_list_empty_values(){
+fn test_generate_trait_list_empty_values() {
     let mock_address = setup();
-    let mock = ITraitCatalogDispatcher{ contract_address : mock_address};
+    let mock = ITraitCatalogDispatcher { contract_address: mock_address };
 
     let values = array![].span();
     mock.generate_trait_list(values);
@@ -67,9 +67,9 @@ fn test_generate_trait_list_empty_values(){
 #[test]
 #[available_gas(2000000)]
 #[should_panic(expected: ('TraitCatalog: invalid update', 'ENTRYPOINT_FAILED'))]
-fn test_generate_trait_list_invalid_values(){
+fn test_generate_trait_list_invalid_values() {
     let mock_address = setup();
-    let mock = ITraitCatalogDispatcher{ contract_address : mock_address};
+    let mock = ITraitCatalogDispatcher { contract_address: mock_address };
 
     let values = array!['fire', 0, 'grass'].span();
     mock.generate_trait_list(values);
@@ -77,9 +77,9 @@ fn test_generate_trait_list_invalid_values(){
 
 #[test]
 #[available_gas(2000000)]
-fn test_append_to_trait_list(){
+fn test_append_to_trait_list() {
     let mock_address = setup();
-    let mock = ITraitCatalogDispatcher{ contract_address : mock_address};
+    let mock = ITraitCatalogDispatcher { contract_address: mock_address };
 
     let values = array!['fire', 'water'].span();
     mock.generate_trait_list(values);
@@ -102,9 +102,9 @@ fn test_append_to_trait_list(){
 #[test]
 #[available_gas(2000000)]
 #[should_panic(expected: ('TraitCatalog: invalid list id', 'ENTRYPOINT_FAILED'))]
-fn test_append_to_non_existant_list(){
+fn test_append_to_non_existant_list() {
     let mock_address = setup();
-    let mock = ITraitCatalogDispatcher{ contract_address : mock_address};
+    let mock = ITraitCatalogDispatcher { contract_address: mock_address };
 
     mock.append_to_trait_list(1, 'grass');
 }
@@ -112,9 +112,9 @@ fn test_append_to_non_existant_list(){
 #[test]
 #[available_gas(2000000)]
 #[should_panic(expected: ('TraitCatalog: invalid list id', 'ENTRYPOINT_FAILED'))]
-fn test_append_to_zero_list(){
+fn test_append_to_zero_list() {
     let mock_address = setup();
-    let mock = ITraitCatalogDispatcher{ contract_address : mock_address};
+    let mock = ITraitCatalogDispatcher { contract_address: mock_address };
 
     let values = array!['fire', 'water'].span();
     mock.generate_trait_list(values);
@@ -124,9 +124,9 @@ fn test_append_to_zero_list(){
 #[test]
 #[available_gas(2000000)]
 #[should_panic(expected: ('TraitCatalog: invalid update', 'ENTRYPOINT_FAILED'))]
-fn test_append_invalid_value(){
+fn test_append_invalid_value() {
     let mock_address = setup();
-    let mock = ITraitCatalogDispatcher{ contract_address : mock_address};
+    let mock = ITraitCatalogDispatcher { contract_address: mock_address };
 
     let values = array!['fire', 'water'].span();
     mock.generate_trait_list(values);
@@ -136,9 +136,9 @@ fn test_append_invalid_value(){
 
 #[test]
 #[available_gas(2000000)]
-fn test_append_batch_to_trait_list(){
+fn test_append_batch_to_trait_list() {
     let mock_address = setup();
-    let mock = ITraitCatalogDispatcher{ contract_address : mock_address};
+    let mock = ITraitCatalogDispatcher { contract_address: mock_address };
 
     let values = array!['fire'].span();
     mock.generate_trait_list(values);
@@ -161,9 +161,9 @@ fn test_append_batch_to_trait_list(){
 #[test]
 #[available_gas(2000000)]
 #[should_panic(expected: ('TraitCatalog: invalid values', 'ENTRYPOINT_FAILED'))]
-fn test_append_batch_to_trait_list_empty_values(){
+fn test_append_batch_to_trait_list_empty_values() {
     let mock_address = setup();
-    let mock = ITraitCatalogDispatcher{ contract_address : mock_address};
+    let mock = ITraitCatalogDispatcher { contract_address: mock_address };
 
     let values = array!['fire'].span();
     mock.generate_trait_list(values);
@@ -173,9 +173,9 @@ fn test_append_batch_to_trait_list_empty_values(){
 #[test]
 #[available_gas(2000000)]
 #[should_panic(expected: ('TraitCatalog: invalid update', 'ENTRYPOINT_FAILED'))]
-fn test_append_batch_with_invalid_values(){
+fn test_append_batch_with_invalid_values() {
     let mock_address = setup();
-    let mock = ITraitCatalogDispatcher{ contract_address : mock_address};
+    let mock = ITraitCatalogDispatcher { contract_address: mock_address };
 
     let values = array!['fire'].span();
     mock.generate_trait_list(values);
@@ -185,18 +185,18 @@ fn test_append_batch_with_invalid_values(){
 #[test]
 #[available_gas(2000000)]
 #[should_panic(expected: ('TraitCatalog: invalid list id', 'ENTRYPOINT_FAILED'))]
-fn test_append_batch_to_non_existant_list(){
+fn test_append_batch_to_non_existant_list() {
     let mock_address = setup();
-    let mock = ITraitCatalogDispatcher{ contract_address : mock_address};
+    let mock = ITraitCatalogDispatcher { contract_address: mock_address };
 
     mock.append_batch_to_trait_list(1, array!['fire'].span());
 }
 
 #[test]
 #[available_gas(2000000)]
-fn test_ammend_trait_list(){
+fn test_ammend_trait_list() {
     let mock_address = setup();
-    let mock = ITraitCatalogDispatcher{ contract_address : mock_address};
+    let mock = ITraitCatalogDispatcher { contract_address: mock_address };
 
     let values = array!['fire', 'water', 'grass'].span();
     mock.generate_trait_list(values);
@@ -221,9 +221,9 @@ fn test_ammend_trait_list(){
 #[test]
 #[available_gas(2000000)]
 #[should_panic(expected: ('TraitCatalog: invalid list id', 'ENTRYPOINT_FAILED'))]
-fn test_ammend_non_existant_list(){
+fn test_ammend_non_existant_list() {
     let mock_address = setup();
-    let mock = ITraitCatalogDispatcher{ contract_address : mock_address};
+    let mock = ITraitCatalogDispatcher { contract_address: mock_address };
 
     let values = array!['fire', 'water', 'grass'].span();
     mock.generate_trait_list(values);
@@ -233,9 +233,9 @@ fn test_ammend_non_existant_list(){
 #[test]
 #[available_gas(2000000)]
 #[should_panic(expected: ('TraitCatalog: invalid update', 'ENTRYPOINT_FAILED'))]
-fn test_ammend_zero_index(){
+fn test_ammend_zero_index() {
     let mock_address = setup();
-    let mock = ITraitCatalogDispatcher{ contract_address : mock_address};
+    let mock = ITraitCatalogDispatcher { contract_address: mock_address };
 
     let values = array!['fire', 'water', 'grass'].span();
     mock.generate_trait_list(values);
@@ -245,9 +245,9 @@ fn test_ammend_zero_index(){
 #[test]
 #[available_gas(2000000)]
 #[should_panic(expected: ('TraitCatalog: index exceeded', 'ENTRYPOINT_FAILED'))]
-fn test_ammend_out_of_bounds_index(){
+fn test_ammend_out_of_bounds_index() {
     let mock_address = setup();
-    let mock = ITraitCatalogDispatcher{ contract_address : mock_address};
+    let mock = ITraitCatalogDispatcher { contract_address: mock_address };
 
     let values = array!['fire', 'water', 'grass'].span();
     mock.generate_trait_list(values);
@@ -258,9 +258,9 @@ fn test_ammend_out_of_bounds_index(){
 #[test]
 #[available_gas(2000000)]
 #[should_panic(expected: ('TraitCatalog: invalid update', 'ENTRYPOINT_FAILED'))]
-fn test_ammend_invalid_value(){
+fn test_ammend_invalid_value() {
     let mock_address = setup();
-    let mock = ITraitCatalogDispatcher{ contract_address : mock_address};
+    let mock = ITraitCatalogDispatcher { contract_address: mock_address };
 
     let values = array!['fire', 'water', 'grass'].span();
     mock.generate_trait_list(values);
