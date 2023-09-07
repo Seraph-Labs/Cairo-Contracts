@@ -197,12 +197,13 @@ mod ERC2114 {
             // @dev uses internal functions as token id approvals is still set to contract address
             //  interanl transfer is to avoid approval settings for token id 
             //  as approval for this function is set for final parent id 
-            ERC721::InternalImpl::_transfer(
-                ref unsafe_state, get_contract_address(), owner, token_id
-            );
+            //  Enum transfer has to go first as it checks balance which ERC721 will modify
             let mut enum_unsafe_state = ERC721Enum::unsafe_new_contract_state();
             ERC721Enum::InternalImpl::_transfer(
                 ref enum_unsafe_state, get_contract_address(), owner, token_id
+            );
+            ERC721::InternalImpl::_transfer(
+                ref unsafe_state, get_contract_address(), owner, token_id
             );
             // scalar remove
             self._scalar_remove(from_token_id, token_id, owner);
@@ -241,12 +242,21 @@ mod ERC2114 {
             SRC5::InternalImpl::register_interface(ref unsafe_state, constants::IERC2114_ID);
         }
 
+        // @dev ensures that token_id has no parent
+        //  used for transfer functions on other token standards 
+        //  to ensure token cant be transfered if its owned by a token
+        fn _assert_token_no_parent(self: @ContractState, token_id: u256) {
+            assert(self.token_parent.read(token_id).is_zero(), 'ERC2114: token has parent');
+        }
+
         // @dev transfer token to another token
         //  DOES NOT check validity of token_id or approval for transfer
         //  DOES NOT actually transfer token to address only sets balances, parent, and index
         fn _scalar_transfer(
             ref self: ContractState, from: ContractAddress, token_id: u256, to_token_id: u256
         ) {
+            // assert token id not transfering to self
+            assert(token_id != to_token_id, 'ERC2114: cant transfer to self');
             // increase balance
             let cur_bal = self.token_balance.read(to_token_id);
             self.token_balance.write(to_token_id, cur_bal + 1);
@@ -333,6 +343,20 @@ mod ERC2114 {
             // remove atr_ids from token
             self._detach_attr_ids_from_token(token_id, subtracted_attr_ids);
         }
+
+        // TODO: burn function for 2114
+        fn _burn(ref self: ContractState, token_id: u256) {
+            // assert to_token_id is valid
+            let unsafe_state = ERC721::unsafe_new_contract_state();
+            assert(
+                ERC721::InternalImpl::_exist(@unsafe_state, token_id), 'ERC2114: invalid token_id'
+            );
+            // assert token id has no parent
+            self._assert_token_no_parent(token_id);
+        // TODO: assert no children or clear out children
+        // TODO: clear all attributes
+        // TODO: burn token
+        }
     }
 
     #[generate_trait]
@@ -341,10 +365,6 @@ mod ERC2114 {
             let catalog_addr = self.trait_catalog_contract.read();
             assert(catalog_addr.is_non_zero(), 'ERC2114: invalid trait catalog');
             ITraitCatalogDispatcher { contract_address: catalog_addr }
-        }
-
-        fn _assert_token_no_parent(self: @ContractState, token_id: u256) {
-            assert(self.token_parent.read(token_id).is_zero(), 'ERC2114: token has parent');
         }
 
         // @dev get the index of token id in its parent
@@ -506,7 +526,7 @@ mod ERC2114 {
             // get index that stores attr_id
             let index = self._find_index_of_attr_in_token(token_id, attr_id);
             let mut cur_attr_pack = self.index_to_token_attr_pack.read((token_id, index));
-            // if cur attr pack is >= 2 means attr_pack slot does not need to be replaced
+            // if cur attr pack is > 1 means attr_pack slot does not need to be replaced
             if cur_attr_pack.len > 1 {
                 // remove attr_id from attr_pack
                 cur_attr_pack.remove_from_pack(attr_id);
@@ -552,12 +572,13 @@ mod ERC2114 {
 
                         let new_value: felt252 = match self.attr_base.read(*attr_id).val_type {
                             AttrType::Empty => {
+                                panic_with_felt252('ERC2114: invalid attr_id');
                                 0
                             },
                             AttrType::String(_) => {
                                 // assert cur_value is zero to ensure attr id is not own
                                 // as string type attributes cant be added only updated
-                                assert(cur_value.is_non_zero(), 'ERC2114: attr_id already exist');
+                                assert(cur_value.is_zero(), 'ERC2114: attr_id already exist');
                                 // string type attr_id values cant be summable so return value
                                 value
                             },
@@ -611,7 +632,7 @@ mod ERC2114 {
                         // assert attr_id is of String Type only can swap to zero cannot subtract
                         let new_value = match self.attr_base.read(*attr_id).val_type {
                             AttrType::Empty => {
-                                panic_with_felt252('ERC2114: invalid attr_id type');
+                                panic_with_felt252('ERC2114: invalid attr_id');
                                 0
                             },
                             AttrType::String(_) => {
