@@ -27,14 +27,14 @@ mod ERC3525 {
     }
 
     #[event]
-    #[derive(Drop, starknet::Event)]
+    #[derive(Drop, PartialEq, starknet::Event)]
     enum Event {
         TransferValue: TransferValue,
         ApprovalValue: ApprovalValue,
         SlotChanged: SlotChanged,
     }
 
-    #[derive(Drop, starknet::Event)]
+    #[derive(Drop, PartialEq, starknet::Event)]
     struct TransferValue {
         #[key]
         from_token_id: u256,
@@ -43,7 +43,7 @@ mod ERC3525 {
         value: u256,
     }
 
-    #[derive(Drop, starknet::Event)]
+    #[derive(Drop, PartialEq, starknet::Event)]
     struct ApprovalValue {
         #[key]
         token_id: u256,
@@ -52,7 +52,7 @@ mod ERC3525 {
         value: u256
     }
 
-    #[derive(Drop, starknet::Event)]
+    #[derive(Drop, PartialEq, starknet::Event)]
     struct SlotChanged {
         #[key]
         token_id: u256,

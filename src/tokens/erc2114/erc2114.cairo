@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0
-// SeraphLabs Contracts for Cairo >=v2.1.0 (tokens/erc2114/erc2114.cairo)
+// SeraphLabs Contracts for Cairo >=v2.2.0 (tokens/erc2114/erc2114.cairo)
 #[starknet::contract]
 mod ERC2114 {
     use seraphlabs::tokens::constants;
@@ -30,7 +30,7 @@ mod ERC2114 {
     }
 
     #[event]
-    #[derive(Drop, starknet::Event)]
+    #[derive(Drop, PartialEq, starknet::Event)]
     enum Event {
         TraitCatalogAttached: TraitCatalogAttached,
         ScalarTransfer: ScalarTransfer,
@@ -39,7 +39,7 @@ mod ERC2114 {
         TokenAttributeUpdate: TokenAttributeUpdate
     }
 
-    #[derive(Drop, starknet::Event)]
+    #[derive(Drop, PartialEq, starknet::Event)]
     struct TraitCatalogAttached {
         #[key]
         from: ContractAddress,
@@ -47,7 +47,7 @@ mod ERC2114 {
         trait_catalog_addr: ContractAddress,
     }
 
-    #[derive(Drop, starknet::Event)]
+    #[derive(Drop, PartialEq, starknet::Event)]
     struct ScalarTransfer {
         #[key]
         from: ContractAddress,
@@ -57,7 +57,7 @@ mod ERC2114 {
         to_token_id: u256
     }
 
-    #[derive(Drop, starknet::Event)]
+    #[derive(Drop, PartialEq, starknet::Event)]
     struct ScalarRemove {
         #[key]
         from_token_id: u256,
@@ -67,7 +67,7 @@ mod ERC2114 {
         to: ContractAddress
     }
 
-    #[derive(Drop, starknet::Event)]
+    #[derive(Drop, PartialEq, starknet::Event)]
     struct AttributeCreated {
         #[key]
         attr_id: u64,
@@ -76,7 +76,7 @@ mod ERC2114 {
         name: felt252
     }
 
-    #[derive(Drop, starknet::Event)]
+    #[derive(Drop, PartialEq, starknet::Event)]
     struct TokenAttributeUpdate {
         #[key]
         token_id: u256,

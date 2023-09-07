@@ -17,12 +17,12 @@ mod TraitCatalog {
     }
 
     #[event]
-    #[derive(Drop, starknet::Event)]
+    #[derive(Drop, PartialEq, starknet::Event)]
     enum Event {
         TraitListUpdate: TraitListUpdate,
     }
 
-    #[derive(Drop, starknet::Event)]
+    #[derive(Drop, PartialEq, starknet::Event)]
     struct TraitListUpdate {
         #[key]
         list_id: u64,
