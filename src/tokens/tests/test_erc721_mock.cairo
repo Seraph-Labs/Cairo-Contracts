@@ -2,15 +2,16 @@ use seraphlabs::tokens::tests::mocks::erc721_mock::{
     ERC721Mock as Mock, IERC721MockDispatcher, IERC721MockDispatcherTrait
 };
 use seraphlabs::tokens::tests::mocks::receivers_mock::{Mock721Receiver as Receiver, NonReceiver};
+use seraphlabs::tokens::erc721::ERC721;
 use seraphlabs::tokens::constants;
 use seraphlabs::utils::testing::{vars, helper};
 use starknet::ContractAddress;
-use starknet::testing::{set_caller_address, set_contract_address};
+use starknet::testing::{set_caller_address, set_contract_address, pop_log, pop_log_raw};
 use traits::{Into, TryInto};
 use option::OptionTrait;
 use array::ArrayTrait;
 use core::clone::Clone;
-
+use debug::PrintTrait;
 
 const NAME: felt252 = 'hello';
 const SYMBOL: felt252 = 'world';
@@ -87,9 +88,10 @@ fn test_balance_of() {
     let mock = IERC721MockDispatcher { contract_address: mock_address };
 
     let owner = vars::OWNER();
-
-    mock.mint(owner, vars::TOKEN_ID());
+    let token_id = vars::TOKEN_ID();
+    mock.mint(owner, token_id);
     assert(mock.balance_of(owner) == 1_u256, 'wrong balance');
+    assert_transfer_event(mock_address, Zeroable::zero(), owner, token_id);
 }
 
 #[test]
@@ -154,6 +156,8 @@ fn test_approve() {
     mock.mint(owner, token_id);
     mock.approve(operator, token_id);
     assert(mock.get_approved(token_id) == operator, 'approved is not set correctly');
+    assert_transfer_event(mock_address, Zeroable::zero(), owner, token_id);
+    assert_approval_event(mock_address, owner, operator, token_id);
 }
 
 #[test]
@@ -195,13 +199,13 @@ fn test_approval_for_all() {
     let mock_address = setup();
     let mock = IERC721MockDispatcher { contract_address: mock_address };
 
-    let token_id = vars::TOKEN_ID();
     let owner = vars::OWNER();
     let operator = vars::OPERATOR();
     set_contract_address(owner);
 
     mock.set_approval_for_all(operator, true);
     assert(mock.is_approved_for_all(owner, operator), 'approval for all fail');
+    assert_approval_for_all_event(mock_address, owner, operator, true);
 }
 
 #[test]
@@ -253,15 +257,21 @@ fn test_transfer() {
     let user = vars::USER();
 
     mock.mint(owner, token_id);
+    // drop transfer event
+    pop_log_raw(mock_address);
 
     set_contract_address(owner);
     mock.approve(operator, token_id);
+    // drop approval event
+    pop_log_raw(mock_address);
     mock.transfer_from(owner, user, token_id);
     // test clear approvals
     assert(mock.get_approved(token_id) == vars::INVALID_ADDRESS(), 'approvals not cleared');
     assert(mock.balance_of(owner) == 0_u256, 'balance is not set correctly');
     assert(mock.balance_of(user) == 1_u256, 'balance is not set correctly');
     assert(mock.owner_of(token_id) == user, 'owner is not set correctly');
+    // test events
+    assert_transfer_event(mock_address, owner, user, token_id);
 }
 
 #[test]
@@ -277,6 +287,9 @@ fn test_approve_transfer() {
     set_contract_address(owner);
     // approve tokenId to account 2
     mock.mint(owner, token_id);
+    // drop transfer event
+    pop_log_raw(mock_address);
+
     mock.approve(operator, token_id);
     // set caller to account 2
     set_contract_address(operator);
@@ -285,6 +298,9 @@ fn test_approve_transfer() {
     assert(mock.balance_of(owner) == 0.into(), 'balance is not set correctly');
     assert(mock.balance_of(operator) == 1.into(), 'balance is not set correctly');
     assert(mock.owner_of(token_id) == operator, 'owner is not set correctly');
+    // test events
+    assert_approval_event(mock_address, owner, operator, token_id);
+    assert_transfer_event(mock_address, owner, operator, token_id);
 }
 
 #[test]
@@ -300,8 +316,10 @@ fn test_approval_for_all_transfer() {
     set_contract_address(owner);
     // approve tokenId to account 2
     mock.mint(owner, token_id);
-    mock.set_approval_for_all(operator, true);
+    // drop transfer event
+    pop_log_raw(mock_address);
 
+    mock.set_approval_for_all(operator, true);
     // set caller to account 2
     set_contract_address(operator);
     mock.transfer_from(owner, operator, token_id);
@@ -309,6 +327,9 @@ fn test_approval_for_all_transfer() {
     assert(mock.balance_of(owner) == 0.into(), 'balance is not set correctly');
     assert(mock.balance_of(operator) == 1.into(), 'balance is not set correctly');
     assert(mock.owner_of(token_id) == operator, 'owner is not set correctly');
+    // test events
+    assert_approval_for_all_event(mock_address, owner, operator, true);
+    assert_transfer_event(mock_address, owner, operator, token_id);
 }
 
 #[test]
@@ -384,12 +405,17 @@ fn test_safe_transfer() {
     let receiver = RECEIVER();
 
     mock.mint(owner, token_id);
+    // drop transfer event
+    pop_log_raw(mock_address);
+
     set_contract_address(owner);
     mock.safe_transfer_from(owner, receiver, token_id, DATA(true));
 
     assert(mock.balance_of(owner) == 0_u256, 'balance is not set correctly');
     assert(mock.balance_of(receiver) == 1_u256, 'balance is not set correctly');
     assert(mock.owner_of(token_id) == receiver, 'owner is not set correctly');
+    // test events
+    assert_transfer_event(mock_address, owner, receiver, token_id);
 }
 
 #[test]
@@ -437,6 +463,8 @@ fn test_safe_mint() {
 
     assert(mock.balance_of(receiver) == 1_u256, 'balance is not set correctly');
     assert(mock.owner_of(token_id) == receiver, 'owner is not set correctly');
+    // test events
+    assert_transfer_event(mock_address, Zeroable::zero(), receiver, token_id);
 }
 
 #[test]
@@ -478,6 +506,49 @@ fn test_burn() {
     set_contract_address(owner);
 
     mock.mint(owner, token_id);
+    // drop transfer event
+    pop_log_raw(mock_address);
+
     mock.burn(token_id);
     assert(mock.balance_of(owner) == 0_u256, 'balance is not set correctly');
+    // test events
+    assert_transfer_event(mock_address, owner, Zeroable::zero(), token_id);
+}
+
+fn assert_transfer_event(
+    contract_addr: ContractAddress, from: ContractAddress, to: ContractAddress, token_id: u256
+) {
+    let event = pop_log::<ERC721::Event>(contract_addr).unwrap();
+    assert(
+        event == ERC721::Event::Transfer(ERC721::Transfer { from, to, token_id }),
+        'Wrong Transfer Event'
+    );
+}
+
+fn assert_approval_event(
+    contract_addr: ContractAddress,
+    owner: ContractAddress,
+    approved: ContractAddress,
+    token_id: u256
+) {
+    let event = pop_log::<ERC721::Event>(contract_addr).unwrap();
+    assert(
+        event == ERC721::Event::Approval(ERC721::Approval { owner, approved, token_id }),
+        'Wrong Approval Event'
+    );
+}
+
+fn assert_approval_for_all_event(
+    contract_addr: ContractAddress,
+    owner: ContractAddress,
+    operator: ContractAddress,
+    approved: bool
+) {
+    let event = pop_log::<ERC721::Event>(contract_addr).unwrap();
+    assert(
+        event == ERC721::Event::ApprovalForAll(
+            ERC721::ApprovalForAll { owner, operator, approved }
+        ),
+        'Wrong ApprovalForAll Event'
+    );
 }
