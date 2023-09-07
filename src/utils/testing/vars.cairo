@@ -26,5 +26,5 @@ fn OPERATOR() -> ContractAddress {
 }
 
 fn INVALID_ADDRESS() -> ContractAddress {
-    Zeroable::zero()
+    contract_address_const::<0>()
 }
