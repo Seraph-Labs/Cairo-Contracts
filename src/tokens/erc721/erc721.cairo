@@ -132,6 +132,7 @@ mod ERC721 {
         fn _is_approved_or_owner(
             self: @ContractState, spender: ContractAddress, token_id: u256
         ) -> bool {
+            assert(spender.is_non_zero(), 'ERC721: invalid caller');
             let owner: ContractAddress = self._owner_of(token_id).expect('ERC721: invalid tokenId');
             owner == spender
                 || spender == self._token_approvals.read(token_id)
@@ -187,7 +188,7 @@ mod ERC721 {
             assert(!operator.is_zero(), 'ERC721: invalid address');
 
             let caller: ContractAddress = get_caller_address();
-            assert(!caller.is_zero(), 'ERC721: invalid address');
+            assert(!caller.is_zero(), 'ERC721: invalid caller');
 
             assert(caller != operator, 'ERC721: owner cant approve self');
 
