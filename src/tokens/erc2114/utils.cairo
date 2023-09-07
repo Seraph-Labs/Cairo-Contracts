@@ -117,6 +117,7 @@ impl AttrPackImpl of AttrPackTrait {
     }
 
     // @dev checks if pack is valid for storing
+    #[inline(always)]
     fn is_valid(self: AttrPack) -> bool {
         self.len.is_non_zero() && self.len <= 3 && self.pack.is_non_zero()
     }
@@ -146,6 +147,7 @@ impl AttrPackImpl of AttrPackTrait {
     }
 
     // @dev retrive attr_id at position from pack
+    #[inline(always)]
     fn get_attr_id(self: AttrPack, pos: u8) -> u64 {
         match pos >= self.len {
             bool::False => AttrPackBitShiftImpl::mask_pack(self.pack, pos),
@@ -245,6 +247,7 @@ impl AttrPackImpl of AttrPackTrait {
 #[generate_trait]
 impl AttrPackBitShiftImpl of AttrPackBitShiftTrait {
     // @dev shifts attr_id bits based on which position it is suppose to be in the pack
+    #[inline(always)]
     fn shift_to(attr_id: u64, pos: u8) -> felt252 {
         if pos > 2 {
             panic_with_felt252('ERC2114: Invalid pack pos');
@@ -265,6 +268,7 @@ impl AttrPackBitShiftImpl of AttrPackBitShiftTrait {
     }
     // @dev mask data at pos to extract attr_id
     //  this function does not check if pack is empty
+    #[inline(always)]
     fn mask_pack(pack: felt252, pos: u8) -> u64 {
         if pos > 2 {
             panic_with_felt252('ERC2114: Invalid pack pos');
@@ -287,12 +291,14 @@ impl AttrPackBitShiftImpl of AttrPackBitShiftTrait {
 impl AttrPackPackableimpl of StorePacking<AttrPack, felt252> {
     // @dev packs AttrPack by adding its packed value to its len 
     // if len is 0 means empty pack so return pack 
+    #[inline(always)]
     fn pack(value: AttrPack) -> felt252 {
         match value.len.into() {
             0 => 0,
             _ => value.pack + value.len.into()
         }
     }
+    #[inline(always)]
     fn unpack(value: felt252) -> AttrPack {
         if value == 0 {
             return AttrPack { pack: 0, len: 0 };
