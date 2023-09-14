@@ -11,6 +11,32 @@ enum AttrType {
     Number: u8,
 }
 
+#[generate_trait]
+impl AttrTypeImpl of AttrTypeTrait {
+    #[inline(always)]
+    fn is_empty(self: AttrType) -> bool {
+        self == AttrType::Empty
+    }
+
+    #[inline(always)]
+    fn get_list_id(self: AttrType) -> u64 {
+        match self {
+            AttrType::Empty => 0,
+            AttrType::String(x) => x,
+            AttrType::Number(x) => 0,
+        }
+    }
+
+    #[inline(always)]
+    fn get_decimal(self: AttrType) -> u8 {
+        match self {
+            AttrType::Empty => 0,
+            AttrType::String(x) => 0,
+            AttrType::Number(x) => x,
+        }
+    }
+}
+
 // -------------------------------------------------------------------------- //
 //                               Attribute Base                               //
 // -------------------------------------------------------------------------- //
@@ -23,12 +49,7 @@ struct AttrBase {
     val_type: AttrType,
 }
 
-trait AttrBaseTrait {
-    fn new(name: felt252, val_type: AttrType) -> AttrBase;
-    fn is_valid(self: AttrBase) -> bool;
-    fn get_list_id(self: AttrBase) -> u64;
-}
-
+#[generate_trait]
 impl AttrBaseImpl of AttrBaseTrait {
     #[inline(always)]
     fn new(name: felt252, val_type: AttrType) -> AttrBase {
@@ -43,15 +64,6 @@ impl AttrBaseImpl of AttrBaseTrait {
     fn is_valid(self: AttrBase) -> bool {
         // @dev return true if name is not zero and type is not Empty
         self.name.is_non_zero() && self.val_type != AttrType::Empty
-    }
-    #[inline(always)]
-    fn get_list_id(self: AttrBase) -> u64 {
-        // @dev will only return non zero if attr is String type and has a list id attached
-        match self.val_type {
-            AttrType::Empty => 0,
-            AttrType::String(x) => x,
-            AttrType::Number(x) => 0,
-        }
     }
 }
 
