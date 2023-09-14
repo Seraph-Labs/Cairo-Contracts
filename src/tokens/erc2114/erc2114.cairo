@@ -5,7 +5,7 @@ mod ERC2114 {
     use seraphlabs::tokens::constants;
     use seraphlabs::tokens::erc2114::interface;
     use interface::{ITraitCatalogDispatcher, ITraitCatalogDispatcherTrait};
-    use seraphlabs::tokens::erc2114::utils::AttrType;
+    use seraphlabs::tokens::erc2114::utils::{AttrType, AttrTypeTrait};
     use seraphlabs::tokens::erc2114::utils::{AttrBase, AttrBaseTrait};
     use seraphlabs::tokens::erc2114::utils::{AttrPack, AttrPackTrait};
     use seraphlabs::tokens::src5::{SRC5, interface::{ISRC5Dispatcher, ISRC5DispatcherTrait}};
@@ -220,10 +220,10 @@ mod ERC2114 {
             // @dev this function checks if attr type and name is valid
             let attr_base = AttrBaseTrait::new(name, attr_type);
             // if list id is attached check if list id exist
-            if attr_base.get_list_id().is_non_zero() {
+            if attr_base.val_type.get_list_id().is_non_zero() {
                 let trait_catalog = self._get_trait_catalog();
                 assert(
-                    trait_catalog.trait_list_count() >= attr_base.get_list_id(),
+                    trait_catalog.trait_list_count() >= attr_base.val_type.get_list_id(),
                     'ERC2114: invalid list_id'
                 );
             }
@@ -397,7 +397,7 @@ mod ERC2114 {
 
         // @dev finds an available index that has space to store x ammount of attr_ids 
         // index is based on len of pack to determine if new index is needed or not
-        fn _find_slot_for_attr_pack(self: @ContractState, token_id: u256, ammount: u8) -> u64 {
+        fn _find_spot_for_attr_pack(self: @ContractState, token_id: u256, ammount: u8) -> u64 {
             // assert ammount needed to store is valid
             assert(ammount > 0 && ammount <= 3, 'ERC2114: invalid attr_id pack');
             let mut index: u64 = 0;
@@ -457,7 +457,7 @@ mod ERC2114 {
             let (q, r) = DivRem::div_rem(attr_ids.len(), 3_u32.try_into().expect('Division by 0'));
             // get the index of tokens attr_pack that can store attr_pack of size 3
             // this is used to avoid constant looping to find index
-            let mut l_index_attr_pack = self._find_slot_for_attr_pack(token_id, 3);
+            let mut l_index_attr_pack = self._find_spot_for_attr_pack(token_id, 3);
             // instantiate index to use for calculating starting pos for slicing Span
             let mut index = 0;
             loop {
@@ -483,32 +483,12 @@ mod ERC2114 {
             if r.is_non_zero() {
                 let slice = attr_ids.slice(index * 3, r);
                 let index_attr_pack = self
-                    ._find_slot_for_attr_pack(token_id, r.try_into().unwrap());
+                    ._find_spot_for_attr_pack(token_id, r.try_into().unwrap());
                 let mut attr_pack = self.index_to_token_attr_pack.read((token_id, index_attr_pack));
                 // add attr_ids to attr_pack
                 attr_pack.add_batch_to_pack(slice);
                 self.index_to_token_attr_pack.write((token_id, index_attr_pack), attr_pack);
             }
-        }
-
-        // @dev removes batch of attr_ids to token attr_packs
-        // DOES NOT check validity of attr_ids 
-        // ASSUMES token has attr_ids
-        fn _detach_attr_ids_from_token(
-            ref self: ContractState, token_id: u256, mut attr_ids: Span<u64>
-        ) {
-            // get last index of token attr_packs
-            let mut l_index = self._find_slot_for_attr_pack(token_id, 3);
-            loop {
-                match attr_ids.pop_front() {
-                    Option::Some(attr_id) => {
-                        self._detach_attr_id_from_token(ref l_index, token_id, *attr_id);
-                    },
-                    Option::None(_) => {
-                        break;
-                    }
-                };
-            };
         }
 
         // @dev removes a single attr id from token attr_packs
@@ -526,14 +506,14 @@ mod ERC2114 {
             // get index that stores attr_id
             let index = self._find_index_of_attr_in_token(token_id, attr_id);
             let mut cur_attr_pack = self.index_to_token_attr_pack.read((token_id, index));
-            // if cur attr pack is > 1 means attr_pack slot does not need to be replaced
+            // if cur attr pack is > 1 means attr_pack spot does not need to be replaced
             if cur_attr_pack.len > 1 {
                 // remove attr_id from attr_pack
                 cur_attr_pack.remove_from_pack(attr_id);
                 self.index_to_token_attr_pack.write((token_id, index), cur_attr_pack);
                 return;
             } else {
-                // minus last index to get new supposed last index of empty slot
+                // minus last index to get new supposed last index of empty spot
                 l_index -= 1;
                 // if index is not last index
                 // replace cur_attr_pack index with last_attr_pack
@@ -546,6 +526,26 @@ mod ERC2114 {
                     .index_to_token_attr_pack
                     .write((token_id, l_index), AttrPack { pack: 0, len: 0 });
             }
+        }
+
+        // @dev removes batch of attr_ids to token attr_packs
+        // DOES NOT check validity of attr_ids 
+        // ASSUMES token has attr_ids
+        fn _detach_attr_ids_from_token(
+            ref self: ContractState, token_id: u256, mut attr_ids: Span<u64>
+        ) {
+            // get last index of token attr_packs
+            let mut l_index = self._find_spot_for_attr_pack(token_id, 3);
+            loop {
+                match attr_ids.pop_front() {
+                    Option::Some(attr_id) => {
+                        self._detach_attr_id_from_token(ref l_index, token_id, *attr_id);
+                    },
+                    Option::None(_) => {
+                        break;
+                    }
+                };
+            };
         }
 
         // @dev adds batch of attr_ids and corresponding values to token
@@ -684,7 +684,7 @@ mod ERC2114 {
 
             // if value is not zero and attr_id has list_id attached 
             // check if value which == to index of trait list is valid
-            let list_id = attr_base.get_list_id();
+            let list_id = attr_base.val_type.get_list_id();
             if value.is_non_zero() && list_id.is_non_zero() {
                 // assert value of index in trait list is not zero
                 // as it means index in trait list has not been set
