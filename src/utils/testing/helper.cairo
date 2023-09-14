@@ -21,3 +21,7 @@ fn drop_events(address: ContractAddress, ammount: u16) {
         x -= 1;
     }
 }
+
+fn assert_no_events_left(address: ContractAddress) {
+    assert(pop_log_raw(address).is_none(), 'Events remaining on contract');
+}
