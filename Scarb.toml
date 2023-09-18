@@ -1,7 +1,10 @@
 [package]
 name = "seraphlabs"
 version = "0.1.0"
+cairo-verrsion = "2.2.0"
 description = "SeraphLabs Starknet Libraries"
+repository = "https://github.com/Seraph-Labs/Cairo-Contracts/tree/cairo-2"
+license = ["LICENSE", "LICENSE-2114"]
 
 [dependencies]
 starknet = ">=2.2.0"
