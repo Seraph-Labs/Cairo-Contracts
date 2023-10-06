@@ -3,6 +3,7 @@ use seraphlabs::tokens::tests::mocks::erc721_mock::{
 };
 use seraphlabs::tokens::tests::mocks::receivers_mock::{Mock721Receiver as Receiver, NonReceiver};
 use seraphlabs::tokens::erc721::ERC721;
+use seraphlabs::tokens::erc721::ERC721Component;
 use seraphlabs::tokens::constants;
 use seraphlabs::utils::testing::{vars, helper};
 use starknet::ContractAddress;
@@ -48,7 +49,7 @@ fn test_constructor() {
 
     assert(mock.name() == NAME, 'name is not set correctly');
     assert(mock.symbol() == SYMBOL, 'symbol is not set correctly');
-    assert(mock.supports_interface(constants::IERC721_ID), 'missing interface ID');
+    assert(mock.supports_interface(constants::IERC721_ID), 'missing 721 interface ID');
     assert(mock.supports_interface(constants::IERC721_METADATA_ID), 'missing interface ID');
 }
 
@@ -518,9 +519,11 @@ fn test_burn() {
 fn assert_transfer_event(
     contract_addr: ContractAddress, from: ContractAddress, to: ContractAddress, token_id: u256
 ) {
-    let event = pop_log::<ERC721::Event>(contract_addr).unwrap();
+    let event = pop_log::<Mock::Event>(contract_addr).unwrap();
     assert(
-        event == ERC721::Event::Transfer(ERC721::Transfer { from, to, token_id }),
+        event == Mock::Event::ERC721Event(
+            ERC721Component::Event::Transfer(ERC721Component::Transfer { from, to, token_id })
+        ),
         'Wrong Transfer Event'
     );
 }
@@ -531,9 +534,13 @@ fn assert_approval_event(
     approved: ContractAddress,
     token_id: u256
 ) {
-    let event = pop_log::<ERC721::Event>(contract_addr).unwrap();
+    let event = pop_log::<Mock::Event>(contract_addr).unwrap();
     assert(
-        event == ERC721::Event::Approval(ERC721::Approval { owner, approved, token_id }),
+        event == Mock::Event::ERC721Event(
+            ERC721Component::Event::Approval(
+                ERC721Component::Approval { owner, approved, token_id }
+            )
+        ),
         'Wrong Approval Event'
     );
 }
@@ -544,10 +551,12 @@ fn assert_approval_for_all_event(
     operator: ContractAddress,
     approved: bool
 ) {
-    let event = pop_log::<ERC721::Event>(contract_addr).unwrap();
+    let event = pop_log::<Mock::Event>(contract_addr).unwrap();
     assert(
-        event == ERC721::Event::ApprovalForAll(
-            ERC721::ApprovalForAll { owner, operator, approved }
+        event == Mock::Event::ERC721Event(
+            ERC721Component::Event::ApprovalForAll(
+                ERC721Component::ApprovalForAll { owner, operator, approved }
+            )
         ),
         'Wrong ApprovalForAll Event'
     );

@@ -5,6 +5,7 @@ trait IERC721Mock<TContractState> {
     fn supports_interface(self: @TContractState, interface_id: felt252) -> bool;
     // Metadata functions
     fn name(self: @TContractState) -> felt252;
+    fn get_name(self: @TContractState) -> felt252;
     fn symbol(self: @TContractState) -> felt252;
     fn token_uri(self: @TContractState, token_id: u256) -> Array<felt252>;
     fn set_base_uri(ref self: TContractState, base_uri: Array<felt252>);
@@ -36,123 +37,86 @@ trait IERC721Mock<TContractState> {
 
 #[starknet::contract]
 mod ERC721Mock {
-    use seraphlabs::tokens::erc721::{ERC721, extensions::ERC721Metadata};
-    use seraphlabs::tokens::src5::SRC5;
+    use seraphlabs::tokens::erc721::{ERC721Component, extensions::ERC721MetadataComponent};
+    use seraphlabs::tokens::src5::SRC5Component;
     use super::ContractAddress;
+    use ERC721Component::{ERC721InternalImpl, ERC721InitializerImpl};
+    use ERC721MetadataComponent::{
+        IERC721MetadataImpl, ERC721MetadataInternalImpl, ERC721MetadataInitializerImpl
+    };
+    component!(path: ERC721Component, storage: erc721, event: ERC721Event);
+    component!(path: ERC721MetadataComponent, storage: erc721_metadata, event: ERC721MetadataEvent);
+    component!(path: SRC5Component, storage: src5, event: SRC5Event);
+
+    #[abi(embed_v0)]
+    impl SRC5 = SRC5Component::SRC5Impl<ContractState>;
+
+    #[abi(embed_v0)]
+    impl ERC721 = ERC721Component::ERC721Impl<ContractState>;
+
+    #[abi(embed_v0)]
+    impl ERC721Metadata =
+        ERC721MetadataComponent::ERC721MetadataImpl<ContractState>;
 
     #[storage]
-    struct Storage {}
+    struct Storage {
+        #[substorage(v0)]
+        src5: SRC5Component::Storage,
+        #[substorage(v0)]
+        erc721: ERC721Component::Storage,
+        #[substorage(v0)]
+        erc721_metadata: ERC721MetadataComponent::Storage,
+    }
+
+    #[event]
+    #[derive(Drop, PartialEq, starknet::Event)]
+    enum Event {
+        SRC5Event: SRC5Component::Event,
+        ERC721Event: ERC721Component::Event,
+        ERC721MetadataEvent: ERC721MetadataComponent::Event
+    }
 
     #[constructor]
     fn constructor(ref self: ContractState, name: felt252, symbol: felt252) {
-        let mut erc721_unsafe_state = ERC721::unsafe_new_contract_state();
-        ERC721::InternalImpl::initializer(ref erc721_unsafe_state);
-        let mut erc721_metadata_unsafe_state = ERC721Metadata::unsafe_new_contract_state();
-        ERC721Metadata::InternalImpl::initializer(ref erc721_metadata_unsafe_state, name, symbol);
-    }
-
-    #[external(v0)]
-    fn supports_interface(self: @ContractState, interface_id: felt252) -> bool {
-        let unsafe_state = SRC5::unsafe_new_contract_state();
-        SRC5::ISRC5Impl::supports_interface(@unsafe_state, interface_id)
+        self.erc721.initializer();
+        self.erc721_metadata.initializer(name, symbol);
     }
 
     #[generate_trait]
     #[external(v0)]
     impl MetadataImpl of MetadataTrait {
-        fn name(self: @ContractState) -> felt252 {
-            let erc721_metadata_unsafe_state = ERC721Metadata::unsafe_new_contract_state();
-            ERC721Metadata::IERC721MetadataImpl::name(@erc721_metadata_unsafe_state)
-        }
-
-        fn symbol(self: @ContractState) -> felt252 {
-            let erc721_metadata_unsafe_state = ERC721Metadata::unsafe_new_contract_state();
-            ERC721Metadata::IERC721MetadataImpl::symbol(@erc721_metadata_unsafe_state)
-        }
-
-        fn token_uri(self: @ContractState, token_id: u256) -> Array<felt252> {
-            let erc721_metadata_unsafe_state = ERC721Metadata::unsafe_new_contract_state();
-            ERC721Metadata::IERC721MetadataImpl::token_uri(@erc721_metadata_unsafe_state, token_id)
-        }
-
         fn set_base_uri(ref self: ContractState, base_uri: Array<felt252>) {
-            let mut erc721_metadata_unsafe_state = ERC721Metadata::unsafe_new_contract_state();
-            ERC721Metadata::InternalImpl::_set_base_uri(ref erc721_metadata_unsafe_state, base_uri);
+            self.erc721_metadata._set_base_uri(base_uri);
         }
     }
 
     #[generate_trait]
     #[external(v0)]
     impl Base721Impl of Base721Trait {
-        fn balance_of(self: @ContractState, owner: ContractAddress) -> u256 {
-            let erc721_unsafe_state = ERC721::unsafe_new_contract_state();
-            ERC721::IERC721Impl::balance_of(@erc721_unsafe_state, owner)
-        }
+        // fn name(self: @ContractState) -> felt252 {
+        //     self.erc721_metadata.name()
+        // }
 
-        fn owner_of(self: @ContractState, token_id: u256) -> ContractAddress {
-            let erc721_unsafe_state = ERC721::unsafe_new_contract_state();
-            ERC721::IERC721Impl::owner_of(@erc721_unsafe_state, token_id)
-        }
+        // fn symbol(self: @ContractState) -> felt252 {
+        //     self.erc721_metadata.symbol()
+        // }
 
-        fn get_approved(self: @ContractState, token_id: u256) -> ContractAddress {
-            let erc721_unsafe_state = ERC721::unsafe_new_contract_state();
-            ERC721::IERC721Impl::get_approved(@erc721_unsafe_state, token_id)
-        }
-
-        fn is_approved_for_all(
-            self: @ContractState, owner: ContractAddress, operator: ContractAddress
-        ) -> bool {
-            let erc721_unsafe_state = ERC721::unsafe_new_contract_state();
-            ERC721::IERC721Impl::is_approved_for_all(@erc721_unsafe_state, owner, operator)
-        }
-
-        fn approve(ref self: ContractState, approved: ContractAddress, token_id: u256) {
-            let mut erc721_unsafe_state = ERC721::unsafe_new_contract_state();
-            ERC721::IERC721Impl::approve(ref erc721_unsafe_state, approved, token_id);
-        }
-
-        fn set_approval_for_all(
-            ref self: ContractState, operator: ContractAddress, approved: bool
-        ) {
-            let mut erc721_unsafe_state = ERC721::unsafe_new_contract_state();
-            ERC721::IERC721Impl::set_approval_for_all(ref erc721_unsafe_state, operator, approved);
-        }
-
-        fn safe_transfer_from(
-            ref self: ContractState,
-            from: ContractAddress,
-            to: ContractAddress,
-            token_id: u256,
-            data: Span<felt252>
-        ) {
-            let mut erc721_unsafe_state = ERC721::unsafe_new_contract_state();
-            ERC721::IERC721Impl::safe_transfer_from(
-                ref erc721_unsafe_state, from, to, token_id, data
-            );
-        }
-
-        fn transfer_from(
-            ref self: ContractState, from: ContractAddress, to: ContractAddress, token_id: u256
-        ) {
-            let mut erc721_unsafe_state = ERC721::unsafe_new_contract_state();
-            ERC721::IERC721Impl::transfer_from(ref erc721_unsafe_state, from, to, token_id);
-        }
+        // fn token_uri(self: @ContractState, token_id: u256) -> Array<felt252> {
+        //     self.erc721_metadata.token_uri(token_id)
+        // }
 
         fn mint(ref self: ContractState, to: ContractAddress, token_id: u256) {
-            let mut erc721_unsafe_state = ERC721::unsafe_new_contract_state();
-            ERC721::InternalImpl::_mint(ref erc721_unsafe_state, to, token_id);
+            self.erc721._mint(to, token_id);
         }
 
         fn safe_mint(
             ref self: ContractState, to: ContractAddress, token_id: u256, data: Span<felt252>
         ) {
-            let mut erc721_unsafe_state = ERC721::unsafe_new_contract_state();
-            ERC721::InternalImpl::_safe_mint(ref erc721_unsafe_state, to, token_id, data);
+            self.erc721._safe_mint(to, token_id, data);
         }
 
         fn burn(ref self: ContractState, token_id: u256) {
-            let mut erc721_unsafe_state = ERC721::unsafe_new_contract_state();
-            ERC721::InternalImpl::_burn(ref erc721_unsafe_state, token_id);
+            self.erc721._burn(token_id);
         }
     }
 }

@@ -99,6 +99,7 @@ struct AttrPack {
 }
 
 // @dev functions for manipulating attr_id packs
+
 #[generate_trait]
 impl AttrPackImpl of AttrPackTrait {
     // @dev creates a new pack from an array of attr_ids
@@ -120,9 +121,7 @@ impl AttrPackImpl of AttrPackTrait {
                     pack += shifted_attr;
                     len += 1;
                 },
-                Option::None(_) => {
-                    break;
-                },
+                Option::None(_) => { break; },
             };
         };
         AttrPack { pack: pack, len: len }
@@ -150,9 +149,7 @@ impl AttrPackImpl of AttrPackTrait {
             }
             match AttrPackBitShiftImpl::mask_pack(self.pack, pos) == attr_id {
                 bool::False => pos += 1,
-                bool::True => {
-                    break true;
-                },
+                bool::True => { break true; },
             };
         };
         is_in_pack
@@ -177,9 +174,7 @@ impl AttrPackImpl of AttrPackTrait {
                     attr_ids.append(AttrPackBitShiftImpl::mask_pack(self.pack, pos));
                     pos += 1;
                 },
-                bool::True => {
-                    break;
-                },
+                bool::True => { break; },
             };
         };
         attr_ids.span()
@@ -205,9 +200,7 @@ impl AttrPackImpl of AttrPackTrait {
                     // if attr_ids len exceeds max of 3 this will panic
                     self.add_to_pack(*val);
                 },
-                Option::None(_) => {
-                    break;
-                },
+                Option::None(_) => { break; },
             };
         };
     }
@@ -231,9 +224,7 @@ impl AttrPackImpl of AttrPackTrait {
                     }
                     pos += 1;
                 },
-                bool::True => {
-                    break;
-                },
+                bool::True => { break; },
             };
         };
 
@@ -245,17 +236,14 @@ impl AttrPackImpl of AttrPackTrait {
         // if attr_ids array length is 0 means pack is empty
         // initialize empty struct else repack the pack
         match attr_ids.len().into() {
-            0 => {
-                self = AttrPack { pack: 0, len: 0 };
-            },
-            _ => {
-                self = AttrPackImpl::new(attr_ids.span());
-            }
+            0 => { self = AttrPack { pack: 0, len: 0 }; },
+            _ => { self = AttrPackImpl::new(attr_ids.span()); }
         }
     }
 }
 
 // @dev functions for shifting and masking data in attr_id packs
+
 #[generate_trait]
 impl AttrPackBitShiftImpl of AttrPackBitShiftTrait {
     // @dev shifts attr_id bits based on which position it is suppose to be in the pack

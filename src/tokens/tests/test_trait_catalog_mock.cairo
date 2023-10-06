@@ -1,5 +1,5 @@
 use seraphlabs::tokens::tests::mocks::trait_catalog_mock::TraitCatalogMock as Mock;
-use seraphlabs::tokens::erc2114::extensions::TraitCatalog;
+use seraphlabs::tokens::erc2114::extensions::TraitCatalogComponent;
 use seraphlabs::tokens::erc2114::interface::{ITraitCatalogDispatcher, ITraitCatalogDispatcherTrait};
 use seraphlabs::tokens::src5::interface::{ISRC5Dispatcher, ISRC5DispatcherTrait};
 use seraphlabs::tokens::constants;
@@ -274,10 +274,12 @@ fn assert_trait_list_update_event(
     old_value: felt252,
     new_value: felt252
 ) {
-    let event = pop_log::<TraitCatalog::Event>(contract_addr).unwrap();
+    let event = pop_log::<Mock::Event>(contract_addr).unwrap();
     assert(
-        event == TraitCatalog::Event::TraitListUpdate(
-            TraitCatalog::TraitListUpdate { list_id, index, old_value, new_value, }
+        event == Mock::Event::TraitCatalogEvent(
+            TraitCatalogComponent::Event::TraitListUpdate(
+                TraitCatalogComponent::TraitListUpdate { list_id, index, old_value, new_value, }
+            )
         ),
         'wrong trait list update event'
     );

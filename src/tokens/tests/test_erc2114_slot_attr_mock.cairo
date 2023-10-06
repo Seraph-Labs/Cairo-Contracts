@@ -3,13 +3,12 @@ use seraphlabs::tokens::tests::mocks::erc2114_slot_attr_mock::{
     IERC2114SlotAttrMockDispatcherTrait,
 };
 use seraphlabs::tokens::erc2114::utils::AttrType;
-use seraphlabs::tokens::erc2114::extensions::ERC2114SlotAttribute as ERC2114SlotAttr;
+use seraphlabs::tokens::erc2114::extensions::ERC2114SlotAttrComponent;
 use seraphlabs::tokens::erc721::ERC721;
 use seraphlabs::tokens::tests::mocks::trait_catalog_mock::{
     TraitCatalogMock, InvalidTraitCatalogMock
 };
 use seraphlabs::tokens::erc2114::interface::{ITraitCatalogDispatcher, ITraitCatalogDispatcherTrait};
-use seraphlabs::tokens::src5::interface::{ISRC5Dispatcher, ISRC5DispatcherTrait};
 use seraphlabs::tokens::constants;
 use seraphlabs::utils::testing::{vars, helper};
 use starknet::ContractAddress;
@@ -362,12 +361,14 @@ fn assert_slot_attribute_update_event(
     old_value: felt252,
     new_value: felt252
 ) {
-    let event = pop_log::<ERC2114SlotAttr::Event>(contract_addr).unwrap();
+    let event = pop_log::<Mock::Event>(contract_addr).unwrap();
     assert(
-        event == ERC2114SlotAttr::Event::SlotAttributeUpdate(
-            ERC2114SlotAttr::SlotAttributeUpdate {
-                slot_id, attr_id, attr_type, old_value, new_value
-            }
+        event == Mock::Event::ERC2114SlotAttrEvent(
+            ERC2114SlotAttrComponent::Event::SlotAttributeUpdate(
+                ERC2114SlotAttrComponent::SlotAttributeUpdate {
+                    slot_id, attr_id, attr_type, old_value, new_value
+                }
+            )
         ),
         'wrong SlotAttributeUpdate'
     );

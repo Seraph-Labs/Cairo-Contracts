@@ -1,7 +1,7 @@
 use seraphlabs::tokens::tests::mocks::erc2114_mock::{
     ERC2114Mock as Mock, IERC2114MockDispatcher, IERC2114MockDispatcherTrait,
 };
-use seraphlabs::tokens::erc2114::{ERC2114, utils::AttrType};
+use seraphlabs::tokens::erc2114::{ERC2114Component, utils::AttrType};
 use seraphlabs::tokens::erc721::ERC721;
 use seraphlabs::tokens::tests::mocks::trait_catalog_mock::{
     TraitCatalogMock, InvalidTraitCatalogMock
@@ -726,10 +726,12 @@ fn test_remove_attribute_subtract_more_than_owned() {
 fn assert_trait_catalog_attached_event(
     contract_addr: ContractAddress, from: ContractAddress, trait_catalog_addr: ContractAddress
 ) {
-    let event = pop_log::<ERC2114::Event>(contract_addr).unwrap();
+    let event = pop_log::<Mock::Event>(contract_addr).unwrap();
     assert(
-        event == ERC2114::Event::TraitCatalogAttached(
-            ERC2114::TraitCatalogAttached { from, trait_catalog_addr }
+        event == Mock::Event::ERC2114Event(
+            ERC2114Component::Event::TraitCatalogAttached(
+                ERC2114Component::TraitCatalogAttached { from, trait_catalog_addr }
+            )
         ),
         'wrong TraitCatalogAttached'
     );
@@ -748,10 +750,12 @@ fn assert_scalar_transfer_event(
         pop_log_raw(contract_addr);
     }
 
-    let event = pop_log::<ERC2114::Event>(contract_addr).unwrap();
+    let event = pop_log::<Mock::Event>(contract_addr).unwrap();
     assert(
-        event == ERC2114::Event::ScalarTransfer(
-            ERC2114::ScalarTransfer { from, token_id, to_token_id }
+        event == Mock::Event::ERC2114Event(
+            ERC2114Component::Event::ScalarTransfer(
+                ERC2114Component::ScalarTransfer { from, token_id, to_token_id }
+            )
         ),
         'wrong ScalarTransfer'
     );
@@ -768,10 +772,12 @@ fn assert_scalar_remove_event(
         pop_log_raw(contract_addr);
     }
 
-    let event = pop_log::<ERC2114::Event>(contract_addr).unwrap();
+    let event = pop_log::<Mock::Event>(contract_addr).unwrap();
     assert(
-        event == ERC2114::Event::ScalarRemove(
-            ERC2114::ScalarRemove { from_token_id, token_id, to }
+        event == Mock::Event::ERC2114Event(
+            ERC2114Component::Event::ScalarRemove(
+                ERC2114Component::ScalarRemove { from_token_id, token_id, to }
+            )
         ),
         'wrong ScalarRemove'
     );
@@ -780,10 +786,12 @@ fn assert_scalar_remove_event(
 fn assert_attribute_created_event(
     contract_addr: ContractAddress, attr_id: u64, attr_type: AttrType, name: felt252
 ) {
-    let event = pop_log::<ERC2114::Event>(contract_addr).unwrap();
+    let event = pop_log::<Mock::Event>(contract_addr).unwrap();
     assert(
-        event == ERC2114::Event::AttributeCreated(
-            ERC2114::AttributeCreated { attr_id, attr_type, name }
+        event == Mock::Event::ERC2114Event(
+            ERC2114Component::Event::AttributeCreated(
+                ERC2114Component::AttributeCreated { attr_id, attr_type, name }
+            )
         ),
         'wrong AttributeCreated'
     );
@@ -797,10 +805,14 @@ fn assert_token_attribute_update_event(
     old_value: felt252,
     new_value: felt252
 ) {
-    let event = pop_log::<ERC2114::Event>(contract_addr).unwrap();
+    let event = pop_log::<Mock::Event>(contract_addr).unwrap();
     assert(
-        event == ERC2114::Event::TokenAttributeUpdate(
-            ERC2114::TokenAttributeUpdate { token_id, attr_id, attr_type, old_value, new_value }
+        event == Mock::Event::ERC2114Event(
+            ERC2114Component::Event::TokenAttributeUpdate(
+                ERC2114Component::TokenAttributeUpdate {
+                    token_id, attr_id, attr_type, old_value, new_value
+                }
+            )
         ),
         'wrong TokenAttributeUpdate'
     );
