@@ -249,6 +249,7 @@ mod TraitCatalogComponent {
         +SRC5Component::HasComponent<TContractState>,
         +Drop<TContractState>
     > of GetSRC5Trait<TContractState> {
+        #[inline(always)]
         fn get_src5(
             self: @ComponentState<TContractState>
         ) -> @SRC5Component::ComponentState<TContractState> {
@@ -256,6 +257,7 @@ mod TraitCatalogComponent {
             SRC5Component::HasComponent::<TContractState>::get_component(contract)
         }
 
+        #[inline(always)]
         fn get_src5_mut(
             ref self: ComponentState<TContractState>
         ) -> SRC5Component::ComponentState<TContractState> {

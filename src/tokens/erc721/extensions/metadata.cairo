@@ -145,6 +145,7 @@ mod ERC721MetadataComponent {
         +SRC5Component::HasComponent<TContractState>,
         +Drop<TContractState>
     > of GetSRC5Trait<TContractState> {
+        #[inline(always)]
         fn get_src5(
             self: @ComponentState<TContractState>
         ) -> @SRC5Component::ComponentState<TContractState> {
@@ -152,6 +153,7 @@ mod ERC721MetadataComponent {
             SRC5Component::HasComponent::<TContractState>::get_component(contract)
         }
 
+        #[inline(always)]
         fn get_src5_mut(
             ref self: ComponentState<TContractState>
         ) -> SRC5Component::ComponentState<TContractState> {
@@ -167,6 +169,7 @@ mod ERC721MetadataComponent {
         +ERC721Component::HasComponent<TContractState>,
         +Drop<TContractState>
     > of GetERC721Trait<TContractState> {
+        #[inline(always)]
         fn get_erc721(
             self: @ComponentState<TContractState>
         ) -> @ERC721Component::ComponentState<TContractState> {
@@ -174,6 +177,7 @@ mod ERC721MetadataComponent {
             ERC721Component::HasComponent::<TContractState>::get_component(contract)
         }
 
+        #[inline(always)]
         fn get_erc721_mut(
             ref self: ComponentState<TContractState>
         ) -> ERC721Component::ComponentState<TContractState> {

@@ -504,6 +504,7 @@ mod ERC2114SlotAttrComponent {
         +SRC5Component::HasComponent<TContractState>,
         +Drop<TContractState>
     > of GetSRC5Trait<TContractState> {
+        #[inline(always)]
         fn get_src5(
             self: @ComponentState<TContractState>
         ) -> @SRC5Component::ComponentState<TContractState> {
@@ -511,6 +512,7 @@ mod ERC2114SlotAttrComponent {
             SRC5Component::HasComponent::<TContractState>::get_component(contract)
         }
 
+        #[inline(always)]
         fn get_src5_mut(
             ref self: ComponentState<TContractState>
         ) -> SRC5Component::ComponentState<TContractState> {
@@ -526,6 +528,7 @@ mod ERC2114SlotAttrComponent {
         +ERC2114Component::HasComponent<TContractState>,
         +Drop<TContractState>
     > of GetERC2114Trait<TContractState> {
+        #[inline(always)]
         fn get_erc2114(
             self: @ComponentState<TContractState>
         ) -> @ERC2114Component::ComponentState<TContractState> {
@@ -533,6 +536,7 @@ mod ERC2114SlotAttrComponent {
             ERC2114Component::HasComponent::<TContractState>::get_component(contract)
         }
 
+        #[inline(always)]
         fn get_erc2114_mut(
             ref self: ComponentState<TContractState>
         ) -> ERC2114Component::ComponentState<TContractState> {

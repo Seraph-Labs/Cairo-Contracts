@@ -842,6 +842,7 @@ mod ERC2114Component {
         +SRC5Component::HasComponent<TContractState>,
         +Drop<TContractState>
     > of GetSRC5Trait<TContractState> {
+        #[inline(always)]
         fn get_src5(
             self: @ComponentState<TContractState>
         ) -> @SRC5Component::ComponentState<TContractState> {
@@ -849,6 +850,7 @@ mod ERC2114Component {
             SRC5Component::HasComponent::<TContractState>::get_component(contract)
         }
 
+        #[inline(always)]
         fn get_src5_mut(
             ref self: ComponentState<TContractState>
         ) -> SRC5Component::ComponentState<TContractState> {
@@ -864,6 +866,7 @@ mod ERC2114Component {
         +ERC721Component::HasComponent<TContractState>,
         +Drop<TContractState>
     > of GetERC721Trait<TContractState> {
+        #[inline(always)]
         fn get_erc721(
             self: @ComponentState<TContractState>
         ) -> @ERC721Component::ComponentState<TContractState> {
@@ -871,6 +874,7 @@ mod ERC2114Component {
             ERC721Component::HasComponent::<TContractState>::get_component(contract)
         }
 
+        #[inline(always)]
         fn get_erc721_mut(
             ref self: ComponentState<TContractState>
         ) -> ERC721Component::ComponentState<TContractState> {
@@ -886,6 +890,7 @@ mod ERC2114Component {
         +ERC721EnumComponent::HasComponent<TContractState>,
         +Drop<TContractState>
     > of GetERC721EnumTrait<TContractState> {
+        #[inline(always)]
         fn get_erc721_enum(
             self: @ComponentState<TContractState>
         ) -> @ERC721EnumComponent::ComponentState<TContractState> {
@@ -893,6 +898,7 @@ mod ERC2114Component {
             ERC721EnumComponent::HasComponent::<TContractState>::get_component(contract)
         }
 
+        #[inline(always)]
         fn get_erc721_enum_mut(
             ref self: ComponentState<TContractState>
         ) -> ERC721EnumComponent::ComponentState<TContractState> {
