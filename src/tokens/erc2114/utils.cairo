@@ -301,27 +301,41 @@ impl AttrPackBitShiftImpl of AttrPackBitShiftTrait {
     }
 }
 
+impl Felt252IntoAttrPackImpl of Into<felt252, AttrPack> {
+    #[inline(always)]
+    fn into(self: felt252) -> AttrPack {
+        if self.is_zero() {
+            return AttrPack { pack: 0, len: 0 };
+        }
+        // convert value into u256 to perform bitwise operations 
+        let value_u256: u256 = self.into();
+        // get len and minus from value to get pack
+        let len = value_u256 & MASK_LEN;
+        let pack = value_u256 - len;
+        AttrPack { pack: pack.try_into().unwrap(), len: len.try_into().unwrap() }
+    }
+}
+
+impl AttrPackIntoFelt252Impl of Into<AttrPack, felt252> {
+    #[inline(always)]
+    fn into(self: AttrPack) -> felt252 {
+        match self.len.into() {
+            0 => 0,
+            _ => self.pack + self.len.into()
+        }
+    }
+}
+
 // @dev implementation for packing AttrPack into felt
 impl AttrPackPackableimpl of StorePacking<AttrPack, felt252> {
     // @dev packs AttrPack by adding its packed value to its len 
     // if len is 0 means empty pack so return pack 
     #[inline(always)]
     fn pack(value: AttrPack) -> felt252 {
-        match value.len.into() {
-            0 => 0,
-            _ => value.pack + value.len.into()
-        }
+        value.into()
     }
     #[inline(always)]
     fn unpack(value: felt252) -> AttrPack {
-        if value == 0 {
-            return AttrPack { pack: 0, len: 0 };
-        }
-        // convert value into u256 to perform bitwise operations 
-        let value_u256: u256 = value.into();
-        // get len and minus from value to get pack
-        let len = value_u256 & MASK_LEN;
-        let pack = value_u256 - len;
-        AttrPack { pack: pack.try_into().unwrap(), len: len.try_into().unwrap() }
+        value.into()
     }
 }
