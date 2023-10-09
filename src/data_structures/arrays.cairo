@@ -19,9 +19,7 @@ impl ArrayImpl<T, impl TDrop: Drop<T>, impl TCopy: Copy<T>> of SeraphArrayTrait<
                     // pop out arrays first value;
                     self.pop_front();
                 },
-                Option::None(()) => {
-                    break;
-                },
+                Option::None(()) => { break; },
             };
         }
     }
@@ -30,9 +28,7 @@ impl ArrayImpl<T, impl TDrop: Drop<T>, impl TCopy: Copy<T>> of SeraphArrayTrait<
         loop {
             match values.pop_front() {
                 Option::Some(val) => self.append(val),
-                Option::None(()) => {
-                    break ();
-                },
+                Option::None(()) => { break (); },
             };
         }
     }
@@ -41,13 +37,22 @@ impl ArrayImpl<T, impl TDrop: Drop<T>, impl TCopy: Copy<T>> of SeraphArrayTrait<
         loop {
             match values.pop_front() {
                 Option::Some(val) => self.append(*val),
-                Option::None(()) => {
-                    break ();
-                },
+                Option::None(()) => { break (); },
             };
         }
     }
 }
 
 #[generate_trait]
-impl SpanImpl<T, impl TDrop: Drop<T>, impl TCopy: Copy<T>> of SeraphSpanTrait<T> {}
+impl SpanImpl<T, impl TDrop: Drop<T>, impl TCopy: Copy<T>> of SeraphSpanTrait<T> {
+    fn contains<impl TPartialEq: PartialEq<T>>(mut self: Span<T>, value: T) -> bool {
+        loop {
+            match self.pop_front() {
+                Option::Some(item) => { if *item == value {
+                    break true;
+                } },
+                Option::None(()) => { break false; },
+            };
+        }
+    }
+}
