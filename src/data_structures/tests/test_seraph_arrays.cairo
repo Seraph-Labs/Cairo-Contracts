@@ -1,5 +1,5 @@
 use array::ArrayTrait;
-use seraphlabs::arrays::SeraphArrayTrait;
+use seraphlabs::arrays::{SeraphArrayTrait, SeraphSpanTrait};
 
 #[test]
 #[available_gas(2000000)]
@@ -42,4 +42,14 @@ fn append_span() {
     assert(*data.at(0) == 2114, 'should be 2114');
     assert(*data.at(1) == 3525, 'should be 3525');
     assert(*data.at(2) == 721, 'should be 721');
+}
+
+
+#[test]
+#[available_gas(2000000)]
+fn test_span_contains() {
+    let mut data = array![1, 2, 3].span();
+    assert(data.contains(1), 'should contain 1');
+    assert(data.contains(2), 'should contain 2');
+    assert(data.contains(3), 'should contain 3');
 }
