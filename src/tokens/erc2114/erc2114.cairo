@@ -198,18 +198,22 @@ mod ERC2114Component {
         +ERC721EnumComponent::HasComponent<TContractState>,
         +Drop<TContractState>
     > of IERC2114ImplTrait<TContractState> {
+        #[inline(always)]
         fn get_trait_catalog(self: @ComponentState<TContractState>) -> ContractAddress {
             self.trait_catalog_contract.read()
         }
 
+        #[inline(always)]
         fn token_balance_of(self: @ComponentState<TContractState>, token_id: u256) -> u256 {
             self.token_balance.read(token_id)
         }
 
+        #[inline(always)]
         fn token_of(self: @ComponentState<TContractState>, token_id: u256) -> u256 {
             self.token_parent.read(token_id)
         }
 
+        #[inline(always)]
         fn token_of_token_by_index(
             self: @ComponentState<TContractState>, token_id: u256, index: u256
         ) -> u256 {
@@ -217,16 +221,19 @@ mod ERC2114Component {
             self.index_to_token_child.read((token_id, index))
         }
 
+        #[inline(always)]
         fn attribute_name(self: @ComponentState<TContractState>, attr_id: u64) -> felt252 {
             let res: AttrBase = self.attr_base.read(attr_id);
             res.name
         }
 
+        #[inline(always)]
         fn attribute_type(self: @ComponentState<TContractState>, attr_id: u64) -> AttrType {
             let res: AttrBase = self.attr_base.read(attr_id);
             res.val_type
         }
 
+        #[inline(always)]
         fn attribute_value(
             self: @ComponentState<TContractState>, token_id: u256, attr_id: u64
         ) -> felt252 {
@@ -249,6 +256,7 @@ mod ERC2114Component {
             self._attributes_of(token_id).span()
         }
 
+        #[inline(always)]
         fn scalar_transfer_from(
             ref self: ComponentState<TContractState>,
             from: ContractAddress,
@@ -267,6 +275,7 @@ mod ERC2114Component {
             self._scalar_transfer(from, token_id, to_token_id);
         }
 
+        #[inline(always)]
         fn scalar_remove_from(
             ref self: ComponentState<TContractState>, from_token_id: u256, token_id: u256
         ) {
@@ -298,6 +307,7 @@ mod ERC2114Component {
             self._scalar_remove(from_token_id, token_id, owner);
         }
 
+        #[inline(always)]
         fn create_attribute(
             ref self: ComponentState<TContractState>,
             attr_id: u64,
@@ -338,6 +348,7 @@ mod ERC2114Component {
         // @dev ensures that token_id has no parent
         //  used for transfer functions on other token standards 
         //  to ensure token cant be transfered if its owned by a token
+        #[inline(always)]
         fn _assert_token_no_parent(self: @ComponentState<TContractState>, token_id: u256) {
             assert(self.token_parent.read(token_id).is_zero(), 'ERC2114: token has parent');
         }
@@ -476,6 +487,7 @@ mod ERC2114Component {
     impl ERC2114PrivateImpl<
         TContractState, +HasComponent<TContractState>
     > of ERC2114PrivateTrait<TContractState> {
+        #[inline(always)]
         fn _get_trait_catalog(self: @ComponentState<TContractState>) -> ITraitCatalogDispatcher {
             let catalog_addr = self.trait_catalog_contract.read();
             assert(catalog_addr.is_non_zero(), 'ERC2114: invalid trait catalog');

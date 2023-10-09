@@ -33,6 +33,7 @@ mod SRC5Component {
 
     #[generate_trait]
     impl SRC5InternalImpl<TContractState> of SRC5InternalTrait<TContractState> {
+        #[inline(always)]
         fn _supports_interface(
             self: @ComponentState<TContractState>, interface_id: felt252
         ) -> bool {
@@ -42,10 +43,12 @@ mod SRC5Component {
             self.supported_interfaces.read(interface_id)
         }
 
+        #[inline(always)]
         fn register_interface(ref self: ComponentState<TContractState>, interface_id: felt252) {
             self.supported_interfaces.write(interface_id, true);
         }
 
+        #[inline(always)]
         fn deregister_interface(ref self: ComponentState<TContractState>, interface_id: felt252) {
             assert(interface_id != constants::ISRC5_ID, 'SRC5: Invalid interface id');
             self.supported_interfaces.write(interface_id, false);

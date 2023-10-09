@@ -148,18 +148,22 @@ mod ERC3525Component {
         +ERC721EnumComponent::HasComponent<TContractState>,
         +Drop<TContractState>
     > of IERC3525ImplTrait<TContractState> {
+        #[inline(always)]
         fn value_decimals(self: @ComponentState<TContractState>) -> u8 {
             self.erc3525_decimals.read()
         }
 
+        #[inline(always)]
         fn value_of(self: @ComponentState<TContractState>, token_id: u256) -> u256 {
             self.erc3525_units.read(token_id)
         }
 
+        #[inline(always)]
         fn slot_of(self: @ComponentState<TContractState>, token_id: u256) -> u256 {
             self.erc3525_slot.read(token_id)
         }
 
+        #[inline(always)]
         fn approve_value(
             ref self: ComponentState<TContractState>,
             token_id: u256,
@@ -179,6 +183,7 @@ mod ERC3525Component {
             self._approve_value(token_id, operator, value);
         }
 
+        #[inline(always)]
         fn allowance(
             self: @ComponentState<TContractState>, token_id: u256, operator: ContractAddress
         ) -> u256 {
@@ -194,6 +199,7 @@ mod ERC3525Component {
             }
         }
 
+        #[inline(always)]
         fn transfer_value_from(
             ref self: ComponentState<TContractState>,
             from_token_id: u256,
@@ -225,6 +231,7 @@ mod ERC3525Component {
         +ERC721EnumComponent::HasComponent<TContractState>,
         +Drop<TContractState>
     > of ERC3525InternalTrait<TContractState> {
+        #[inline(always)]
         fn _mint(
             ref self: ComponentState<TContractState>,
             to: ContractAddress,
@@ -241,6 +248,7 @@ mod ERC3525Component {
             self._mint_new(to, token_id, slot_id, value);
         }
 
+        #[inline(always)]
         fn _mint_value(ref self: ComponentState<TContractState>, to_token_id: u256, value: u256) {
             assert(self.get_erc721()._exist(to_token_id), 'ERC3525: invalid tokenId');
 
@@ -251,6 +259,7 @@ mod ERC3525Component {
             self.emit(TransferValue { from_token_id: 0.into(), to_token_id, value })
         }
 
+        #[inline(always)]
         fn _burn(ref self: ComponentState<TContractState>, token_id: u256) {
             let mut erc721_enum = self.get_erc721_enum_mut();
             // function already checks if token_id exist
@@ -268,6 +277,7 @@ mod ERC3525Component {
             self.emit(TransferValue { from_token_id: token_id, to_token_id: 0_u256, value });
         }
 
+        #[inline(always)]
         fn _burn_value(ref self: ComponentState<TContractState>, token_id: u256, value: u256) {
             assert(self.get_erc721()._exist(token_id), 'ERC3525: invalid tokenId');
             assert(value > 0_u256, 'ERC3525: invalid value');
@@ -279,6 +289,7 @@ mod ERC3525Component {
             self.emit(TransferValue { from_token_id: token_id, to_token_id: 0_u256, value });
         }
 
+        #[inline(always)]
         fn _approve_value(
             ref self: ComponentState<TContractState>,
             token_id: u256,
@@ -310,6 +321,7 @@ mod ERC3525Component {
             self.emit(ApprovalValue { token_id, operator, value });
         }
 
+        #[inline(always)]
         fn _spend_allownce(
             ref self: ComponentState<TContractState>,
             token_id: u256,
@@ -329,6 +341,7 @@ mod ERC3525Component {
             self.emit(ApprovalValue { token_id, operator, value: value_approvals.units });
         }
 
+        #[inline(always)]
         fn _transfer_value_to_address(
             ref self: ComponentState<TContractState>,
             from_token_id: u256,
@@ -353,6 +366,7 @@ mod ERC3525Component {
             token_id
         }
 
+        #[inline(always)]
         fn _transfer_value(
             ref self: ComponentState<TContractState>,
             from_token_id: u256,
@@ -388,6 +402,7 @@ mod ERC3525Component {
             self.emit(TransferValue { from_token_id, to_token_id, value });
         }
 
+        #[inline(always)]
         fn _mint_new(
             ref self: ComponentState<TContractState>,
             to: ContractAddress,
@@ -497,6 +512,7 @@ mod ERC3525Component {
             new_token_id
         }
 
+        #[inline(always)]
         fn _check_max_token_id(ref self: ComponentState<TContractState>, token_id: u256) {
             // if token_id is greater than max_token_id update max_token_id
             if token_id > self.erc3525_max_token_id.read() {
@@ -504,6 +520,7 @@ mod ERC3525Component {
             }
         }
 
+        #[inline(always)]
         fn _check_on_erc3525_received(
             self: @ComponentState<TContractState>,
             to: ContractAddress,

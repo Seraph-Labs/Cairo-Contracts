@@ -141,25 +141,30 @@ mod ERC721Component {
     impl IERC721Impl<
         TContractState, +HasComponent<TContractState>,
     > of IERC721ImplTrait<TContractState> {
+        #[inline(always)]
         fn balance_of(self: @ComponentState<TContractState>, owner: ContractAddress) -> u256 {
             self.erc721_balances.read(owner)
         }
 
+        #[inline(always)]
         fn owner_of(self: @ComponentState<TContractState>, token_id: u256) -> ContractAddress {
             self._owner_of(token_id).expect('ERC721: invalid tokenId')
         }
 
+        #[inline(always)]
         fn get_approved(self: @ComponentState<TContractState>, token_id: u256) -> ContractAddress {
             assert(self._exist(token_id), 'ERC721: tokenId does not exist');
             self.erc721_token_approvals.read(token_id)
         }
 
+        #[inline(always)]
         fn is_approved_for_all(
             self: @ComponentState<TContractState>, owner: ContractAddress, operator: ContractAddress
         ) -> bool {
             self.erc721_operator_approvals.read((owner, operator))
         }
 
+        #[inline(always)]
         fn approve(
             ref self: ComponentState<TContractState>, approved: ContractAddress, token_id: u256
         ) {
@@ -169,12 +174,14 @@ mod ERC721Component {
             self._approve(approved, token_id);
         }
 
+        #[inline(always)]
         fn set_approval_for_all(
             ref self: ComponentState<TContractState>, operator: ContractAddress, approved: bool
         ) {
             self._set_approval_for_all(operator, approved);
         }
 
+        #[inline(always)]
         fn safe_transfer_from(
             ref self: ComponentState<TContractState>,
             from: ContractAddress,
@@ -187,6 +194,7 @@ mod ERC721Component {
             self._safe_transfer(from, to, token_id, data);
         }
 
+        #[inline(always)]
         fn transfer_from(
             ref self: ComponentState<TContractState>,
             from: ContractAddress,
@@ -207,6 +215,7 @@ mod ERC721Component {
     impl ERC721InternalImpl<
         TContractState, +HasComponent<TContractState>,
     > of ERC721InternalTrait<TContractState> {
+        #[inline(always)]
         fn _owner_of(
             self: @ComponentState<TContractState>, token_id: u256
         ) -> Option<ContractAddress> {
@@ -217,11 +226,13 @@ mod ERC721Component {
             }
         }
 
+        #[inline(always)]
         fn _exist(self: @ComponentState<TContractState>, token_id: u256) -> bool {
             let owner = self.erc721_owners.read(token_id);
             !owner.is_zero()
         }
 
+        #[inline(always)]
         fn _is_approved_or_owner(
             self: @ComponentState<TContractState>, spender: ContractAddress, token_id: u256
         ) -> bool {
@@ -232,6 +243,7 @@ mod ERC721Component {
                 || self.erc721_operator_approvals.read((owner, spender))
         }
 
+        #[inline(always)]
         fn _transfer(
             ref self: ComponentState<TContractState>,
             from: ContractAddress,
@@ -258,6 +270,7 @@ mod ERC721Component {
             self.emit(Transfer { from, to, token_id });
         }
 
+        #[inline(always)]
         fn _safe_transfer(
             ref self: ComponentState<TContractState>,
             from: ContractAddress,
@@ -271,6 +284,7 @@ mod ERC721Component {
             );
         }
 
+        #[inline(always)]
         fn _approve(ref self: ComponentState<TContractState>, to: ContractAddress, token_id: u256) {
             let owner = self._owner_of(token_id).expect('ERC721: invalid tokenId');
             assert(owner != to, 'ERC721: owner cant approve self');
@@ -278,6 +292,7 @@ mod ERC721Component {
             self.emit(Approval { owner, approved: to, token_id });
         }
 
+        #[inline(always)]
         fn _set_approval_for_all(
             ref self: ComponentState<TContractState>, operator: ContractAddress, approved: bool
         ) {
@@ -292,6 +307,7 @@ mod ERC721Component {
             self.emit(ApprovalForAll { owner: caller, operator, approved });
         }
 
+        #[inline(always)]
         fn _mint(ref self: ComponentState<TContractState>, to: ContractAddress, token_id: u256) {
             assert(!to.is_zero(), 'ERC721: invalid address');
             assert(token_id > 0_u256, 'ERC721: invalid tokenId');
@@ -305,6 +321,7 @@ mod ERC721Component {
             self.emit(Transfer { from: Zeroable::zero(), to, token_id });
         }
 
+        #[inline(always)]
         fn _safe_mint(
             ref self: ComponentState<TContractState>,
             to: ContractAddress,
@@ -318,6 +335,7 @@ mod ERC721Component {
             );
         }
 
+        #[inline(always)]
         fn _burn(ref self: ComponentState<TContractState>, token_id: u256) {
             // ensures tokenId has owner
             let owner = self._owner_of(token_id).expect('ERC721: invalid tokenId');
@@ -336,6 +354,7 @@ mod ERC721Component {
         }
 
 
+        #[inline(always)]
         fn _check_on_erc721_received(
             self: @ComponentState<TContractState>,
             from: ContractAddress,

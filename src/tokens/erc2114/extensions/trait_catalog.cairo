@@ -107,20 +107,24 @@ mod TraitCatalogComponent {
     impl ITraitCatalogImpl<
         TContractState, +HasComponent<TContractState>
     > of ITraitCatalogImplTrait<TContractState> {
+        #[inline(always)]
         fn trait_list_count(self: @ComponentState<TContractState>) -> u64 {
             self.trait_list_counter.read()
         }
 
+        #[inline(always)]
         fn trait_list_length(self: @ComponentState<TContractState>, list_id: u64) -> felt252 {
             self.trait_list_size.read(list_id)
         }
 
+        #[inline(always)]
         fn trait_list_value_by_index(
             self: @ComponentState<TContractState>, list_id: u64, index: felt252
         ) -> felt252 {
             self.index_to_trait_list_value.read((list_id, index))
         }
 
+        #[inline(always)]
         fn generate_trait_list(
             ref self: ComponentState<TContractState>, values: Span<felt252>
         ) -> u64 {
@@ -134,6 +138,7 @@ mod TraitCatalogComponent {
             list_id
         }
 
+        #[inline(always)]
         fn append_to_trait_list(
             ref self: ComponentState<TContractState>, list_id: u64, value: felt252
         ) {
@@ -146,6 +151,7 @@ mod TraitCatalogComponent {
             self.trait_list_size.write(list_id, cur_len + 1);
         }
 
+        #[inline(always)]
         fn append_batch_to_trait_list(
             ref self: ComponentState<TContractState>, list_id: u64, values: Span<felt252>
         ) {
@@ -157,6 +163,7 @@ mod TraitCatalogComponent {
             self._append_batch_to_trait_list(list_id, values);
         }
 
+        #[inline(always)]
         fn ammend_trait_list(
             ref self: ComponentState<TContractState>, list_id: u64, index: felt252, value: felt252
         ) {
@@ -205,6 +212,7 @@ mod TraitCatalogComponent {
     impl TraitCatalogPrivateImpl<
         TContractState, +HasComponent<TContractState>
     > of TraitCatalogPrivateTrait<TContractState> {
+        #[inline(always)]
         fn _assert_trait_list_exists(self: @ComponentState<TContractState>, list_id: u64) {
             assert(
                 list_id > 0 && list_id <= self.trait_list_counter.read(),
@@ -212,6 +220,7 @@ mod TraitCatalogComponent {
             );
         }
 
+        #[inline(always)]
         fn _increase_trait_list_count(ref self: ComponentState<TContractState>) {
             self.trait_list_counter.write(self.trait_list_counter.read() + 1);
         }
@@ -221,6 +230,8 @@ mod TraitCatalogComponent {
         //  DOES NOT check validity of list_id
         //  DOES NOT check validity of index in relation to trait_list length
         //  checks validity of value and if index is non_zero
+
+        #[inline(always)]
         fn _update_trait_list(
             ref self: ComponentState<TContractState>, list_id: u64, index: felt252, value: felt252
         ) {

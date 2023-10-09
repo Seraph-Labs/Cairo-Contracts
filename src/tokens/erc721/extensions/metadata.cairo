@@ -74,14 +74,17 @@ mod ERC721MetadataComponent {
         +ERC721Component::HasComponent<TContractState>,
         +Drop<TContractState>
     > of IERC721MetadataImplTrait<TContractState> {
+        #[inline(always)]
         fn name(self: @ComponentState<TContractState>) -> felt252 {
             self.erc721_name.read()
         }
 
+        #[inline(always)]
         fn symbol(self: @ComponentState<TContractState>) -> felt252 {
             self.erc721_symbol.read()
         }
 
+        #[inline(always)]
         fn token_uri(self: @ComponentState<TContractState>, token_id: u256) -> Array<felt252> {
             // get_base_uri
             assert(self.get_erc721()._exist(token_id), 'ERC721Metadata: invalid tokenId');

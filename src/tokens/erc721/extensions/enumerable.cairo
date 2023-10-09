@@ -77,10 +77,12 @@ mod ERC721EnumComponent {
         +ERC721Component::HasComponent<TContractState>,
         +Drop<TContractState>
     > of IERC721EnumImplTrait<TContractState> {
+        #[inline(always)]
         fn total_supply(self: @ComponentState<TContractState>) -> u256 {
             self.erc721_supply.read()
         }
 
+        #[inline(always)]
         fn token_by_index(self: @ComponentState<TContractState>, index: u256) -> u256 {
             // assert index is not out of bounds
             let supply = self.erc721_supply.read();
@@ -88,6 +90,7 @@ mod ERC721EnumComponent {
             self.erc721_index_to_tokens.read(index)
         }
 
+        #[inline(always)]
         fn token_of_owner_by_index(
             self: @ComponentState<TContractState>, owner: ContractAddress, index: u256
         ) -> u256 {
@@ -106,6 +109,7 @@ mod ERC721EnumComponent {
         +ERC721Component::HasComponent<TContractState>,
         +Drop<TContractState>
     > of ERC721EnumInternalTrait<TContractState> {
+        #[inline(always)]
         fn transfer_from(
             ref self: ComponentState<TContractState>,
             from: ContractAddress,
@@ -117,6 +121,7 @@ mod ERC721EnumComponent {
             erc721.transfer_from(from, to, token_id);
         }
 
+        #[inline(always)]
         fn safe_transfer_from(
             ref self: ComponentState<TContractState>,
             from: ContractAddress,
@@ -130,6 +135,8 @@ mod ERC721EnumComponent {
         }
 
         // @dev transfer function that only edits the enum storage and not 721 storage
+
+        #[inline(always)]
         fn _transfer(
             ref self: ComponentState<TContractState>,
             from: ContractAddress,
@@ -140,6 +147,7 @@ mod ERC721EnumComponent {
             self._add_token_to_owner_enum(to, token_id);
         }
 
+        #[inline(always)]
         fn _mint(ref self: ComponentState<TContractState>, to: ContractAddress, token_id: u256) {
             self._add_token_to_owner_enum(to, token_id);
             self._add_token_to_total_enum(token_id);
@@ -148,6 +156,7 @@ mod ERC721EnumComponent {
             erc721._mint(to, token_id);
         }
 
+        #[inline(always)]
         fn _safe_mint(
             ref self: ComponentState<TContractState>,
             to: ContractAddress,
@@ -161,6 +170,7 @@ mod ERC721EnumComponent {
             erc721._safe_mint(to, token_id, data);
         }
 
+        #[inline(always)]
         fn _burn(ref self: ComponentState<TContractState>, token_id: u256) {
             let mut erc721 = self.get_erc721_mut();
             let owner = erc721.owner_of(token_id);
@@ -172,6 +182,7 @@ mod ERC721EnumComponent {
             erc721._burn(token_id);
         }
 
+        #[inline(always)]
         fn _token_of_owner_by_index(
             self: @ComponentState<TContractState>, owner: ContractAddress, index: u256
         ) -> Option<u256> {
@@ -192,6 +203,7 @@ mod ERC721EnumComponent {
         +ERC721Component::HasComponent<TContractState>,
         +Drop<TContractState>
     > of ERC721EnumPrivateTrait<TContractState> {
+        #[inline(always)]
         fn _add_token_to_total_enum(ref self: ComponentState<TContractState>, token_id: u256) {
             let supply = self.erc721_supply.read();
             // add token_id to totals last index
@@ -202,6 +214,7 @@ mod ERC721EnumComponent {
             self.erc721_supply.write(supply + 1_u256);
         }
 
+        #[inline(always)]
         fn _remove_token_from_total_enum(ref self: ComponentState<TContractState>, token_id: u256) {
             // index starts from zero therefore minus 1
             let last_token_index = self.erc721_supply.read() - 1_u256;
@@ -223,6 +236,7 @@ mod ERC721EnumComponent {
             self.erc721_supply.write(last_token_index);
         }
 
+        #[inline(always)]
         fn _add_token_to_owner_enum(
             ref self: ComponentState<TContractState>, owner: ContractAddress, token_id: u256
         ) {
@@ -233,6 +247,7 @@ mod ERC721EnumComponent {
             self.erc721_owner_token_to_index.write(token_id, len);
         }
 
+        #[inline(always)]
         fn _remove_token_from_owner_enum(
             ref self: ComponentState<TContractState>, owner: ContractAddress, token_id: u256
         ) {

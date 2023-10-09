@@ -119,6 +119,7 @@ mod ERC2114SlotAttrComponent {
         +ERC721EnumComponent::HasComponent<TContractState>,
         +Drop<TContractState>
     > of IERC2114SlotAttrImplTrait<TContractState> {
+        #[inline(always)]
         fn slot_attribute_value(
             self: @ComponentState<TContractState>, slot_id: u256, attr_id: u64
         ) -> felt252 {
@@ -139,10 +140,12 @@ mod ERC2114SlotAttrComponent {
             }
         }
 
+        #[inline(always)]
         fn slot_attributes_of(self: @ComponentState<TContractState>, slot_id: u256) -> Span<u64> {
             self._slot_attributes_of(slot_id).span()
         }
 
+        #[inline(always)]
         fn set_slot_attribute(
             ref self: ComponentState<TContractState>, slot_id: u256, attr_id: u64, value: felt252
         ) {
@@ -152,6 +155,7 @@ mod ERC2114SlotAttrComponent {
             self._set_attributes_to_slot(slot_id, array![attr_id].span(), array![value].span());
         }
 
+        #[inline(always)]
         fn batch_set_slot_attribute(
             ref self: ComponentState<TContractState>,
             slot_id: u256,
