@@ -2,6 +2,7 @@
 // SeraphLabs Contracts for Cairo >=v2.2.0 (tokens/erc2114/extensions/slot_attribute.cairo)
 #[starknet::component]
 mod ERC2114SlotAttrComponent {
+    use core::array::ArrayTrait;
     use seraphlabs::tokens::constants;
     use seraphlabs::tokens::erc2114::interface;
     use interface::{ITraitCatalogDispatcher, ITraitCatalogDispatcherTrait};
@@ -139,18 +140,7 @@ mod ERC2114SlotAttrComponent {
         }
 
         fn slot_attributes_of(self: @ComponentState<TContractState>, slot_id: u256) -> Span<u64> {
-            let mut attr_ids = ArrayTrait::new();
-            let mut index = 0;
-            loop {
-                let attr_pack = self.index_to_slot_attr_pack.read((slot_id, index));
-                if !attr_pack.is_valid() {
-                    break;
-                }
-                let mut attr_ids_span = attr_pack.unpack_all();
-                attr_ids.append_span(ref attr_ids_span);
-                index += 1;
-            };
-            attr_ids.span()
+            self._slot_attributes_of(slot_id).span()
         }
 
         fn set_slot_attribute(
@@ -186,6 +176,21 @@ mod ERC2114SlotAttrComponent {
         +ERC721EnumComponent::HasComponent<TContractState>,
         +Drop<TContractState>
     > of ERC2114SlotAttrInternalTrait<TContractState> {
+        fn _slot_attributes_of(self: @ComponentState<TContractState>, slot_id: u256) -> Array<u64> {
+            let mut attr_ids = ArrayTrait::new();
+            let mut index = 0;
+            loop {
+                let attr_pack = self.index_to_slot_attr_pack.read((slot_id, index));
+                if !attr_pack.is_valid() {
+                    break;
+                }
+                // unpack into array
+                attr_pack.unpack_into(ref attr_ids);
+                index += 1;
+            };
+            attr_ids
+        }
+
         fn _set_attributes_to_slot(
             ref self: ComponentState<TContractState>,
             slot_id: u256,

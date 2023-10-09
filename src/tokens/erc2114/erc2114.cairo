@@ -246,18 +246,7 @@ mod ERC2114Component {
         }
 
         fn attributes_of(self: @ComponentState<TContractState>, token_id: u256) -> Span<u64> {
-            let mut attr_ids = ArrayTrait::new();
-            let mut index = 0;
-            loop {
-                let attr_pack = self.index_to_token_attr_pack.read((token_id, index));
-                if !attr_pack.is_valid() {
-                    break;
-                }
-                let mut attr_ids_span = attr_pack.unpack_all();
-                attr_ids.append_span(ref attr_ids_span);
-                index += 1;
-            };
-            attr_ids.span()
+            self._attributes_of(token_id).span()
         }
 
         fn scalar_transfer_from(
@@ -351,6 +340,21 @@ mod ERC2114Component {
         //  to ensure token cant be transfered if its owned by a token
         fn _assert_token_no_parent(self: @ComponentState<TContractState>, token_id: u256) {
             assert(self.token_parent.read(token_id).is_zero(), 'ERC2114: token has parent');
+        }
+
+        fn _attributes_of(self: @ComponentState<TContractState>, token_id: u256) -> Array<u64> {
+            let mut attr_ids = ArrayTrait::new();
+            let mut index = 0;
+            loop {
+                let attr_pack = self.index_to_token_attr_pack.read((token_id, index));
+                if !attr_pack.is_valid() {
+                    break;
+                }
+                // unpack into array
+                attr_pack.unpack_into(ref attr_ids);
+                index += 1;
+            };
+            attr_ids
         }
 
         // @dev transfer token to another token

@@ -180,6 +180,20 @@ impl AttrPackImpl of AttrPackTrait {
         attr_ids.span()
     }
 
+    // @dev unpack attr_ids into an array
+    fn unpack_into(self: AttrPack, ref attr_ids: Array<u64>) {
+        let mut pos = 0;
+        loop {
+            match pos >= self.len {
+                bool::False => {
+                    attr_ids.append(AttrPackBitShiftImpl::mask_pack(self.pack, pos));
+                    pos += 1;
+                },
+                bool::True => { break; },
+            };
+        };
+    }
+
     // @dev adds an attr_id into pack if have space
     //  this function does not check if attr_id is already in pack
     fn add_to_pack(ref self: AttrPack, attr_id: u64) {
