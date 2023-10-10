@@ -6,6 +6,7 @@ mod ERC2114SlotAttrComponent {
     use seraphlabs::tokens::constants;
     use seraphlabs::tokens::erc2114::interface;
     use interface::{ITraitCatalogDispatcher, ITraitCatalogDispatcherTrait};
+    use seraphlabs::tokens::erc2114::utils::Errors;
     use seraphlabs::tokens::erc2114::utils::{AttrType, AttrTypeTrait};
     use seraphlabs::tokens::erc2114::utils::{AttrPack, AttrPackTrait};
     use seraphlabs::tokens::erc2114::utils::{AttrBase, AttrBaseTrait};
@@ -202,7 +203,7 @@ mod ERC2114SlotAttrComponent {
             values: Span<felt252>
         ) {
             // assert slot_id is valid
-            assert(slot_id.is_non_zero(), 'ERC2114: invalid slot_id');
+            assert(slot_id.is_non_zero(), Errors::INVALID_SLOT_ID);
             // if attr_ids is empty return
             if attr_ids.len().is_zero() {
                 return;
@@ -222,7 +223,7 @@ mod ERC2114SlotAttrComponent {
             ref self: ComponentState<TContractState>, slot_id: u256, attr_ids: Span<u64>
         ) {
             // assert slot_id is valid
-            assert(slot_id.is_non_zero(), 'ERC2114: invalid slot_id');
+            assert(slot_id.is_non_zero(), Errors::INVALID_SLOT_ID);
             // if attr_ids is empty return
             if attr_ids.len().is_zero() {
                 return;
@@ -253,7 +254,7 @@ mod ERC2114SlotAttrComponent {
             self: @ComponentState<TContractState>, slot_id: u256, ammount: u8
         ) -> u64 {
             // assert ammount needed to store is valid
-            assert(ammount > 0 && ammount <= 3, 'ERC2114: invalid attr_id pack');
+            assert(ammount > 0 && ammount <= 3, Errors::INVALID_ATTR_PACK);
             let mut index: u64 = 0;
             loop {
                 let pack: AttrPack = self.index_to_slot_attr_pack.read((slot_id, index));
@@ -399,7 +400,7 @@ mod ERC2114SlotAttrComponent {
             mut values: Span<felt252>
         ) -> Span<u64> {
             // assert that values and attr_ids len are the same length and length is not zero
-            assert(attr_ids.len() == values.len(), 'ERC2114: invalid ids or values');
+            assert(attr_ids.len() == values.len(), Errors::INVALID_ID_OR_VALUE);
             let mut new_attr_ids = ArrayTrait::new();
 
             let mut erc2114 = self.get_erc2114_mut();
@@ -410,7 +411,7 @@ mod ERC2114SlotAttrComponent {
                         let cur_value = self.slot_attr_value.read((slot_id, *attr_id));
                         let value = *values.pop_front().unwrap();
                         //assert value is not zero
-                        assert(value.is_non_zero(), 'ERC2114: invalid attr_id value');
+                        assert(value.is_non_zero(), Errors::INVALID_ATTR_VALUE);
 
                         let attr_type = erc2114.attribute_type(*attr_id);
 
@@ -461,7 +462,7 @@ mod ERC2114SlotAttrComponent {
             let attr_type: AttrType = erc2114.attribute_type(attr_id);
             // check if attr_id is exists
             // TODO: when strings come out change error message 
-            assert(!attr_type.is_empty(), 'ERC2114: invalid attr_id');
+            assert(!attr_type.is_empty(), Errors::INVALID_ATTR_ID);
 
             // if value is the same as current value return
             let cur_attr_value = self.slot_attr_value.read((slot_id, attr_id));
@@ -478,7 +479,7 @@ mod ERC2114SlotAttrComponent {
                 // as it means index in trait list has not been set
                 assert(
                     trait_cat.trait_list_value_by_index(list_id, value).is_non_zero(),
-                    'ERC2114: invalid attr_id value'
+                    Errors::INVALID_ATTR_VALUE
                 );
             }
 

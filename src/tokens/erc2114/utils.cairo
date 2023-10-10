@@ -3,6 +3,32 @@
 use starknet::ContractAddress;
 use starknet::storage_access::StorePacking;
 
+// -------------------------------------------------------------------------- //
+//                               Error Messages                               //
+// -------------------------------------------------------------------------- //
+mod Errors {
+    const INVALID_TOKEN_ID: felt252 = 'ERC2114: invalid token_id';
+    const INVALID_SLOT_ID: felt252 = 'ERC2114: invalid slot_id';
+    const INVALID_ATTR_ID: felt252 = 'ERC2114: invalid attr_id';
+    const INVALID_LIST_ID: felt252 = 'ERC2114: invalid list_id';
+    const INVALID_PARENT: felt252 = 'ERC2114: invalid token parent';
+    const INVALID_ATTR_VALUE: felt252 = 'ERC2114: invalid attr_id value';
+    const INVALID_ATTR_PACK: felt252 = 'ERC2114: invalid attr_id pack';
+    const INVALID_TRAIT_CATALOG: felt252 = 'ERC2114: invalid trait catalog';
+    const INVALID_ID_OR_VALUE: felt252 = 'ERC2114: invalid ids or values';
+    const ATTR_ID_ALREADY_EXIST: felt252 = 'ERC2114: attr_id already exist';
+    const INDEX_OUT_OF_BOUNDS: felt252 = 'ERC2114: index out of bounds';
+    const INVENTORY_NO_SPACE: felt252 = 'ERC2114: inventory has no space';
+    const INVALID_CRITERIA: felt252 = 'ERC2114: invalid criteria';
+    const INVALID_SLOT_CAPACITY: felt252 = 'ERC2114: invalid slot capacity';
+    const UNAPPROVED_CALLER: felt252 = 'ERC2114: caller is not approved';
+    const ALREADY_EQUIPPED: felt252 = 'ERC2114: token already equipped';
+    const ALREADY_UNEQUIPPED: felt252 = 'ERC2114: token not equipped';
+}
+// -------------------------------------------------------------------------- //
+//                                  AttrType                                  //
+// -------------------------------------------------------------------------- //
+
 #[derive(Copy, Drop, Serde, PartialEq, starknet::Store, Default)]
 enum AttrType {
     #[default]
@@ -301,6 +327,10 @@ impl AttrPackBitShiftImpl of AttrPackBitShiftTrait {
     }
 }
 
+// -------------------------------------------------------------------------- //
+//                            AttrPack Into Traits                            //
+// -------------------------------------------------------------------------- //
+
 impl Felt252IntoAttrPackImpl of Into<felt252, AttrPack> {
     #[inline(always)]
     fn into(self: felt252) -> AttrPack {
@@ -325,6 +355,10 @@ impl AttrPackIntoFelt252Impl of Into<AttrPack, felt252> {
         }
     }
 }
+
+// -------------------------------------------------------------------------- //
+//                        Stroage Packking for AttrPack                       //
+// -------------------------------------------------------------------------- //
 
 // @dev implementation for packing AttrPack into felt
 impl AttrPackPackableimpl of StorePacking<AttrPack, felt252> {
