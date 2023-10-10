@@ -2,7 +2,6 @@
 // SeraphLabs Contracts for Cairo >=v2.2.0 (tokens/erc2114/extensions/slot_attribute.cairo)
 #[starknet::component]
 mod ERC2114SlotAttrComponent {
-    use core::array::ArrayTrait;
     use seraphlabs::tokens::constants;
     use seraphlabs::tokens::erc2114::interface;
     use interface::{ITraitCatalogDispatcher, ITraitCatalogDispatcherTrait};

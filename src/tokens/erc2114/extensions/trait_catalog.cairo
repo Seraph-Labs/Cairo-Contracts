@@ -2,7 +2,6 @@
 // SeraphLabs Contracts for Cairo >=v2.2.0 (tokens/erc2114/extensions/traitcatalog.cairo)
 #[starknet::component]
 mod TraitCatalogComponent {
-    use core::zeroable::Zeroable;
     use seraphlabs::tokens::constants;
     use seraphlabs::tokens::erc2114::interface;
     use seraphlabs::tokens::src5::{
