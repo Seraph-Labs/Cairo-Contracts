@@ -4,7 +4,6 @@ use seraphlabs::tokens::tests::mocks::erc2114_slot_attr_mock::{
 };
 use seraphlabs::tokens::erc2114::utils::AttrType;
 use seraphlabs::tokens::erc2114::extensions::ERC2114SlotAttrComponent;
-use seraphlabs::tokens::erc721::ERC721;
 use seraphlabs::tokens::tests::mocks::trait_catalog_mock::{
     TraitCatalogMock, InvalidTraitCatalogMock
 };

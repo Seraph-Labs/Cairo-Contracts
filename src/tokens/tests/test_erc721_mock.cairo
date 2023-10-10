@@ -2,7 +2,6 @@ use seraphlabs::tokens::tests::mocks::erc721_mock::{
     ERC721Mock as Mock, IERC721MockDispatcher, IERC721MockDispatcherTrait
 };
 use seraphlabs::tokens::tests::mocks::receivers_mock::{Mock721Receiver as Receiver, NonReceiver};
-use seraphlabs::tokens::erc721::ERC721;
 use seraphlabs::tokens::erc721::ERC721Component;
 use seraphlabs::tokens::constants;
 use seraphlabs::utils::testing::{vars, helper};
