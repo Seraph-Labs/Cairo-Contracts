@@ -206,7 +206,18 @@ mod ERC3525Component {
             to: ContractAddress,
             value: u256
         ) -> u256 {
+            // assert value is not zero
             assert(value != 0.into(), 'ERC3525: invalid value');
+            // assert caller is valid
+            let caller = get_caller_address();
+            assert(!caller.is_zero(), 'ERC3525: invalid caller');
+            // checks for tokenId level approval and above
+            // if not there check for value level approval and spend allowance
+            // functions already check if `from_tokenId` exist
+            let mut erc721 = self.get_erc721_mut();
+            if !erc721._is_approved_or_owner(caller, from_token_id) {
+                self._spend_allownce(from_token_id, caller, value);
+            }
             let token_id = self._transfer_value_to_address(from_token_id, to, value);
             let data = ArrayTrait::<felt252>::new();
             assert(
@@ -260,6 +271,27 @@ mod ERC3525Component {
         }
 
         #[inline(always)]
+        fn _mint_new(
+            ref self: ComponentState<TContractState>,
+            to: ContractAddress,
+            token_id: u256,
+            slot_id: u256,
+            value: u256
+        ) {
+            //? internal mint function does not check for assertions or on ERC3525Received
+            let mut erc721_enum = self.get_erc721_enum_mut();
+            erc721_enum._mint(to, token_id);
+            // check if token_id is greater than max_token_id
+            self._check_max_token_id(token_id);
+
+            self.erc3525_slot.write(token_id, slot_id);
+            self.erc3525_units.write(token_id, value);
+            // emit event
+            self.emit(SlotChanged { token_id, old_slot: 0.into(), new_slot: slot_id });
+            self.emit(TransferValue { from_token_id: 0.into(), to_token_id: token_id, value });
+        }
+
+        #[inline(always)]
         fn _burn(ref self: ComponentState<TContractState>, token_id: u256) {
             let mut erc721_enum = self.get_erc721_enum_mut();
             // function already checks if token_id exist
@@ -296,8 +328,7 @@ mod ERC3525Component {
             operator: ContractAddress,
             value: u256
         ) {
-            let index = self._find_operator_index(token_id, operator);
-            match index {
+            match self._find_operator_index(token_id, operator) {
                 OperatorIndex::Contain(x) => {
                     // if operator already approved update value
                     self
@@ -328,8 +359,8 @@ mod ERC3525Component {
             operator: ContractAddress,
             value: u256
         ) {
-            //* does not check if operator is a zero address
-            // method will revert if index returned is rom a empty slot, means operator not approved
+            // does not check if operator is a zero address
+            // method will revert if index returned is from a empty slot, means operator not approved
             let index = self
                 ._find_operator_index(token_id, operator)
                 .expect_contains('ERC3525: operator not approved');
@@ -341,6 +372,12 @@ mod ERC3525Component {
             self.emit(ApprovalValue { token_id, operator, value: value_approvals.units });
         }
 
+        // @dev transfers value from a token_id to address
+        //  checks if `to` address has a token with the same slot as `from_token_id`
+        //  if it does not then mint a new token with the same slot and transfer value to it
+        //  else transfer value to the token with the same slot
+        //  DOES NOT check validity of from_token_id
+        //  DOES Not spend allowance
         #[inline(always)]
         fn _transfer_value_to_address(
             ref self: ComponentState<TContractState>,
@@ -362,10 +399,18 @@ mod ERC3525Component {
                     new_token_id
                 },
             };
+            // this function emits TransferValue event
             self._transfer_value(from_token_id, token_id, value);
             token_id
         }
 
+        // @dev transfers value from a token_id to another token_id
+        //  DOES NOT check validity of from_token_id 
+        //  DOES NOT check approval of from_token_id 
+        //  DOES NOT spend approval allowance
+        //  DOES check validity of to_token_id
+        //  DOES check if value exceed from_token_id units
+        //  EMITS TransferValue event
         #[inline(always)]
         fn _transfer_value(
             ref self: ComponentState<TContractState>,
@@ -373,18 +418,8 @@ mod ERC3525Component {
             to_token_id: u256,
             value: u256
         ) {
-            // assert caller is valid
-            let caller = get_caller_address();
-            assert(!caller.is_zero(), 'ERC3525: invalid caller');
-            // checks for tokenId level approval and above
-            // if not there check for value level approval and spend allowance
-            // functions already check if from_tokenId exist
-            let erc721 = self.get_erc721();
-            if !erc721._is_approved_or_owner(caller, from_token_id) {
-                self._spend_allownce(from_token_id, caller, value);
-            }
             // checks if to_token_id exist
-            assert(erc721._exist(to_token_id), 'ERC3525: invalid tokenId');
+            assert(self.get_erc721_mut()._exist(to_token_id), 'ERC3525: invalid tokenId');
             // assert from and to tokenIds are different
             assert(from_token_id != to_token_id, 'ERC3525: cant transfer self');
             // checks tokenIds have the same slot
@@ -402,27 +437,10 @@ mod ERC3525Component {
             self.emit(TransferValue { from_token_id, to_token_id, value });
         }
 
-        #[inline(always)]
-        fn _mint_new(
-            ref self: ComponentState<TContractState>,
-            to: ContractAddress,
-            token_id: u256,
-            slot_id: u256,
-            value: u256
-        ) {
-            //? internal mint function does not check for assertions or on ERC3525Received
-            let mut erc721_enum = self.get_erc721_enum_mut();
-            erc721_enum._mint(to, token_id);
-            // check if token_id is greater than max_token_id
-            self._check_max_token_id(token_id);
 
-            self.erc3525_slot.write(token_id, slot_id);
-            self.erc3525_units.write(token_id, value);
-            // emit event
-            self.emit(SlotChanged { token_id, old_slot: 0.into(), new_slot: slot_id });
-            self.emit(TransferValue { from_token_id: 0.into(), to_token_id: token_id, value });
-        }
-
+        // @dev clear all operator value approvals for token_id
+        //  Mainly used for transfer functions outside of ERC3525
+        //  when transfering or burning a token
         fn _clear_value_approvals(ref self: ComponentState<TContractState>, token_id: u256) {
             let mut index = 0;
             loop {
@@ -449,6 +467,7 @@ mod ERC3525Component {
         +ERC721EnumComponent::HasComponent<TContractState>,
         +Drop<TContractState>
     > of ERC3525PrivateTrait<TContractState> {
+        // @dev loops through token_id operators to find operator
         fn _find_operator_index(
             self: @ComponentState<TContractState>, token_id: u256, operator: ContractAddress
         ) -> OperatorIndex<u16> {
@@ -467,6 +486,7 @@ mod ERC3525Component {
             new_index
         }
 
+        // @dev loops through `to` address owned tokens to find a token with same slot
         fn _find_same_slot_token_id(
             self: @ComponentState<TContractState>, from_token_id: u256, to: ContractAddress
         ) -> Option<u256> {
@@ -496,8 +516,10 @@ mod ERC3525Component {
             found_token_id
         }
 
+        // @dev assumes highest token id is the last token minted
+        //  else loop and find the next available token
+        //  this is gas inefficient so if ussing this function should ensure that tokens are minted sequentially
         fn _generate_new_token_id(self: @ComponentState<TContractState>) -> u256 {
-            //? gets the current higest token and assumes next token is available
             // if not loop and find the next available token
             let highest = self.erc3525_max_token_id.read();
             let mut new_token_id = highest + 1_u256;
