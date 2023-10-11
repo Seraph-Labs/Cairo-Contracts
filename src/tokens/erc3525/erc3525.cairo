@@ -1,5 +1,6 @@
 #[starknet::component]
 mod ERC3525Component {
+    use core::zeroable::Zeroable;
     use seraphlabs::tokens::constants;
     use seraphlabs::tokens::erc3525::interface;
     use interface::{IERC3525ReceiverDispatcher, IERC3525ReceiverDispatcherTrait};
@@ -207,10 +208,10 @@ mod ERC3525Component {
             value: u256
         ) -> u256 {
             // assert value is not zero
-            assert(value != 0.into(), 'ERC3525: invalid value');
+            assert(value.is_non_zero(), 'ERC3525: invalid value');
             // assert caller is valid
             let caller = get_caller_address();
-            assert(!caller.is_zero(), 'ERC3525: invalid caller');
+            assert(caller.is_non_zero(), 'ERC3525: invalid caller');
             // checks for tokenId level approval and above
             // if not there check for value level approval and spend allowance
             // functions already check if `from_tokenId` exist
@@ -254,43 +255,27 @@ mod ERC3525Component {
             assert(!to.is_zero(), 'ERC3525: invalid to address');
             // assert token_id does not exist
             assert(!self.get_erc721()._exist(token_id), 'ERC3525: token already exist');
-            // mint token
+            // mint actual token
+            let mut erc721_enum = self.get_erc721_enum_mut();
+            erc721_enum._mint(to, token_id);
+            // mint token values and slot
+            // this functionm EMITs SlotChanged and TransferValue events
             self._unsafe_mint(to, token_id, slot_id, value);
         }
 
         // @dev mints value straight to a token
         #[inline(always)]
         fn _mint_value(ref self: ComponentState<TContractState>, to_token_id: u256, value: u256) {
-            assert(self.get_erc721()._exist(to_token_id), 'ERC3525: invalid tokenId');
-
-            assert(value != 0.into(), 'ERC3525: invalid value');
+            // assert valid to value
+            assert(value.is_non_zero(), 'ERC3525: invalid value');
+            // assert token_id exist
+            assert(self.get_erc721()._exist(to_token_id), 'ERC3525: invalid token_id');
             // increase to units
             self.erc3525_units.write(to_token_id, self.erc3525_units.read(to_token_id) + value);
             // emit event
-            self.emit(TransferValue { from_token_id: 0.into(), to_token_id, value })
+            self.emit(TransferValue { from_token_id: 0, to_token_id, value })
         }
 
-        // @dev mints a new token without any assertions
-        #[inline(always)]
-        fn _unsafe_mint(
-            ref self: ComponentState<TContractState>,
-            to: ContractAddress,
-            token_id: u256,
-            slot_id: u256,
-            value: u256
-        ) {
-            //? internal mint function does not check for assertions or on ERC3525Received
-            let mut erc721_enum = self.get_erc721_enum_mut();
-            erc721_enum._mint(to, token_id);
-            // check if token_id is greater than max_token_id
-            self._check_max_token_id(token_id);
-
-            self.erc3525_slot.write(token_id, slot_id);
-            self.erc3525_units.write(token_id, value);
-            // emit event
-            self.emit(SlotChanged { token_id, old_slot: 0.into(), new_slot: slot_id });
-            self.emit(TransferValue { from_token_id: 0.into(), to_token_id: token_id, value });
-        }
 
         #[inline(always)]
         fn _burn(ref self: ComponentState<TContractState>, token_id: u256) {
@@ -364,7 +349,7 @@ mod ERC3525Component {
             // method will revert if index returned is from a empty slot, means operator not approved
             let index = self
                 ._find_operator_index(token_id, operator)
-                .expect_contains('ERC3525: operator not approved');
+                .expect_contains('ERC3525: insufficient allowance');
             let mut value_approvals = self.erc3525_unit_level_approvals.read((token_id, index));
             // spend units , method alrady checks for value exceeding units
             value_approvals.spend_units(value);
@@ -387,16 +372,13 @@ mod ERC3525Component {
             value: u256
         ) -> u256 {
             // assert valid to adderss
-            assert(!to.is_zero(), 'ERC3525: invalid address');
+            assert(to.is_non_zero(), 'ERC3525: invalid address');
             // find token_id with same slot to transfer if not generate new token_id and mint
             let token_id = match self._find_same_slot_token_id(from_token_id, to) {
                 Option::Some(x) => x,
                 Option::None(_) => {
                     let new_token_id = self._generate_new_token_id();
-                    self
-                        ._unsafe_mint(
-                            to, new_token_id, self.erc3525_slot.read(from_token_id), 0.into()
-                        );
+                    self._mint(to, new_token_id, self.erc3525_slot.read(from_token_id), 0);
                     new_token_id
                 },
             };
@@ -446,12 +428,15 @@ mod ERC3525Component {
             let mut index = 0;
             loop {
                 // if zero break else clear approval slot
-                let value_approvals = self.erc3525_unit_level_approvals.read((token_id, index));
-                if value_approvals.is_zero() {
-                    break ();
-                }
-                self.erc3525_unit_level_approvals.write((token_id, index), Zeroable::zero());
-                index += 1;
+                match self.erc3525_unit_level_approvals.read((token_id, index)).is_zero() {
+                    bool::False => {
+                        self
+                            .erc3525_unit_level_approvals
+                            .write((token_id, index), Zeroable::zero());
+                        index += 1;
+                    },
+                    bool::True => { break; }
+                };
             }
         }
     }
@@ -497,7 +482,7 @@ mod ERC3525Component {
 
             let found_token_id = loop {
                 // use internal function so function wont revert on out of bounds index
-                match erc721_enum._token_of_owner_by_index(to, index.into()) {
+                match erc721_enum._token_of_owner_by_index(to, index) {
                     Option::Some(x) => {
                         // if x == from_token_id or slot not the same  skip
                         // else break and return token_id
@@ -541,6 +526,27 @@ mod ERC3525Component {
             if token_id > self.erc3525_max_token_id.read() {
                 self.erc3525_max_token_id.write(token_id);
             }
+        }
+
+        // @dev mints a new token without any assertions
+        // does not actually mint a token just updates 3525 storage
+        #[inline(always)]
+        fn _unsafe_mint(
+            ref self: ComponentState<TContractState>,
+            to: ContractAddress,
+            token_id: u256,
+            slot_id: u256,
+            value: u256
+        ) {
+            // check if token_id is greater than max_token_id
+            // if it is set mac token id 
+            self._check_max_token_id(token_id);
+
+            self.erc3525_slot.write(token_id, slot_id);
+            self.erc3525_units.write(token_id, value);
+            // emit event
+            self.emit(SlotChanged { token_id, old_slot: 0, new_slot: slot_id });
+            self.emit(TransferValue { from_token_id: 0, to_token_id: token_id, value });
         }
 
         #[inline(always)]

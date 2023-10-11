@@ -30,35 +30,12 @@ impl ApprovedUnitsImpl of ApprovedUnitsTrait {
     #[inline(always)]
     fn spend_units(ref self: ApprovedUnits, value: u256) {
         if self.units < value {
-            panic_with_felt252('ERC3525: Insufficient allowance');
+            panic_with_felt252('ERC3525: insufficient allowance');
         }
 
         self.units -= value;
     }
 }
-
-// impl StorageAccessApprovedUniits of StorageAccess<ApprovedUnits> {
-//     #[inline(always)]
-//     fn read(address_domain: u32, base: StorageBaseAddress) -> SyscallResult<ApprovedUnits> {
-//         let units = StorageAccess::<u256>::read(address_domain, base)?;
-//         let operator_base = storage_base_address_from_felt252(
-//             storage_address_from_base_and_offset(base, 2_u8).into()
-//         );
-//         let operator = StorageAccess::<ContractAddress>::read(address_domain, operator_base)?;
-//         Result::Ok(ApprovedUnits { units: units, operator: operator })
-//     }
-
-//     #[inline(always)]
-//     fn write(
-//         address_domain: u32, base: StorageBaseAddress, value: ApprovedUnits
-//     ) -> SyscallResult<()> {
-//         StorageAccess::<u256>::write(address_domain, base, value.units)?;
-//         let operator_base = storage_base_address_from_felt252(
-//             storage_address_from_base_and_offset(base, 2_u8).into()
-//         );
-//         StorageAccess::write(address_domain, operator_base, value.operator)
-//     }
-// }
 
 impl ApprovedUnitsZeroable of Zeroable<ApprovedUnits> {
     #[inline(always)]
