@@ -135,7 +135,6 @@ mod ERC721EnumComponent {
         }
 
         // @dev transfer function that only edits the enum storage and not 721 storage
-
         #[inline(always)]
         fn _transfer(
             ref self: ComponentState<TContractState>,
