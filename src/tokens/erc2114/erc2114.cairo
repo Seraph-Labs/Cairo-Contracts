@@ -218,8 +218,7 @@ mod ERC2114Component {
         fn token_of_token_by_index(
             self: @ComponentState<TContractState>, token_id: u256, index: u256
         ) -> u256 {
-            assert(self.token_balance.read(token_id) > index, Errors::INDEX_OUT_OF_BOUNDS);
-            self.index_to_token_child.read((token_id, index))
+            self._token_of_token_by_index(token_id, index).expect(Errors::INDEX_OUT_OF_BOUNDS)
         }
 
         #[inline(always)]
@@ -367,6 +366,17 @@ mod ERC2114Component {
                 index += 1;
             };
             attr_ids
+        }
+
+        #[inline(always)]
+        fn _token_of_token_by_index(
+            self: @ComponentState<TContractState>, token_id: u256, index: u256
+        ) -> Option<u256> {
+            let child_id = self.index_to_token_child.read((token_id, index));
+            match child_id.is_zero() {
+                bool::False => Option::Some(child_id),
+                bool::True => Option::None,
+            }
         }
 
         // @dev transfer token to another token
