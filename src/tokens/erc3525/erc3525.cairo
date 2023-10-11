@@ -254,11 +254,11 @@ mod ERC3525Component {
             assert(!to.is_zero(), 'ERC3525: invalid to address');
             // assert token_id does not exist
             assert(!self.get_erc721()._exist(token_id), 'ERC3525: token already exist');
-            assert(token_id != 0.into(), 'ERC3525: invalid token_id');
             // mint token
-            self._mint_new(to, token_id, slot_id, value);
+            self._unsafe_mint(to, token_id, slot_id, value);
         }
 
+        // @dev mints value straight to a token
         #[inline(always)]
         fn _mint_value(ref self: ComponentState<TContractState>, to_token_id: u256, value: u256) {
             assert(self.get_erc721()._exist(to_token_id), 'ERC3525: invalid tokenId');
@@ -270,8 +270,9 @@ mod ERC3525Component {
             self.emit(TransferValue { from_token_id: 0.into(), to_token_id, value })
         }
 
+        // @dev mints a new token without any assertions
         #[inline(always)]
-        fn _mint_new(
+        fn _unsafe_mint(
             ref self: ComponentState<TContractState>,
             to: ContractAddress,
             token_id: u256,
@@ -393,7 +394,7 @@ mod ERC3525Component {
                 Option::None(_) => {
                     let new_token_id = self._generate_new_token_id();
                     self
-                        ._mint_new(
+                        ._unsafe_mint(
                             to, new_token_id, self.erc3525_slot.read(from_token_id), 0.into()
                         );
                     new_token_id
