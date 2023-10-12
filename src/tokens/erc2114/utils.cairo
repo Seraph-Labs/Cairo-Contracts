@@ -22,8 +22,6 @@ mod Errors {
     const INVALID_CRITERIA: felt252 = 'ERC2114: invalid criteria';
     const INVALID_SLOT_CAPACITY: felt252 = 'ERC2114: invalid slot capacity';
     const UNAPPROVED_CALLER: felt252 = 'ERC2114: caller is not approved';
-    const ALREADY_EQUIPPED: felt252 = 'ERC2114: token already equipped';
-    const ALREADY_UNEQUIPPED: felt252 = 'ERC2114: token not equipped';
 }
 // -------------------------------------------------------------------------- //
 //                                  AttrType                                  //

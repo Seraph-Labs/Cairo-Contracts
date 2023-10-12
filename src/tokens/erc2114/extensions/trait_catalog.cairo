@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0
-// SeraphLabs Contracts for Cairo >=v2.2.0 (tokens/erc2114/extensions/traitcatalog.cairo)
+// SeraphLabs Contracts for Cairo >=v2.3.0-rc0 (tokens/erc2114/extensions/trait_catalog.cairo)
 #[starknet::component]
 mod TraitCatalogComponent {
     use seraphlabs::tokens::constants;
