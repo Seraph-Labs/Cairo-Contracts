@@ -4,3 +4,4 @@ mod erc3525_mock;
 mod trait_catalog_mock;
 mod erc2114_mock;
 mod erc2114_slot_attr_mock;
+mod erc2114_inv_mock;
