@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0
-// SeraphLabs Contracts for Cairo >=v2.1.0 (tokens/erc2114/interface.cairo)
+// SeraphLabs Contracts for Cairo >=v2.2.0 (tokens/erc2114/interface.cairo)
 use seraphlabs::tokens::erc2114::utils::AttrType;
 use starknet::ContractAddress;
 use array::{ArrayTrait, SpanTrait, SpanSerde};
@@ -59,4 +59,25 @@ trait IERC2114SlotAttribute<TContractState> {
     fn batch_set_slot_attribute(
         ref self: TContractState, slot_id: u256, attr_ids: Span<u64>, values: Span<felt252>
     );
+}
+
+#[starknet::interface]
+trait IERC2114Inventory<TContractState> {
+    fn equipped_attribute_value(self: @TContractState, token_id: u256, attr_id: u64) -> felt252;
+
+    fn is_inside_inventory(self: @TContractState, token_id: u256, child_id: u256) -> bool;
+
+    fn token_supply_in_inventory(self: @TContractState, token_id: u256, criteria: u256) -> u64;
+
+    fn inventory_of(self: @TContractState, token_id: u256) -> Span<u256>;
+
+    fn inventory_attributes_of(self: @TContractState, slot_id: u256) -> Span<u64>;
+
+    fn slot_criteria_capacity(self: @TContractState, slot_id: u256, criteria: u256) -> u64;
+
+    fn edit_inventory(ref self: TContractState, token_id: u256, child_id: u256, equipped: bool);
+
+    fn set_slot_criteria(ref self: TContractState, slot_id: u256, criteria: u256, capacity: u64);
+
+    fn set_inventory_attributes(ref self: TContractState, slot_id: u256, attr_ids: Span<u64>);
 }
