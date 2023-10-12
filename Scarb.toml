@@ -3,7 +3,7 @@ name = "seraphlabs"
 version = "0.4.1-rc0"
 cairo-version = "2.3.0-rc0"
 description = "SeraphLabs Starknet Libraries"
-repository = "https://github.com/Seraph-Labs/Cairo-Contracts/tree/cairo-2"
+repository = "https://github.com/Seraph-Labs/Cairo-Contracts"
 license = "MIT OR AGPL-3.0"
 
 [dependencies]
