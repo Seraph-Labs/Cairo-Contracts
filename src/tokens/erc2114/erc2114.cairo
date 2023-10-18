@@ -252,6 +252,7 @@ mod ERC2114Component {
             }
         }
 
+        #[inline(always)]
         fn attributes_of(self: @ComponentState<TContractState>, token_id: u256) -> Span<u64> {
             self._attributes_of(token_id).span()
         }
@@ -382,6 +383,7 @@ mod ERC2114Component {
         // @dev transfer token to another token
         //  DOES NOT check validity of token_id or approval for transfer
         //  DOES NOT actually transfer token to address only sets balances, parent, and index
+        #[inline(always)]
         fn _scalar_transfer(
             ref self: ComponentState<TContractState>,
             from: ContractAddress,
@@ -404,6 +406,7 @@ mod ERC2114Component {
         // @dev remove token to another token
         //  DOES NOT check validity of token_id or approval for removal
         //  DOES NOT actually remove token to address only sets balances, parent, and index
+        #[inline(always)]
         fn _scalar_remove(
             ref self: ComponentState<TContractState>,
             from_token_id: u256,
@@ -433,6 +436,7 @@ mod ERC2114Component {
         }
 
         // @dev add attr_ids with corresponding values to token
+        #[inline(always)]
         fn _add_attributes_to_token(
             ref self: ComponentState<TContractState>,
             token_id: u256,
@@ -457,6 +461,7 @@ mod ERC2114Component {
         // @dev remove attr_ids with corresponding values from token
         //  if attr_id is of type Number value can be subtracted
         //  if attr_id is of type String value can only be set to zero for removal
+        #[inline(always)]
         fn _remove_attributes_from_token(
             ref self: ComponentState<TContractState>,
             token_id: u256,
@@ -570,6 +575,7 @@ mod ERC2114Component {
             index
         }
 
+        #[inline(always)]
         fn _add_trait_catalog(
             ref self: ComponentState<TContractState>, catalog_addr: ContractAddress
         ) {
@@ -640,6 +646,7 @@ mod ERC2114Component {
         // DOES NOT check validity of attr_id
         // @param 'l_index' is the last index of token attr_pack that is empty
         //  used to avoid recomputing l_index for batch removals 
+        #[inline(always)]
         fn _detach_attr_id_from_token(
             ref self: ComponentState<TContractState>, ref l_index: u64, token_id: u256, attr_id: u64
         ) {
@@ -810,6 +817,7 @@ mod ERC2114Component {
         // DOES NOT check if token attr_id value have already been set
         // DOES NOT remove or add attr_id to pack
         // checks valilidty of attr_id and attr_id value 
+        #[inline(always)]
         fn _update_token_attr_value(
             ref self: ComponentState<TContractState>, token_id: u256, attr_id: u64, value: felt252
         ) {
