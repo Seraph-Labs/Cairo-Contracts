@@ -251,12 +251,11 @@ mod ERC3525Component {
             slot_id: u256,
             value: u256
         ) {
-            // assert valid to address
-            assert(!to.is_zero(), 'ERC3525: invalid to address');
-            // assert token_id does not exist
-            assert(!self.get_erc721()._exist(token_id), 'ERC3525: token already exist');
-            // mint actual token
             let mut erc721_enum = self.get_erc721_enum_mut();
+            // @dev this function already checks if token_id exist
+            //  and if to address is non zero
+            //  erc721 enum propogates the checking to erc721
+            // mint actual token
             erc721_enum._mint(to, token_id);
             // mint token values and slot
             // this functionm EMITs SlotChanged and TransferValue events
