@@ -16,6 +16,11 @@ fn BASEURI() -> Array<felt252> {
 }
 
 #[inline(always)]
+fn ADMIN() -> ContractAddress {
+    contract_address_const::<'admin'>()
+}
+
+#[inline(always)]
 fn OWNER() -> ContractAddress {
     contract_address_const::<2114>()
 }
