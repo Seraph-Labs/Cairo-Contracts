@@ -186,7 +186,7 @@ mod ERC721EnumComponent {
             self: @ComponentState<TContractState>, owner: ContractAddress, index: u256
         ) -> Option<u256> {
             let token_id = self.erc721_owner_index_to_token.read((owner, index));
-            match token_id == BoundedInt::<u256>::min() {
+            match token_id.is_zero() {
                 bool::False(()) => Option::Some(token_id),
                 bool::True(()) => Option::None(()),
             }

@@ -301,9 +301,10 @@ mod ERC2114Component {
             //  interanl transfer is to avoid approval settings for token id 
             //  as approval for this function is set for final parent id 
             //  Enum transfer has to go first as it checks balance which ERC721 will modify
+            let cur_contract = get_contract_address();
             let mut erc721_enum = self.get_erc721_enum_mut();
-            erc721_enum._transfer(get_contract_address(), owner, token_id);
-            erc721._transfer(get_contract_address(), owner, token_id);
+            erc721_enum._transfer(cur_contract, owner, token_id);
+            erc721._transfer(cur_contract, owner, token_id);
             // scalar remove
             self._scalar_remove(from_token_id, token_id, owner);
         }
