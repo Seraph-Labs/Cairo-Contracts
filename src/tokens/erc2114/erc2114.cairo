@@ -26,13 +26,13 @@ mod ERC2114Component {
 
     #[storage]
     struct Storage {
-        trait_catalog_contract: ContractAddress,
-        attr_base: LegacyMap<u64, AttrBase>,
-        token_attr_value: LegacyMap<(u256, u64), felt252>,
-        token_balance: LegacyMap<u256, u256>,
-        token_parent: LegacyMap<u256, u256>,
-        index_to_token_child: LegacyMap<(u256, u256), u256>,
-        index_to_token_attr_pack: LegacyMap<(u256, u64), AttrPack>
+        ERC2114_trait_catalog_contract: ContractAddress,
+        ERC2114_attr_base: LegacyMap<u64, AttrBase>,
+        ERC2114_token_attr_value: LegacyMap<(u256, u64), felt252>,
+        ERC2114_token_balance: LegacyMap<u256, u256>,
+        ERC2114_token_parent: LegacyMap<u256, u256>,
+        ERC2114_index_to_token_child: LegacyMap<(u256, u256), u256>,
+        ERC2114_index_to_token_attr_pack: LegacyMap<(u256, u64), AttrPack>
     }
 
     #[event]
@@ -201,17 +201,17 @@ mod ERC2114Component {
     > of IERC2114ImplTrait<TContractState> {
         #[inline(always)]
         fn get_trait_catalog(self: @ComponentState<TContractState>) -> ContractAddress {
-            self.trait_catalog_contract.read()
+            self.ERC2114_trait_catalog_contract.read()
         }
 
         #[inline(always)]
         fn token_balance_of(self: @ComponentState<TContractState>, token_id: u256) -> u256 {
-            self.token_balance.read(token_id)
+            self.ERC2114_token_balance.read(token_id)
         }
 
         #[inline(always)]
         fn token_of(self: @ComponentState<TContractState>, token_id: u256) -> u256 {
-            self.token_parent.read(token_id)
+            self.ERC2114_token_parent.read(token_id)
         }
 
         #[inline(always)]
@@ -223,13 +223,13 @@ mod ERC2114Component {
 
         #[inline(always)]
         fn attribute_name(self: @ComponentState<TContractState>, attr_id: u64) -> felt252 {
-            let res: AttrBase = self.attr_base.read(attr_id);
+            let res: AttrBase = self.ERC2114_attr_base.read(attr_id);
             res.name
         }
 
         #[inline(always)]
         fn attribute_type(self: @ComponentState<TContractState>, attr_id: u64) -> AttrType {
-            let res: AttrBase = self.attr_base.read(attr_id);
+            let res: AttrBase = self.ERC2114_attr_base.read(attr_id);
             res.val_type
         }
 
@@ -237,8 +237,8 @@ mod ERC2114Component {
         fn attribute_value(
             self: @ComponentState<TContractState>, token_id: u256, attr_id: u64
         ) -> felt252 {
-            let value = self.token_attr_value.read((token_id, attr_id));
-            let attribute_base: AttrBase = self.attr_base.read(attr_id);
+            let value = self.ERC2114_token_attr_value.read((token_id, attr_id));
+            let attribute_base: AttrBase = self.ERC2114_attr_base.read(attr_id);
             match attribute_base.val_type {
                 AttrType::Empty => { 0 },
                 AttrType::String(list_id) => {
@@ -285,7 +285,8 @@ mod ERC2114Component {
             assert(erc721._exist(token_id), Errors::INVALID_TOKEN_ID);
             // assert token id is child of from_token_id and from_token_id is non zero
             assert(
-                self.token_parent.read(token_id) == from_token_id && from_token_id.is_non_zero(),
+                self.ERC2114_token_parent.read(token_id) == from_token_id
+                    && from_token_id.is_non_zero(),
                 Errors::INVALID_PARENT
             );
             // assert owner/approval of final parent is valid
@@ -319,7 +320,7 @@ mod ERC2114Component {
             // assert attr_id is not zero
             assert(attr_id.is_non_zero(), Errors::INVALID_ATTR_ID);
             // assert that attr_id does not exist
-            assert(!self.attr_base.read(attr_id).is_valid(), Errors::ATTR_ID_ALREADY_EXIST);
+            assert(!self.ERC2114_attr_base.read(attr_id).is_valid(), Errors::ATTR_ID_ALREADY_EXIST);
             // create new attr_base 
             // @dev this function checks if attr type and name is valid
             let attr_base = AttrBaseTrait::new(name, attr_type);
@@ -332,7 +333,7 @@ mod ERC2114Component {
                 );
             }
             // add attr_base to storage
-            self.attr_base.write(attr_id, attr_base);
+            self.ERC2114_attr_base.write(attr_id, attr_base);
             // emit event
             self.emit(AttributeCreated { attr_id, attr_type, name });
         }
@@ -352,14 +353,14 @@ mod ERC2114Component {
         //  to ensure token cant be transfered if its owned by a token
         #[inline(always)]
         fn _assert_token_no_parent(self: @ComponentState<TContractState>, token_id: u256) {
-            assert(self.token_parent.read(token_id).is_zero(), 'ERC2114: token has parent');
+            assert(self.ERC2114_token_parent.read(token_id).is_zero(), 'ERC2114: token has parent');
         }
 
         fn _attributes_of(self: @ComponentState<TContractState>, token_id: u256) -> Array<u64> {
             let mut attr_ids = ArrayTrait::new();
             let mut index = 0;
             loop {
-                let attr_pack = self.index_to_token_attr_pack.read((token_id, index));
+                let attr_pack = self.ERC2114_index_to_token_attr_pack.read((token_id, index));
                 if !attr_pack.is_valid() {
                     break;
                 }
@@ -374,7 +375,7 @@ mod ERC2114Component {
         fn _token_of_token_by_index(
             self: @ComponentState<TContractState>, token_id: u256, index: u256
         ) -> Option<u256> {
-            let child_id = self.index_to_token_child.read((token_id, index));
+            let child_id = self.ERC2114_index_to_token_child.read((token_id, index));
             match child_id.is_zero() {
                 bool::False => Option::Some(child_id),
                 bool::True => Option::None,
@@ -394,12 +395,12 @@ mod ERC2114Component {
             // assert token id not transfering to self
             assert(token_id != to_token_id, 'ERC2114: cant transfer to self');
             // increase balance
-            let cur_bal = self.token_balance.read(to_token_id);
-            self.token_balance.write(to_token_id, cur_bal + 1);
+            let cur_bal = self.ERC2114_token_balance.read(to_token_id);
+            self.ERC2114_token_balance.write(to_token_id, cur_bal + 1);
             // set index
-            self.index_to_token_child.write((to_token_id, cur_bal), token_id);
+            self.ERC2114_index_to_token_child.write((to_token_id, cur_bal), token_id);
             // set parent
-            self.token_parent.write(token_id, to_token_id);
+            self.ERC2114_token_parent.write(token_id, to_token_id);
             // emit event
             self.emit(ScalarTransfer { from, token_id, to_token_id });
         }
@@ -415,23 +416,27 @@ mod ERC2114Component {
             to: ContractAddress
         ) {
             // assert token id is child of from_token_id
-            assert(self.token_parent.read(token_id) == from_token_id, Errors::INVALID_PARENT);
+            assert(
+                self.ERC2114_token_parent.read(token_id) == from_token_id, Errors::INVALID_PARENT
+            );
             // decrease balance
-            let new_bal = self.token_balance.read(from_token_id) - 1;
-            self.token_balance.write(from_token_id, new_bal);
+            let new_bal = self.ERC2114_token_balance.read(from_token_id) - 1;
+            self.ERC2114_token_balance.write(from_token_id, new_bal);
             // unset index
             let cur_index = self._get_index_of_child_token(token_id);
             // if cur_index is not last index
             if cur_index != new_bal {
                 // get last token id
-                let last_token_id = self.index_to_token_child.read((from_token_id, new_bal));
+                let last_token_id = self
+                    .ERC2114_index_to_token_child
+                    .read((from_token_id, new_bal));
                 // set last token id to current index
-                self.index_to_token_child.write((from_token_id, cur_index), last_token_id);
+                self.ERC2114_index_to_token_child.write((from_token_id, cur_index), last_token_id);
             }
             // unset last index to zero 
-            self.index_to_token_child.write((from_token_id, new_bal), 0);
+            self.ERC2114_index_to_token_child.write((from_token_id, new_bal), 0);
             // unset parent
-            self.token_parent.write(token_id, 0);
+            self.ERC2114_token_parent.write(token_id, 0);
             // emit event
             self.emit(ScalarRemove { from_token_id, token_id, to });
         }
@@ -504,7 +509,7 @@ mod ERC2114Component {
     > of ERC2114PrivateTrait<TContractState> {
         #[inline(always)]
         fn _get_trait_catalog(self: @ComponentState<TContractState>) -> ITraitCatalogDispatcher {
-            let catalog_addr = self.trait_catalog_contract.read();
+            let catalog_addr = self.ERC2114_trait_catalog_contract.read();
             assert(catalog_addr.is_non_zero(), Errors::INVALID_TRAIT_CATALOG);
             ITraitCatalogDispatcher { contract_address: catalog_addr }
         }
@@ -513,11 +518,11 @@ mod ERC2114Component {
         fn _get_index_of_child_token(
             self: @ComponentState<TContractState>, token_id: u256
         ) -> u256 {
-            let parent_id = self.token_parent.read(token_id);
+            let parent_id = self.ERC2114_token_parent.read(token_id);
             assert(parent_id.is_non_zero(), 'ERC2114: token has no parent');
             let mut index = 0;
             loop {
-                if self.index_to_token_child.read((parent_id, index)) == token_id {
+                if self.ERC2114_index_to_token_child.read((parent_id, index)) == token_id {
                     break;
                 }
                 index += 1;
@@ -530,7 +535,7 @@ mod ERC2114Component {
         fn _get_final_parent(self: @ComponentState<TContractState>, token_id: u256) -> u256 {
             let mut child_id = token_id;
             let final_parent_id = loop {
-                let parent_id = self.token_parent.read(child_id);
+                let parent_id = self.ERC2114_token_parent.read(child_id);
                 if parent_id.is_zero() {
                     break child_id;
                 }
@@ -548,7 +553,7 @@ mod ERC2114Component {
             assert(ammount > 0 && ammount <= 3, Errors::INVALID_ATTR_PACK);
             let mut index: u64 = 0;
             loop {
-                let pack: AttrPack = self.index_to_token_attr_pack.read((token_id, index));
+                let pack: AttrPack = self.ERC2114_index_to_token_attr_pack.read((token_id, index));
                 if pack.len + ammount <= 3 {
                     break;
                 }
@@ -565,7 +570,7 @@ mod ERC2114Component {
         ) -> u64 {
             let mut index = 0;
             loop {
-                let attr_pack = self.index_to_token_attr_pack.read((token_id, index));
+                let attr_pack = self.ERC2114_index_to_token_attr_pack.read((token_id, index));
                 // if attr pack is not valid means index is out of bounds
                 assert(attr_pack.is_valid(), 'ERC2114: failed to find attr_id');
                 if attr_pack.has_attr(attr_id) {
@@ -587,7 +592,7 @@ mod ERC2114Component {
                 Errors::INVALID_TRAIT_CATALOG
             );
             // set trait catalog address
-            self.trait_catalog_contract.write(catalog_addr);
+            self.ERC2114_trait_catalog_contract.write(catalog_addr);
             // emit event
             self
                 .emit(
@@ -622,7 +627,7 @@ mod ERC2114Component {
                         let slice = attr_ids.slice(index * 3, 3);
                         // write attr_pack to storage
                         self
-                            .index_to_token_attr_pack
+                            .ERC2114_index_to_token_attr_pack
                             .write((token_id, l_index_attr_pack), AttrPackTrait::new(slice));
                         // increment index and l_index_attr_pack
                         l_index_attr_pack += 1;
@@ -636,10 +641,12 @@ mod ERC2114Component {
                 let slice = attr_ids.slice(index * 3, r);
                 let index_attr_pack = self
                     ._find_spot_for_attr_pack(token_id, r.try_into().unwrap());
-                let mut attr_pack = self.index_to_token_attr_pack.read((token_id, index_attr_pack));
+                let mut attr_pack = self
+                    .ERC2114_index_to_token_attr_pack
+                    .read((token_id, index_attr_pack));
                 // add attr_ids to attr_pack
                 attr_pack.add_batch_to_pack(slice);
-                self.index_to_token_attr_pack.write((token_id, index_attr_pack), attr_pack);
+                self.ERC2114_index_to_token_attr_pack.write((token_id, index_attr_pack), attr_pack);
             }
         }
 
@@ -653,17 +660,19 @@ mod ERC2114Component {
         ) {
             // assert attr_id value has been set to zero
             assert(
-                self.token_attr_value.read((token_id, attr_id)).is_zero(),
+                self.ERC2114_token_attr_value.read((token_id, attr_id)).is_zero(),
                 'ERC2114: attr_id cant remove'
             );
             // get index that stores attr_id
             let index = self._find_index_of_attr_in_token(token_id, attr_id);
-            let mut cur_attr_pack: AttrPack = self.index_to_token_attr_pack.read((token_id, index));
+            let mut cur_attr_pack: AttrPack = self
+                .ERC2114_index_to_token_attr_pack
+                .read((token_id, index));
             // if cur attr pack is > 1 means attr_pack spot does not need to be replaced
             if cur_attr_pack.len > 1 {
                 // remove attr_id from attr_pack
                 cur_attr_pack.remove_from_pack(attr_id);
-                self.index_to_token_attr_pack.write((token_id, index), cur_attr_pack);
+                self.ERC2114_index_to_token_attr_pack.write((token_id, index), cur_attr_pack);
                 return;
             } else {
                 // minus last index to get new supposed last index of empty spot
@@ -671,12 +680,14 @@ mod ERC2114Component {
                 // if index is not last index
                 // replace cur_attr_pack index with last_attr_pack
                 if index != l_index {
-                    let last_attr_pack = self.index_to_token_attr_pack.read((token_id, l_index));
-                    self.index_to_token_attr_pack.write((token_id, index), last_attr_pack);
+                    let last_attr_pack = self
+                        .ERC2114_index_to_token_attr_pack
+                        .read((token_id, l_index));
+                    self.ERC2114_index_to_token_attr_pack.write((token_id, index), last_attr_pack);
                 }
                 // set last index to zero
                 self
-                    .index_to_token_attr_pack
+                    .ERC2114_index_to_token_attr_pack
                     .write((token_id, l_index), AttrPack { pack: 0, len: 0 });
             }
         }
@@ -718,9 +729,9 @@ mod ERC2114Component {
             loop {
                 match attr_ids.pop_front() {
                     Option::Some(attr_id) => {
-                        let cur_value = self.token_attr_value.read((token_id, *attr_id));
+                        let cur_value = self.ERC2114_token_attr_value.read((token_id, *attr_id));
                         let value = *values.pop_front().unwrap();
-                        let attribute_base: AttrBase = self.attr_base.read(*attr_id);
+                        let attribute_base: AttrBase = self.ERC2114_attr_base.read(*attr_id);
                         let new_value: felt252 = match attribute_base.val_type {
                             AttrType::Empty => {
                                 panic_with_felt252(Errors::INVALID_ATTR_ID);
@@ -774,12 +785,12 @@ mod ERC2114Component {
                 match attr_ids.pop_front() {
                     Option::Some(attr_id) => {
                         let value = *values.pop_front().unwrap();
-                        let cur_value = self.token_attr_value.read((token_id, *attr_id));
+                        let cur_value = self.ERC2114_token_attr_value.read((token_id, *attr_id));
                         // assert cur_value is non zero
                         assert(cur_value.is_non_zero(), 'ERC2114: attr_id not in token');
                         // assert attr_id is of type Number and subtracted value does not exceed current value
                         // assert attr_id is of String Type only can swap to zero cannot subtract
-                        let attribute_base: AttrBase = self.attr_base.read(*attr_id);
+                        let attribute_base: AttrBase = self.ERC2114_attr_base.read(*attr_id);
                         let new_value = match attribute_base.val_type {
                             AttrType::Empty => {
                                 panic_with_felt252(Errors::INVALID_ATTR_ID);
@@ -823,10 +834,10 @@ mod ERC2114Component {
             ref self: ComponentState<TContractState>, token_id: u256, attr_id: u64, value: felt252
         ) {
             // assert that attr_id exist
-            let attr_base = self.attr_base.read(attr_id);
+            let attr_base = self.ERC2114_attr_base.read(attr_id);
             assert(attr_base.is_valid(), Errors::INVALID_ATTR_ID);
             // if value is the same as current value return
-            let cur_attr_value = self.token_attr_value.read((token_id, attr_id));
+            let cur_attr_value = self.ERC2114_token_attr_value.read((token_id, attr_id));
             if cur_attr_value == value {
                 return;
             }
@@ -847,7 +858,7 @@ mod ERC2114Component {
             }
 
             // update token attr value
-            self.token_attr_value.write((token_id, attr_id), value);
+            self.ERC2114_token_attr_value.write((token_id, attr_id), value);
             // emit event
             self
                 .emit(

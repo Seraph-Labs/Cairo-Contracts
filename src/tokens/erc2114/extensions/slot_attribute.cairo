@@ -26,8 +26,8 @@ mod ERC2114SlotAttrComponent {
 
     #[storage]
     struct Storage {
-        slot_attr_value: LegacyMap<(u256, u64), felt252>,
-        index_to_slot_attr_pack: LegacyMap<(u256, u64), AttrPack>
+        ERC2114_slot_attr_value: LegacyMap<(u256, u64), felt252>,
+        ERC2114_index_to_slot_attr_pack: LegacyMap<(u256, u64), AttrPack>
     }
 
     #[event]
@@ -123,7 +123,7 @@ mod ERC2114SlotAttrComponent {
         fn slot_attribute_value(
             self: @ComponentState<TContractState>, slot_id: u256, attr_id: u64
         ) -> felt252 {
-            let value = self.slot_attr_value.read((slot_id, attr_id));
+            let value = self.ERC2114_slot_attr_value.read((slot_id, attr_id));
             let erc2114 = self.get_erc2114();
 
             let attr_type: AttrType = erc2114.attribute_type(attr_id);
@@ -184,7 +184,7 @@ mod ERC2114SlotAttrComponent {
             let mut attr_ids = ArrayTrait::new();
             let mut index = 0;
             loop {
-                let attr_pack = self.index_to_slot_attr_pack.read((slot_id, index));
+                let attr_pack = self.ERC2114_index_to_slot_attr_pack.read((slot_id, index));
                 if !attr_pack.is_valid() {
                     break;
                 }
@@ -256,7 +256,7 @@ mod ERC2114SlotAttrComponent {
             assert(ammount > 0 && ammount <= 3, Errors::INVALID_ATTR_PACK);
             let mut index: u64 = 0;
             loop {
-                let pack: AttrPack = self.index_to_slot_attr_pack.read((slot_id, index));
+                let pack: AttrPack = self.ERC2114_index_to_slot_attr_pack.read((slot_id, index));
                 if pack.len + ammount <= 3 {
                     break;
                 }
@@ -290,7 +290,7 @@ mod ERC2114SlotAttrComponent {
                         let slice = attr_ids.slice(index * 3, 3);
                         // write attr_pack to storage
                         self
-                            .index_to_slot_attr_pack
+                            .ERC2114_index_to_slot_attr_pack
                             .write((slot_id, l_index_attr_pack), AttrPackTrait::new(slice));
                         // increment index and l_index_attr_pack
                         l_index_attr_pack += 1;
@@ -304,10 +304,12 @@ mod ERC2114SlotAttrComponent {
                 let slice = attr_ids.slice(index * 3, r);
                 let index_attr_pack = self
                     ._find_spot_for_slot_attr_pack(slot_id, r.try_into().unwrap());
-                let mut attr_pack = self.index_to_slot_attr_pack.read((slot_id, index_attr_pack));
+                let mut attr_pack = self
+                    .ERC2114_index_to_slot_attr_pack
+                    .read((slot_id, index_attr_pack));
                 // add attr_ids to attr_pack
                 attr_pack.add_batch_to_pack(slice);
-                self.index_to_slot_attr_pack.write((slot_id, index_attr_pack), attr_pack);
+                self.ERC2114_index_to_slot_attr_pack.write((slot_id, index_attr_pack), attr_pack);
             }
         }
 
@@ -319,7 +321,7 @@ mod ERC2114SlotAttrComponent {
         ) -> u64 {
             let mut index = 0;
             loop {
-                let attr_pack = self.index_to_slot_attr_pack.read((slot_id, index));
+                let attr_pack = self.ERC2114_index_to_slot_attr_pack.read((slot_id, index));
                 // if attr pack is not valid means index is out of bounds
                 assert(attr_pack.is_valid(), 'ERC2114: failed to find attr_id');
                 if attr_pack.has_attr(attr_id) {
@@ -339,17 +341,19 @@ mod ERC2114SlotAttrComponent {
         ) {
             // assert attr_id value has been set to zero
             assert(
-                self.slot_attr_value.read((slot_id, attr_id)).is_zero(),
+                self.ERC2114_slot_attr_value.read((slot_id, attr_id)).is_zero(),
                 'ERC2114: attr_id cant remove'
             );
             // get index that stores attr_id
             let index = self._find_index_of_attr_in_slot(slot_id, attr_id);
-            let mut cur_attr_pack: AttrPack = self.index_to_slot_attr_pack.read((slot_id, index));
+            let mut cur_attr_pack: AttrPack = self
+                .ERC2114_index_to_slot_attr_pack
+                .read((slot_id, index));
             // if cur attr pack is > 1 means attr_pack spot does not need to be replaced
             if cur_attr_pack.len > 1 {
                 // remove attr_id from attr_pack
                 cur_attr_pack.remove_from_pack(attr_id);
-                self.index_to_slot_attr_pack.write((slot_id, index), cur_attr_pack);
+                self.ERC2114_index_to_slot_attr_pack.write((slot_id, index), cur_attr_pack);
                 return;
             } else {
                 // minus last index to get new supposed last index of empty spot
@@ -357,12 +361,14 @@ mod ERC2114SlotAttrComponent {
                 // if index is not last index
                 // replace cur_attr_pack index with last_attr_pack
                 if index != l_index {
-                    let last_attr_pack = self.index_to_slot_attr_pack.read((slot_id, l_index));
-                    self.index_to_slot_attr_pack.write((slot_id, index), last_attr_pack);
+                    let last_attr_pack = self
+                        .ERC2114_index_to_slot_attr_pack
+                        .read((slot_id, l_index));
+                    self.ERC2114_index_to_slot_attr_pack.write((slot_id, index), last_attr_pack);
                 }
                 // set last index to zero
                 self
-                    .index_to_slot_attr_pack
+                    .ERC2114_index_to_slot_attr_pack
                     .write((slot_id, l_index), AttrPack { pack: 0, len: 0 });
             }
         }
@@ -407,7 +413,7 @@ mod ERC2114SlotAttrComponent {
             loop {
                 match attr_ids.pop_front() {
                     Option::Some(attr_id) => {
-                        let cur_value = self.slot_attr_value.read((slot_id, *attr_id));
+                        let cur_value = self.ERC2114_slot_attr_value.read((slot_id, *attr_id));
                         let value = *values.pop_front().unwrap();
                         //assert value is not zero
                         assert(value.is_non_zero(), Errors::INVALID_ATTR_VALUE);
@@ -438,7 +444,7 @@ mod ERC2114SlotAttrComponent {
             loop {
                 match attr_ids.pop_front() {
                     Option::Some(attr_id) => {
-                        let cur_value = self.slot_attr_value.read((slot_id, *attr_id));
+                        let cur_value = self.ERC2114_slot_attr_value.read((slot_id, *attr_id));
                         // assert cur_value is non zero
                         assert(cur_value.is_non_zero(), 'ERC2114: attr_id not in slot');
                         // update values, emit events
@@ -464,7 +470,7 @@ mod ERC2114SlotAttrComponent {
             assert(!attr_type.is_empty(), Errors::INVALID_ATTR_ID);
 
             // if value is the same as current value return
-            let cur_attr_value = self.slot_attr_value.read((slot_id, attr_id));
+            let cur_attr_value = self.ERC2114_slot_attr_value.read((slot_id, attr_id));
             if cur_attr_value == value {
                 return;
             }
@@ -483,7 +489,7 @@ mod ERC2114SlotAttrComponent {
             }
 
             // update slot attr value
-            self.slot_attr_value.write((slot_id, attr_id), value);
+            self.ERC2114_slot_attr_value.write((slot_id, attr_id), value);
             // emit event
             self
                 .emit(

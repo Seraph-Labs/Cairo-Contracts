@@ -24,10 +24,10 @@ mod ERC2114InventoryComponent {
 
     #[storage]
     struct Storage {
-        token_inv_supply: LegacyMap<(u256, u256), u64>,
-        token_inv_equipped: LegacyMap<u256, bool>,
-        inv_slot_criteria_capacity: LegacyMap<(u256, u256), u64>,
-        index_to_inv_attr_pack: LegacyMap<(u256, u64), AttrPack>
+        ERC2114_token_inv_supply: LegacyMap<(u256, u256), u64>,
+        ERC2114_token_inv_equipped: LegacyMap<u256, bool>,
+        ERC2114_inv_slot_criteria_capacity: LegacyMap<(u256, u256), u64>,
+        ERC2114_index_to_inv_attr_pack: LegacyMap<(u256, u64), AttrPack>
     }
 
     #[event]
@@ -205,7 +205,7 @@ mod ERC2114InventoryComponent {
         fn token_supply_in_inventory(
             self: @ComponentState<TContractState>, token_id: u256, criteria: u256
         ) -> u64 {
-            self.token_inv_supply.read((token_id, criteria))
+            self.ERC2114_token_inv_supply.read((token_id, criteria))
         }
 
         #[inline(always)]
@@ -227,7 +227,7 @@ mod ERC2114InventoryComponent {
         fn slot_criteria_capacity(
             self: @ComponentState<TContractState>, slot_id: u256, criteria: u256
         ) -> u64 {
-            self.inv_slot_criteria_capacity.read((slot_id, criteria))
+            self.ERC2114_inv_slot_criteria_capacity.read((slot_id, criteria))
         }
 
         #[inline(always)]
@@ -248,7 +248,7 @@ mod ERC2114InventoryComponent {
                 Errors::UNAPPROVED_CALLER
             );
             // get equipped status of child
-            let is_equipped: bool = self.token_inv_equipped.read(child_id);
+            let is_equipped: bool = self.ERC2114_token_inv_equipped.read(child_id);
             assert(is_equipped != equipped, 'ERC2114: inventory up to date');
             // update inventory
             // this functions checks if token_id is child_id direct parent
@@ -263,7 +263,7 @@ mod ERC2114InventoryComponent {
         ) {
             // assert that capacity is bigger than current capacity
             // inventory should only expand and not decrease
-            let cur_capacity = self.inv_slot_criteria_capacity.read((slot_id, criteria));
+            let cur_capacity = self.ERC2114_inv_slot_criteria_capacity.read((slot_id, criteria));
             assert(cur_capacity < capacity, Errors::INVALID_SLOT_CAPACITY);
             // update slot criteria
             self._edit_slot_criteria(slot_id, criteria, capacity);
@@ -337,7 +337,7 @@ mod ERC2114InventoryComponent {
             let erc2114 = self.get_erc2114();
             match erc2114.token_of(child_id) == token_id {
                 bool::False => false,
-                bool::True => self.token_inv_equipped.read(child_id),
+                bool::True => self.ERC2114_token_inv_equipped.read(child_id),
             }
         }
 
@@ -351,12 +351,12 @@ mod ERC2114InventoryComponent {
             // loop through and if its in inventory add to array
             loop {
                 // read directly from storage to avoid index out of bounds to save gas
-                let child_id: u256 = erc2114.index_to_token_child.read((token_id, index));
+                let child_id: u256 = erc2114.ERC2114_index_to_token_child.read((token_id, index));
                 // if child id is zero means we reach end of list thus break
                 match child_id.is_zero() {
                     bool::False => {
                         // if its in inventory add to array
-                        if self.token_inv_equipped.read(child_id) {
+                        if self.ERC2114_token_inv_equipped.read(child_id) {
                             inventory.append(child_id);
                         }
                         index += 1;
@@ -373,7 +373,7 @@ mod ERC2114InventoryComponent {
             let mut attr_ids = ArrayTrait::new();
             let mut index = 0;
             loop {
-                let pack: AttrPack = self.index_to_inv_attr_pack.read((slot_id, index));
+                let pack: AttrPack = self.ERC2114_index_to_inv_attr_pack.read((slot_id, index));
                 if pack.len.is_zero() {
                     break;
                 }
@@ -400,7 +400,7 @@ mod ERC2114InventoryComponent {
             let criteria = erc3525.slot_of(child_id);
             // if inventory is full or child is already equipped return
             if self._is_inventory_full(slot_id, token_id, criteria)
-                || self.token_inv_equipped.read(child_id) {
+                || self.ERC2114_token_inv_equipped.read(child_id) {
                 return ();
             } else {
                 // update inventory
@@ -418,7 +418,7 @@ mod ERC2114InventoryComponent {
             ref self: ComponentState<TContractState>, token_id: u256, child_id: u256
         ) {
             // if child id is not equipped return 
-            if !self.token_inv_equipped.read(child_id) {
+            if !self.ERC2114_token_inv_equipped.read(child_id) {
                 return ();
             } else {
                 // update inventory
@@ -446,8 +446,8 @@ mod ERC2114InventoryComponent {
         fn _assert_inventory_has_space(
             self: @ComponentState<TContractState>, slot_id: u256, token_id: u256, criteria: u256,
         ) {
-            let capacity = self.inv_slot_criteria_capacity.read((slot_id, criteria));
-            let supply = self.token_inv_supply.read((token_id, criteria));
+            let capacity = self.ERC2114_inv_slot_criteria_capacity.read((slot_id, criteria));
+            let supply = self.ERC2114_token_inv_supply.read((token_id, criteria));
             assert(capacity > supply, Errors::INVENTORY_NO_SPACE);
         }
 
@@ -482,8 +482,8 @@ mod ERC2114InventoryComponent {
         fn _is_inventory_full(
             self: @ComponentState<TContractState>, slot_id: u256, token_id: u256, criteria: u256,
         ) -> bool {
-            let capacity = self.inv_slot_criteria_capacity.read((slot_id, criteria));
-            let supply = self.token_inv_supply.read((token_id, criteria));
+            let capacity = self.ERC2114_inv_slot_criteria_capacity.read((slot_id, criteria));
+            let supply = self.ERC2114_token_inv_supply.read((token_id, criteria));
             supply >= capacity
         }
 
@@ -494,7 +494,7 @@ mod ERC2114InventoryComponent {
         ) -> bool {
             let mut index = 0;
             loop {
-                let pack: AttrPack = self.index_to_inv_attr_pack.read((slot_id, index));
+                let pack: AttrPack = self.ERC2114_index_to_inv_attr_pack.read((slot_id, index));
                 // if no attr_id is found at the end return false
                 if pack.len.is_zero() {
                     break false;
@@ -519,7 +519,7 @@ mod ERC2114InventoryComponent {
             let erc2114 = self.get_erc2114();
             // read straight from storage to save gas as its assume to be number type
             // add attr_id value to sum_val
-            sum_val += erc2114.token_attr_value.read((token_id, attr_id));
+            sum_val += erc2114.ERC2114_token_attr_value.read((token_id, attr_id));
             // check if attr_id is a inventory attribute 
             // if false return as it means referenced token cant inherit this attr_id
             let slot_id = self.get_erc3525().slot_of(token_id);
@@ -530,7 +530,7 @@ mod ERC2114InventoryComponent {
             let mut index = 0;
             loop {
                 // read directly from storage to avoid index out of bounds to save gas
-                let child_id: u256 = erc2114.index_to_token_child.read((token_id, index));
+                let child_id: u256 = erc2114.ERC2114_index_to_token_child.read((token_id, index));
                 // if child_id is 0 means we reach end of index
                 if child_id.is_zero() {
                     break;
@@ -539,7 +539,7 @@ mod ERC2114InventoryComponent {
                 // check if child is in inventory
                 // if child is not in inventory continue
                 // else recursively sum value of attr_id in child inventory
-                let is_equipped: bool = self.token_inv_equipped.read(child_id);
+                let is_equipped: bool = self.ERC2114_token_inv_equipped.read(child_id);
                 match is_equipped {
                     bool::False => { continue; },
                     bool::True => {
@@ -561,7 +561,7 @@ mod ERC2114InventoryComponent {
             // if it does return it as token can only have one string value
             let erc2114 = self.get_erc2114();
             // read straight from the 
-            let value: felt252 = erc2114.token_attr_value.read((token_id, attr_id));
+            let value: felt252 = erc2114.ERC2114_token_attr_value.read((token_id, attr_id));
             if value.is_non_zero() {
                 return value;
             }
@@ -576,7 +576,7 @@ mod ERC2114InventoryComponent {
             let mut index = 0;
             loop {
                 // read directly from storage to avoid index out of bounds to save gas
-                let child_id: u256 = erc2114.index_to_token_child.read((token_id, index));
+                let child_id: u256 = erc2114.ERC2114_index_to_token_child.read((token_id, index));
                 // if child_id is 0 means we reach end of index
                 if child_id.is_zero() {
                     break 0;
@@ -586,7 +586,7 @@ mod ERC2114InventoryComponent {
                 // check if child is in inventory
                 // if child is not in inventory continue
                 // else recursively find value of attr_id in child inventory
-                if !self.token_inv_equipped.read(child_id) {
+                if !self.ERC2114_token_inv_equipped.read(child_id) {
                     continue;
                 } else {
                     // recursively find value of attr_id in token_id equipped child_id inventory
@@ -616,27 +616,27 @@ mod ERC2114InventoryComponent {
             let mut erc3525 = self.get_erc3525_mut();
             let criteria = erc3525.slot_of(child_id);
             // get old balance
-            let old_bal = self.token_inv_supply.read((token_id, criteria));
+            let old_bal = self.ERC2114_token_inv_supply.read((token_id, criteria));
             // if child is in backpack check if its equipped 
             // if it is unequip if its not equip it
-            let is_equipped: bool = self.token_inv_equipped.read(child_id);
+            let is_equipped: bool = self.ERC2114_token_inv_equipped.read(child_id);
             let new_bal = match is_equipped {
                 bool::False => {
                     // assert inventory has space
                     let slot_id = erc3525.slot_of(token_id);
                     self._assert_inventory_has_space(slot_id, token_id, criteria);
                     // equip child
-                    self.token_inv_equipped.write(child_id, true);
+                    self.ERC2114_token_inv_equipped.write(child_id, true);
                     old_bal + 1
                 },
                 bool::True => {
                     // unequip child
-                    self.token_inv_equipped.write(child_id, false);
+                    self.ERC2114_token_inv_equipped.write(child_id, false);
                     old_bal - 1
                 },
             };
             // update inverntory supply
-            self.token_inv_supply.write((token_id, criteria), new_bal);
+            self.ERC2114_token_inv_supply.write((token_id, criteria), new_bal);
             // emit event
             self.emit(InventoryUpdated { token_id, criteria, child_id, old_bal, new_bal });
         }
@@ -649,12 +649,12 @@ mod ERC2114InventoryComponent {
             ref self: ComponentState<TContractState>, slot_id: u256, criteria: u256, capacity: u64
         ) {
             // skip if old_capacity is the same as capacity
-            let old_capacity = self.inv_slot_criteria_capacity.read((slot_id, criteria));
+            let old_capacity = self.ERC2114_inv_slot_criteria_capacity.read((slot_id, criteria));
             if old_capacity == capacity {
                 return ();
             }
             // update capacity
-            self.inv_slot_criteria_capacity.write((slot_id, criteria), capacity);
+            self.ERC2114_inv_slot_criteria_capacity.write((slot_id, criteria), capacity);
             // emit event
             self
                 .emit(
@@ -693,7 +693,7 @@ mod ERC2114InventoryComponent {
                             let slice = attr_ids.slice(index * 3, 3);
                             // write attr_pack to storage
                             self
-                                .index_to_inv_attr_pack
+                                .ERC2114_index_to_inv_attr_pack
                                 .write((slot_id, index.into()), AttrPackTrait::new(slice));
                             // increment index and l_index
                             index += 1;
@@ -705,7 +705,7 @@ mod ERC2114InventoryComponent {
                 if r.is_non_zero() {
                     let slice = attr_ids.slice(index * 3, r);
                     self
-                        .index_to_inv_attr_pack
+                        .ERC2114_index_to_inv_attr_pack
                         .write((slot_id, index.into()), AttrPackTrait::new(slice));
                     index += 1;
                 }
@@ -724,11 +724,11 @@ mod ERC2114InventoryComponent {
             // keep clearing attrpacks at index until index returns empty attrpack
             // which means we are at the end of the attrpacks list
             loop {
-                let pack: AttrPack = self.index_to_inv_attr_pack.read((slot_id, index));
+                let pack: AttrPack = self.ERC2114_index_to_inv_attr_pack.read((slot_id, index));
                 match pack.len.is_zero() {
                     bool::False => {
                         // clear attr_pack
-                        self.index_to_inv_attr_pack.write((slot_id, index), 0.into());
+                        self.ERC2114_index_to_inv_attr_pack.write((slot_id, index), 0.into());
                         // increase index
                         index += 1;
                     },

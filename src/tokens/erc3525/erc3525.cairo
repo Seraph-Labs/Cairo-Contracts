@@ -25,13 +25,13 @@ mod ERC3525Component {
 
     #[storage]
     struct Storage {
-        erc3525_decimals: u8,
-        erc3525_slot: LegacyMap::<u256, u256>,
-        erc3525_units: LegacyMap::<u256, u256>,
+        ERC3525_decimals: u8,
+        ERC3525_slot: LegacyMap::<u256, u256>,
+        ERC3525_units: LegacyMap::<u256, u256>,
         // (token_id, index) -> (units, operator)
-        erc3525_unit_level_approvals: LegacyMap::<(u256, u16), ApprovedUnits>,
+        ERC3525_unit_level_approvals: LegacyMap::<(u256, u16), ApprovedUnits>,
         // to track the higest token minted
-        erc3525_max_token_id: u256,
+        ERC3525_max_token_id: u256,
     }
 
     #[event]
@@ -133,7 +133,7 @@ mod ERC3525Component {
         fn initializer(ref self: ComponentState<TContractState>, value_decimals: u8) {
             let mut src5 = self.get_src5_mut();
             src5.register_interface(constants::IERC3525_ID);
-            self.erc3525_decimals.write(value_decimals);
+            self.ERC3525_decimals.write(value_decimals);
         }
     }
 
@@ -151,17 +151,17 @@ mod ERC3525Component {
     > of IERC3525ImplTrait<TContractState> {
         #[inline(always)]
         fn value_decimals(self: @ComponentState<TContractState>) -> u8 {
-            self.erc3525_decimals.read()
+            self.ERC3525_decimals.read()
         }
 
         #[inline(always)]
         fn value_of(self: @ComponentState<TContractState>, token_id: u256) -> u256 {
-            self.erc3525_units.read(token_id)
+            self.ERC3525_units.read(token_id)
         }
 
         #[inline(always)]
         fn slot_of(self: @ComponentState<TContractState>, token_id: u256) -> u256 {
-            self.erc3525_slot.read(token_id)
+            self.ERC3525_slot.read(token_id)
         }
 
         #[inline(always)]
@@ -192,7 +192,7 @@ mod ERC3525Component {
             match index {
                 OperatorIndex::Contain(x) => {
                     let approved: ApprovedUnits = self
-                        .erc3525_unit_level_approvals
+                        .ERC3525_unit_level_approvals
                         .read((token_id, x));
                     approved.units
                 },
@@ -270,7 +270,7 @@ mod ERC3525Component {
             // assert token_id exist
             assert(self.get_erc721()._exist(to_token_id), 'ERC3525: invalid token_id');
             // increase to units
-            self.erc3525_units.write(to_token_id, self.erc3525_units.read(to_token_id) + value);
+            self.ERC3525_units.write(to_token_id, self.ERC3525_units.read(to_token_id) + value);
             // emit event
             self.emit(TransferValue { from_token_id: 0, to_token_id, value })
         }
@@ -284,11 +284,11 @@ mod ERC3525Component {
             // clear value approvals
             self._clear_value_approvals(token_id);
             // get slot and units
-            let slot_id = self.erc3525_slot.read(token_id);
-            let value = self.erc3525_units.read(token_id);
+            let slot_id = self.ERC3525_slot.read(token_id);
+            let value = self.ERC3525_units.read(token_id);
             // clear slot and units
-            self.erc3525_slot.write(token_id, 0_u256);
-            self.erc3525_units.write(token_id, 0_u256);
+            self.ERC3525_slot.write(token_id, 0_u256);
+            self.ERC3525_units.write(token_id, 0_u256);
             // emit events
             self.emit(SlotChanged { token_id, old_slot: slot_id, new_slot: 0_u256 });
             self.emit(TransferValue { from_token_id: token_id, to_token_id: 0_u256, value });
@@ -299,9 +299,9 @@ mod ERC3525Component {
             assert(self.get_erc721()._exist(token_id), 'ERC3525: invalid tokenId');
             assert(value > 0_u256, 'ERC3525: invalid value');
             // decrease token units
-            let token_units = self.erc3525_units.read(token_id);
+            let token_units = self.ERC3525_units.read(token_id);
             assert(token_units >= value, 'ERC3525: insufficient balance');
-            self.erc3525_units.write(token_id, token_units - value);
+            self.ERC3525_units.write(token_id, token_units - value);
             // emit event
             self.emit(TransferValue { from_token_id: token_id, to_token_id: 0_u256, value });
         }
@@ -317,7 +317,7 @@ mod ERC3525Component {
                 OperatorIndex::Contain(x) => {
                     // if operator already approved update value
                     self
-                        .erc3525_unit_level_approvals
+                        .ERC3525_unit_level_approvals
                         .write((token_id, x), ApprovedUnitsTrait::new(value, operator));
                 },
                 OperatorIndex::Empty(x) => {
@@ -330,7 +330,7 @@ mod ERC3525Component {
                     }
 
                     self
-                        .erc3525_unit_level_approvals
+                        .ERC3525_unit_level_approvals
                         .write((token_id, x), ApprovedUnitsTrait::new(value, operator));
                 }
             }
@@ -349,10 +349,10 @@ mod ERC3525Component {
             let index = self
                 ._find_operator_index(token_id, operator)
                 .expect_contains('ERC3525: insufficient allowance');
-            let mut value_approvals = self.erc3525_unit_level_approvals.read((token_id, index));
+            let mut value_approvals = self.ERC3525_unit_level_approvals.read((token_id, index));
             // spend units , method alrady checks for value exceeding units
             value_approvals.spend_units(value);
-            self.erc3525_unit_level_approvals.write((token_id, index), value_approvals);
+            self.ERC3525_unit_level_approvals.write((token_id, index), value_approvals);
             //  emit event
             self.emit(ApprovalValue { token_id, operator, value: value_approvals.units });
         }
@@ -377,7 +377,7 @@ mod ERC3525Component {
                 Option::Some(x) => x,
                 Option::None(_) => {
                     let new_token_id = self._generate_new_token_id();
-                    self._mint(to, new_token_id, self.erc3525_slot.read(from_token_id), 0);
+                    self._mint(to, new_token_id, self.ERC3525_slot.read(from_token_id), 0);
                     new_token_id
                 },
             };
@@ -406,15 +406,15 @@ mod ERC3525Component {
             assert(from_token_id != to_token_id, 'ERC3525: cant transfer self');
             // checks tokenIds have the same slot
             assert(
-                self.erc3525_slot.read(from_token_id) == self.erc3525_slot.read(to_token_id),
+                self.ERC3525_slot.read(from_token_id) == self.ERC3525_slot.read(to_token_id),
                 'ERC3525: different slots'
             );
             // asserts that value does not exceend balance
-            let from_units = self.erc3525_units.read(from_token_id);
+            let from_units = self.ERC3525_units.read(from_token_id);
             assert(from_units >= value, 'ERC3525: insufficient balance');
             // decrease from units and increase to units
-            self.erc3525_units.write(from_token_id, from_units - value);
-            self.erc3525_units.write(to_token_id, self.erc3525_units.read(to_token_id) + value);
+            self.ERC3525_units.write(from_token_id, from_units - value);
+            self.ERC3525_units.write(to_token_id, self.ERC3525_units.read(to_token_id) + value);
             // emit event
             self.emit(TransferValue { from_token_id, to_token_id, value });
         }
@@ -427,10 +427,10 @@ mod ERC3525Component {
             let mut index = 0;
             loop {
                 // if zero break else clear approval slot
-                match self.erc3525_unit_level_approvals.read((token_id, index)).is_zero() {
+                match self.ERC3525_unit_level_approvals.read((token_id, index)).is_zero() {
                     bool::False => {
                         self
-                            .erc3525_unit_level_approvals
+                            .ERC3525_unit_level_approvals
                             .write((token_id, index), Zeroable::zero());
                         index += 1;
                     },
@@ -460,7 +460,7 @@ mod ERC3525Component {
             // if operator found break else loop
             // until empty slot is found 
             let new_index = loop {
-                let value_approvals = self.erc3525_unit_level_approvals.read((token_id, index));
+                let value_approvals = self.ERC3525_unit_level_approvals.read((token_id, index));
                 if value_approvals.is_zero() {
                     break OperatorIndex::Empty(index);
                 } else if value_approvals.operator == operator {
@@ -476,7 +476,7 @@ mod ERC3525Component {
             self: @ComponentState<TContractState>, from_token_id: u256, to: ContractAddress
         ) -> Option<u256> {
             let mut index = 0;
-            let slot = self.erc3525_slot.read(from_token_id);
+            let slot = self.ERC3525_slot.read(from_token_id);
             let erc721_enum = self.get_erc721_enum();
 
             let found_token_id = loop {
@@ -485,7 +485,7 @@ mod ERC3525Component {
                     Option::Some(x) => {
                         // if x == from_token_id or slot not the same  skip
                         // else break and return token_id
-                        if x == from_token_id || self.erc3525_slot.read(x) != slot {
+                        if x == from_token_id || self.ERC3525_slot.read(x) != slot {
                             index += 1;
                             continue;
                         } else {
@@ -506,7 +506,7 @@ mod ERC3525Component {
         //  this is gas inefficient so if ussing this function should ensure that tokens are minted sequentially
         fn _generate_new_token_id(self: @ComponentState<TContractState>) -> u256 {
             // if not loop and find the next available token
-            let highest = self.erc3525_max_token_id.read();
+            let highest = self.ERC3525_max_token_id.read();
             let mut new_token_id = highest + 1_u256;
 
             let erc721 = self.get_erc721();
@@ -522,8 +522,8 @@ mod ERC3525Component {
         #[inline(always)]
         fn _check_max_token_id(ref self: ComponentState<TContractState>, token_id: u256) {
             // if token_id is greater than max_token_id update max_token_id
-            if token_id > self.erc3525_max_token_id.read() {
-                self.erc3525_max_token_id.write(token_id);
+            if token_id > self.ERC3525_max_token_id.read() {
+                self.ERC3525_max_token_id.write(token_id);
             }
         }
 
@@ -541,8 +541,8 @@ mod ERC3525Component {
             // if it is set mac token id 
             self._check_max_token_id(token_id);
 
-            self.erc3525_slot.write(token_id, slot_id);
-            self.erc3525_units.write(token_id, value);
+            self.ERC3525_slot.write(token_id, slot_id);
+            self.ERC3525_units.write(token_id, value);
             // emit event
             self.emit(SlotChanged { token_id, old_slot: 0, new_slot: slot_id });
             self.emit(TransferValue { from_token_id: 0, to_token_id: token_id, value });

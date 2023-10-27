@@ -13,11 +13,11 @@ mod ERC721EnumComponent {
 
     #[storage]
     struct Storage {
-        erc721_supply: u256,
-        erc721_index_to_tokens: LegacyMap::<u256, u256>,
-        erc721_tokens_to_index: LegacyMap::<u256, u256>,
-        erc721_owner_index_to_token: LegacyMap::<(ContractAddress, u256), u256>,
-        erc721_owner_token_to_index: LegacyMap::<u256, u256>,
+        ERC721_supply: u256,
+        ERC721_index_to_tokens: LegacyMap::<u256, u256>,
+        ERC721_tokens_to_index: LegacyMap::<u256, u256>,
+        ERC721_owner_index_to_token: LegacyMap::<(ContractAddress, u256), u256>,
+        ERC721_owner_token_to_index: LegacyMap::<u256, u256>,
     }
 
     #[event]
@@ -79,15 +79,15 @@ mod ERC721EnumComponent {
     > of IERC721EnumImplTrait<TContractState> {
         #[inline(always)]
         fn total_supply(self: @ComponentState<TContractState>) -> u256 {
-            self.erc721_supply.read()
+            self.ERC721_supply.read()
         }
 
         #[inline(always)]
         fn token_by_index(self: @ComponentState<TContractState>, index: u256) -> u256 {
             // assert index is not out of bounds
-            let supply = self.erc721_supply.read();
+            let supply = self.ERC721_supply.read();
             assert(index < supply, 'ERC721Enum: index out of bounds');
-            self.erc721_index_to_tokens.read(index)
+            self.ERC721_index_to_tokens.read(index)
         }
 
         #[inline(always)]
@@ -177,7 +177,7 @@ mod ERC721EnumComponent {
             self._remove_token_from_owner_enum(owner, token_id);
             self._remove_token_from_total_enum(token_id);
             // set owners token_id index to zero
-            self.erc721_owner_token_to_index.write(token_id, BoundedInt::min());
+            self.ERC721_owner_token_to_index.write(token_id, BoundedInt::min());
             erc721._burn(token_id);
         }
 
@@ -185,7 +185,7 @@ mod ERC721EnumComponent {
         fn _token_of_owner_by_index(
             self: @ComponentState<TContractState>, owner: ContractAddress, index: u256
         ) -> Option<u256> {
-            let token_id = self.erc721_owner_index_to_token.read((owner, index));
+            let token_id = self.ERC721_owner_index_to_token.read((owner, index));
             match token_id.is_zero() {
                 bool::False(()) => Option::Some(token_id),
                 bool::True(()) => Option::None(()),
@@ -204,35 +204,35 @@ mod ERC721EnumComponent {
     > of ERC721EnumPrivateTrait<TContractState> {
         #[inline(always)]
         fn _add_token_to_total_enum(ref self: ComponentState<TContractState>, token_id: u256) {
-            let supply = self.erc721_supply.read();
+            let supply = self.ERC721_supply.read();
             // add token_id to totals last index
-            self.erc721_index_to_tokens.write(supply, token_id);
+            self.ERC721_index_to_tokens.write(supply, token_id);
             // add last index to token_id
-            self.erc721_tokens_to_index.write(token_id, supply);
+            self.ERC721_tokens_to_index.write(token_id, supply);
             // add to new_supply
-            self.erc721_supply.write(supply + 1_u256);
+            self.ERC721_supply.write(supply + 1_u256);
         }
 
         #[inline(always)]
         fn _remove_token_from_total_enum(ref self: ComponentState<TContractState>, token_id: u256) {
             // index starts from zero therefore minus 1
-            let last_token_index = self.erc721_supply.read() - 1_u256;
-            let cur_token_index = self.erc721_tokens_to_index.read(token_id);
+            let last_token_index = self.ERC721_supply.read() - 1_u256;
+            let cur_token_index = self.ERC721_tokens_to_index.read(token_id);
 
             if last_token_index != cur_token_index {
                 // set last token Id to cur token index
-                let last_tokenId = self.erc721_index_to_tokens.read(last_token_index);
-                self.erc721_index_to_tokens.write(cur_token_index, last_tokenId);
+                let last_tokenId = self.ERC721_index_to_tokens.read(last_token_index);
+                self.ERC721_index_to_tokens.write(cur_token_index, last_tokenId);
                 // set cur token index to last token_id
-                self.erc721_tokens_to_index.write(last_tokenId, cur_token_index);
+                self.ERC721_tokens_to_index.write(last_tokenId, cur_token_index);
             }
 
             // set token at last index to zero
-            self.erc721_index_to_tokens.write(last_token_index, BoundedInt::min());
+            self.ERC721_index_to_tokens.write(last_token_index, BoundedInt::min());
             // set token_id index to zero
-            self.erc721_tokens_to_index.write(token_id, BoundedInt::min());
+            self.ERC721_tokens_to_index.write(token_id, BoundedInt::min());
             // remove 1 from supply
-            self.erc721_supply.write(last_token_index);
+            self.ERC721_supply.write(last_token_index);
         }
 
         #[inline(always)]
@@ -241,9 +241,9 @@ mod ERC721EnumComponent {
         ) {
             let len = self.get_erc721_mut().balance_of(owner);
             // set token_id to owners last index
-            self.erc721_owner_index_to_token.write((owner, len), token_id);
+            self.ERC721_owner_index_to_token.write((owner, len), token_id);
             // set index to owners token_id
-            self.erc721_owner_token_to_index.write(token_id, len);
+            self.ERC721_owner_token_to_index.write(token_id, len);
         }
 
         #[inline(always)]
@@ -252,17 +252,17 @@ mod ERC721EnumComponent {
         ) {
             // index starts from zero therefore minus 1
             let last_token_index = self.get_erc721_mut().balance_of(owner) - 1.into();
-            let cur_token_index = self.erc721_owner_token_to_index.read(token_id);
+            let cur_token_index = self.ERC721_owner_token_to_index.read(token_id);
 
             if last_token_index != cur_token_index {
                 // set last token Id to cur token index
-                let last_tokenId = self.erc721_owner_index_to_token.read((owner, last_token_index));
-                self.erc721_owner_index_to_token.write((owner, cur_token_index), last_tokenId);
+                let last_tokenId = self.ERC721_owner_index_to_token.read((owner, last_token_index));
+                self.ERC721_owner_index_to_token.write((owner, cur_token_index), last_tokenId);
                 // set cur token index to last token_id
-                self.erc721_owner_token_to_index.write(last_tokenId, cur_token_index);
+                self.ERC721_owner_token_to_index.write(last_tokenId, cur_token_index);
             }
             // set token at owners last index to zero
-            self.erc721_owner_index_to_token.write((owner, last_token_index), BoundedInt::min());
+            self.ERC721_owner_index_to_token.write((owner, last_token_index), BoundedInt::min());
         }
     }
 

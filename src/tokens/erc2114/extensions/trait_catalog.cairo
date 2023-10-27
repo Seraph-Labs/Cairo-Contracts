@@ -13,9 +13,9 @@ mod TraitCatalogComponent {
 
     #[storage]
     struct Storage {
-        trait_list_counter: u64,
-        trait_list_size: LegacyMap<u64, felt252>,
-        index_to_trait_list_value: LegacyMap<(u64, felt252), felt252>,
+        ERC2114_trait_list_counter: u64,
+        ERC2114_trait_list_size: LegacyMap<u64, felt252>,
+        ERC2114_index_to_trait_list_value: LegacyMap<(u64, felt252), felt252>,
     }
 
     #[event]
@@ -108,19 +108,19 @@ mod TraitCatalogComponent {
     > of ITraitCatalogImplTrait<TContractState> {
         #[inline(always)]
         fn trait_list_count(self: @ComponentState<TContractState>) -> u64 {
-            self.trait_list_counter.read()
+            self.ERC2114_trait_list_counter.read()
         }
 
         #[inline(always)]
         fn trait_list_length(self: @ComponentState<TContractState>, list_id: u64) -> felt252 {
-            self.trait_list_size.read(list_id)
+            self.ERC2114_trait_list_size.read(list_id)
         }
 
         #[inline(always)]
         fn trait_list_value_by_index(
             self: @ComponentState<TContractState>, list_id: u64, index: felt252
         ) -> felt252 {
-            self.index_to_trait_list_value.read((list_id, index))
+            self.ERC2114_index_to_trait_list_value.read((list_id, index))
         }
 
         #[inline(always)]
@@ -131,7 +131,7 @@ mod TraitCatalogComponent {
             assert(values.len().is_non_zero(), 'TraitCatalog: invalid values');
             // increase trait list count
             self._increase_trait_list_count();
-            let list_id = self.trait_list_counter.read();
+            let list_id = self.ERC2114_trait_list_counter.read();
             // emits events, increases length, updates values and checks validity of value
             self._append_batch_to_trait_list(list_id, values);
             list_id
@@ -143,11 +143,11 @@ mod TraitCatalogComponent {
         ) {
             // assert trait list validity
             self._assert_trait_list_exists(list_id);
-            let cur_len = self.trait_list_size.read(list_id);
+            let cur_len = self.ERC2114_trait_list_size.read(list_id);
             // emits events and cheecks validity of value
             self._update_trait_list(list_id, cur_len + 1, value);
             // increase trait list length
-            self.trait_list_size.write(list_id, cur_len + 1);
+            self.ERC2114_trait_list_size.write(list_id, cur_len + 1);
         }
 
         #[inline(always)]
@@ -169,7 +169,7 @@ mod TraitCatalogComponent {
             // assert trait list validity
             self._assert_trait_list_exists(list_id);
             // assert index is not out of bounds
-            let cur_len: u256 = self.trait_list_size.read(list_id).into();
+            let cur_len: u256 = self.ERC2114_trait_list_size.read(list_id).into();
             assert(index.into() <= cur_len, 'TraitCatalog: index exceeded');
             // emits events and cheecks validity of value and ensures index is non_zero
             self._update_trait_list(list_id, index, value);
@@ -190,7 +190,7 @@ mod TraitCatalogComponent {
         fn _append_batch_to_trait_list(
             ref self: ComponentState<TContractState>, list_id: u64, mut values: Span<felt252>
         ) {
-            let mut cur_len = self.trait_list_size.read(list_id);
+            let mut cur_len = self.ERC2114_trait_list_size.read(list_id);
             loop {
                 match values.pop_front() {
                     Option::Some(value) => {
@@ -200,7 +200,7 @@ mod TraitCatalogComponent {
                     Option::None(_) => { break; }
                 };
             };
-            self.trait_list_size.write(list_id, cur_len);
+            self.ERC2114_trait_list_size.write(list_id, cur_len);
         }
     }
 
@@ -214,14 +214,14 @@ mod TraitCatalogComponent {
         #[inline(always)]
         fn _assert_trait_list_exists(self: @ComponentState<TContractState>, list_id: u64) {
             assert(
-                list_id > 0 && list_id <= self.trait_list_counter.read(),
+                list_id > 0 && list_id <= self.ERC2114_trait_list_counter.read(),
                 'TraitCatalog: invalid list id'
             );
         }
 
         #[inline(always)]
         fn _increase_trait_list_count(ref self: ComponentState<TContractState>) {
-            self.trait_list_counter.write(self.trait_list_counter.read() + 1);
+            self.ERC2114_trait_list_counter.write(self.ERC2114_trait_list_counter.read() + 1);
         }
 
         // @dev updates trait list value at index
@@ -238,12 +238,12 @@ mod TraitCatalogComponent {
             assert(index.is_non_zero() && value.is_non_zero(), 'TraitCatalog: invalid update');
 
             // if old_value == current value return
-            let old_value = self.index_to_trait_list_value.read((list_id, index));
+            let old_value = self.ERC2114_index_to_trait_list_value.read((list_id, index));
             if old_value == value {
                 return;
             }
             // update index_to_trait_list_value
-            self.index_to_trait_list_value.write((list_id, index), value);
+            self.ERC2114_index_to_trait_list_value.write((list_id, index), value);
             //emit event
             self.emit(TraitListUpdate { list_id, index, old_value, new_value: value });
         }

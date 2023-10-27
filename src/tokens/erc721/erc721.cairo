@@ -15,10 +15,10 @@ mod ERC721Component {
 
     #[storage]
     struct Storage {
-        erc721_owners: LegacyMap::<u256, ContractAddress>,
-        erc721_balances: LegacyMap::<ContractAddress, u256>,
-        erc721_token_approvals: LegacyMap::<u256, ContractAddress>,
-        erc721_operator_approvals: LegacyMap::<(ContractAddress, ContractAddress), bool>,
+        ERC721_owners: LegacyMap::<u256, ContractAddress>,
+        ERC721_balances: LegacyMap::<ContractAddress, u256>,
+        ERC721_token_approvals: LegacyMap::<u256, ContractAddress>,
+        ERC721_operator_approvals: LegacyMap::<(ContractAddress, ContractAddress), bool>,
     }
 
     #[event]
@@ -143,7 +143,7 @@ mod ERC721Component {
     > of IERC721ImplTrait<TContractState> {
         #[inline(always)]
         fn balance_of(self: @ComponentState<TContractState>, owner: ContractAddress) -> u256 {
-            self.erc721_balances.read(owner)
+            self.ERC721_balances.read(owner)
         }
 
         #[inline(always)]
@@ -154,14 +154,14 @@ mod ERC721Component {
         #[inline(always)]
         fn get_approved(self: @ComponentState<TContractState>, token_id: u256) -> ContractAddress {
             assert(self._exist(token_id), 'ERC721: tokenId does not exist');
-            self.erc721_token_approvals.read(token_id)
+            self.ERC721_token_approvals.read(token_id)
         }
 
         #[inline(always)]
         fn is_approved_for_all(
             self: @ComponentState<TContractState>, owner: ContractAddress, operator: ContractAddress
         ) -> bool {
-            self.erc721_operator_approvals.read((owner, operator))
+            self.ERC721_operator_approvals.read((owner, operator))
         }
 
         #[inline(always)]
@@ -219,7 +219,7 @@ mod ERC721Component {
         fn _owner_of(
             self: @ComponentState<TContractState>, token_id: u256
         ) -> Option<ContractAddress> {
-            let owner = self.erc721_owners.read(token_id);
+            let owner = self.ERC721_owners.read(token_id);
             match owner.is_zero() {
                 bool::False(()) => Option::Some(owner),
                 bool::True(()) => Option::None(()),
@@ -228,7 +228,7 @@ mod ERC721Component {
 
         #[inline(always)]
         fn _exist(self: @ComponentState<TContractState>, token_id: u256) -> bool {
-            let owner = self.erc721_owners.read(token_id);
+            let owner = self.ERC721_owners.read(token_id);
             !owner.is_zero()
         }
 
@@ -239,8 +239,8 @@ mod ERC721Component {
             assert(spender.is_non_zero(), 'ERC721: invalid caller');
             let owner: ContractAddress = self._owner_of(token_id).expect('ERC721: invalid tokenId');
             owner == spender
-                || spender == self.erc721_token_approvals.read(token_id)
-                || self.erc721_operator_approvals.read((owner, spender))
+                || spender == self.ERC721_token_approvals.read(token_id)
+                || self.ERC721_operator_approvals.read((owner, spender))
         }
 
         #[inline(always)]
@@ -258,14 +258,14 @@ mod ERC721Component {
             assert(!to.is_zero(), 'ERC721: invalid address');
 
             // clear approvals
-            self.erc721_token_approvals.write(token_id, Zeroable::zero());
+            self.ERC721_token_approvals.write(token_id, Zeroable::zero());
 
             // update balances
-            self.erc721_balances.write(to, self.erc721_balances.read(to) + 1_u256);
-            self.erc721_balances.write(from, self.erc721_balances.read(from) - 1_u256);
+            self.ERC721_balances.write(to, self.ERC721_balances.read(to) + 1_u256);
+            self.ERC721_balances.write(from, self.ERC721_balances.read(from) - 1_u256);
 
             // update owner
-            self.erc721_owners.write(token_id, to);
+            self.ERC721_owners.write(token_id, to);
             // emit event
             self.emit(Transfer { from, to, token_id });
         }
@@ -288,7 +288,7 @@ mod ERC721Component {
         fn _approve(ref self: ComponentState<TContractState>, to: ContractAddress, token_id: u256) {
             let owner = self._owner_of(token_id).expect('ERC721: invalid tokenId');
             assert(owner != to, 'ERC721: owner cant approve self');
-            self.erc721_token_approvals.write(token_id, to);
+            self.ERC721_token_approvals.write(token_id, to);
             self.emit(Approval { owner, approved: to, token_id });
         }
 
@@ -303,7 +303,7 @@ mod ERC721Component {
 
             assert(caller != operator, 'ERC721: owner cant approve self');
 
-            self.erc721_operator_approvals.write((caller, operator), approved);
+            self.ERC721_operator_approvals.write((caller, operator), approved);
             self.emit(ApprovalForAll { owner: caller, operator, approved });
         }
 
@@ -314,9 +314,9 @@ mod ERC721Component {
             assert(!self._exist(token_id), 'ERC721: tokenId already exist');
 
             // update balances
-            self.erc721_balances.write(to, self.erc721_balances.read(to) + 1.into());
+            self.ERC721_balances.write(to, self.ERC721_balances.read(to) + 1.into());
             // update owner
-            self.erc721_owners.write(token_id, to);
+            self.ERC721_owners.write(token_id, to);
             // emit event
             self.emit(Transfer { from: Zeroable::zero(), to, token_id });
         }
@@ -341,13 +341,13 @@ mod ERC721Component {
             let owner = self._owner_of(token_id).expect('ERC721: invalid tokenId');
 
             // clear approvals
-            self.erc721_token_approvals.write(token_id, Zeroable::zero());
+            self.ERC721_token_approvals.write(token_id, Zeroable::zero());
 
             // update balances
-            self.erc721_balances.write(owner, self.erc721_balances.read(owner) - 1.into());
+            self.ERC721_balances.write(owner, self.ERC721_balances.read(owner) - 1.into());
 
             // update owner
-            self.erc721_owners.write(token_id, Zeroable::zero());
+            self.ERC721_owners.write(token_id, Zeroable::zero());
 
             // emit event
             self.emit(Transfer { from: owner, to: Zeroable::zero(), token_id });

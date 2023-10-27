@@ -5,7 +5,7 @@ mod SRC5Component {
 
     #[storage]
     struct Storage {
-        supported_interfaces: LegacyMap<felt252, bool>
+        SRC5_supported_interfaces: LegacyMap<felt252, bool>
     }
 
     #[event]
@@ -40,18 +40,18 @@ mod SRC5Component {
             if interface_id == constants::ISRC5_ID {
                 return true;
             }
-            self.supported_interfaces.read(interface_id)
+            self.SRC5_supported_interfaces.read(interface_id)
         }
 
         #[inline(always)]
         fn register_interface(ref self: ComponentState<TContractState>, interface_id: felt252) {
-            self.supported_interfaces.write(interface_id, true);
+            self.SRC5_supported_interfaces.write(interface_id, true);
         }
 
         #[inline(always)]
         fn deregister_interface(ref self: ComponentState<TContractState>, interface_id: felt252) {
             assert(interface_id != constants::ISRC5_ID, 'SRC5: Invalid interface id');
-            self.supported_interfaces.write(interface_id, false);
+            self.SRC5_supported_interfaces.write(interface_id, false);
         }
     }
 }

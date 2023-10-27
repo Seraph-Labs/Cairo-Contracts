@@ -10,10 +10,10 @@ mod ERC721MetadataComponent {
 
     #[storage]
     struct Storage {
-        erc721_name: felt252,
-        erc721_symbol: felt252,
-        erc721_base_uri: LegacyMap::<felt252, felt252>,
-        erc721_base_uri_len: felt252,
+        ERC721_name: felt252,
+        ERC721_symbol: felt252,
+        ERC721_base_uri: LegacyMap::<felt252, felt252>,
+        ERC721_base_uri_len: felt252,
     }
 
     #[event]
@@ -56,8 +56,8 @@ mod ERC721MetadataComponent {
         +Drop<TContractState>
     > of ERC721MetadataInitializerTrait<TContractState> {
         fn initializer(ref self: ComponentState<TContractState>, name: felt252, symbol: felt252) {
-            self.erc721_name.write(name);
-            self.erc721_symbol.write(symbol);
+            self.ERC721_name.write(name);
+            self.ERC721_symbol.write(symbol);
             let mut src5 = self.get_src5_mut();
             src5.register_interface(constants::IERC721_METADATA_ID);
         }
@@ -76,12 +76,12 @@ mod ERC721MetadataComponent {
     > of IERC721MetadataImplTrait<TContractState> {
         #[inline(always)]
         fn name(self: @ComponentState<TContractState>) -> felt252 {
-            self.erc721_name.read()
+            self.ERC721_name.read()
         }
 
         #[inline(always)]
         fn symbol(self: @ComponentState<TContractState>) -> felt252 {
-            self.erc721_symbol.read()
+            self.ERC721_symbol.read()
         }
 
         #[inline(always)]
@@ -107,14 +107,14 @@ mod ERC721MetadataComponent {
         TContractState, +HasComponent<TContractState>,
     > of ERC721MetadataInternalTrait<TContractState> {
         fn _get_base_uri(self: @ComponentState<TContractState>) -> Array<felt252> {
-            let len = self.erc721_base_uri_len.read();
+            let len = self.ERC721_base_uri_len.read();
             let mut base_uri = ArrayTrait::<felt252>::new();
             let mut index = 0;
             loop {
                 if index == len {
                     break ();
                 }
-                base_uri.append(self.erc721_base_uri.read(index));
+                base_uri.append(self.ERC721_base_uri.read(index));
                 index += 1;
             };
             base_uri
@@ -126,14 +126,14 @@ mod ERC721MetadataComponent {
             loop {
                 match base_uri.pop_front() {
                     Option::Some(value) => {
-                        self.erc721_base_uri.write(index, value);
+                        self.ERC721_base_uri.write(index, value);
                         index += 1;
                     },
                     Option::None(()) => { break (); },
                 };
             };
             // write length to storage
-            self.erc721_base_uri_len.write(len.into());
+            self.ERC721_base_uri_len.write(len.into());
         }
     }
 
@@ -181,7 +181,7 @@ mod ERC721MetadataComponent {
         }
 
         #[inline(always)]
-        fn get_erc721_mut(
+        fn get_ERC721_mut(
             ref self: ComponentState<TContractState>
         ) -> ERC721Component::ComponentState<TContractState> {
             let mut contract = self.get_contract_mut();
